@@ -12,12 +12,12 @@ public:
 	}; 
 	struct Data_xls 
 	{
-            vector<int> years;
-			vector<int> doy;
-			vector<double> srad;
-			vector<double> tmax;
-			vector<double> tmin;
-			vector<double> rain;
+             vector<int> years;
+	     vector<int> doy;
+	     vector<double> srad;
+	     vector<double> tmax;
+	     vector<double> tmin;
+	     vector<double> rain;
 	};
 	Data_h5 data_h5;
 	Data_xls data_xls;
@@ -25,7 +25,7 @@ public:
 	void parse_param(QString line)
 	{
 		QStringList list;
-    	list = line.split(QRegExp("\\W+"));//WRONG separation!!!
+    	        list = line.split(QRegExp("\\W+"));//WRONG separation!!!
 		for (int i = 0; i < list.size(); i++)
 		{
 			cout << list.at(i).toLocal8Bit().constData() << endl;
