@@ -202,10 +202,10 @@ public:
 //	double  LAI;//ЗАМЕНИ LATITUDE НА ЭТУ ХЕРНЮ
 //	double MXLAI;
 //	double WSFL;
-	double  SLNG;
+//	double  SLNG;////////в data_p
 
 	double GLAI;
-	double INLF;
+//	double INLF;
 
 	double DLAI;
 
@@ -213,8 +213,8 @@ public:
 	double GLF;
 	double SLA;
 
-	double XNLF;
-	double SLNS;
+//	double XNLF;
+//	double SLNS;
 
 	double TCFRUE;
 	double RUE;
@@ -253,6 +253,36 @@ public:
 
 	double VPTEMP1;
 	double VPD1;
+
+
+	//LEGUMpLANT
+	double NUP;
+	double XNLF;
+	double XNST;
+	double INLF;
+	double INST;
+	double INGRN;
+
+	double NFC;
+	double PDNF;
+	double DNF;
+	double TRLN;
+	double FXLF;
+
+
+	//dmddistribution
+	double WLF;
+	double WST;
+	double WVEG;
+	double TRANSL;
+	double SGR;
+	double DHI;
+	double DHIF;
+	double TRLDM;
+	double DDMP2;
+	double FLF1;
+	double GST;
+	double HI;
 	Data data;
 	Parametrs param;
 	Result res;
@@ -772,12 +802,12 @@ public slots:
 			PLA1 = 0;
 			LAI = 0;
 			MXLAI = 0; WSFL = 1;
-			SLNG = 2;
+			data.data_p.SLNG = 2;
 			iniLai = 1;
 		}
 		// Yesterday LAI to intercept PAR today
-		if (GLAI > (INLF / SLNG))
-			GLAI = (INLF / SLNG);
+		if (GLAI > (INLF / data.data_p.SLNG))
+			GLAI = (INLF / data.data_p.SLNG);
 		LAI = LAI + GLAI - DLAI;
 		if (LAI < 0)
 			LAI = 0;
@@ -803,7 +833,7 @@ public slots:
 		//Saving LAI at BSG
 		else if (CBD > bdTLP)
 			GLAI = 0;
-		DLAI = XNLF / (SLNG - SLNS);
+		DLAI = XNLF / (data.data_p.SLNG - data.data_p.SLNS);
 	}
 	//dmproduction
 	
@@ -966,254 +996,332 @@ public slots:
 				DDMP = 0;
 
 	}
+	
 	void DMDistribution(void)
 	{
-		/*
-		'------------------------------- Parameters and Initials
-			If iniDMD = 0 Then
-			FLF1A = ThisWorkbook.Worksheets("Crops").Cells(20, CropColNo)  'Sheet5.[b20]
-			FLF1B = ThisWorkbook.Worksheets("Crops").Cells(21, CropColNo)  'Sheet5.[b21]
-			WTOPL = ThisWorkbook.Worksheets("Crops").Cells(22, CropColNo)  'Sheet5.[b22]
-			FLF2 = ThisWorkbook.Worksheets("Crops").Cells(23, CropColNo)  'Sheet5.[b23]
 
-			FRTRL = ThisWorkbook.Worksheets("Crops").Cells(25, CropColNo)  'Sheet5.[b25]
-			GCF = ThisWorkbook.Worksheets("Crops").Cells(26, CropColNo)  'Sheet5.[b26]
-			PDHI = ThisWorkbook.Worksheets("Crops").Cells(27, CropColNo)  'Sheet5.[b27]
-			WDHI1 = ThisWorkbook.Worksheets("Crops").Cells(28, CropColNo)  'Sheet5.[b28]
-			WDHI2 = ThisWorkbook.Worksheets("Crops").Cells(29, CropColNo)  'Sheet5.[b29]
-			WDHI3 = ThisWorkbook.Worksheets("Crops").Cells(30, CropColNo)  'Sheet5.[b30]
-			WDHI4 = ThisWorkbook.Worksheets("Crops").Cells(31, CropColNo)  'Sheet5.[B31]
+		//	'------------------------------- Parameters and Initials
+		if (iniDMD == 0)
+		{
+			/*FLF1A = ThisWorkbook.Worksheets("Crops").Cells(20, CropColNo)  'Sheet5.[b20]
+				FLF1B = ThisWorkbook.Worksheets("Crops").Cells(21, CropColNo)  'Sheet5.[b21]
+				WTOPL = ThisWorkbook.Worksheets("Crops").Cells(22, CropColNo)  'Sheet5.[b22]
+				FLF2 = ThisWorkbook.Worksheets("Crops").Cells(23, CropColNo)  'Sheet5.[b23]
 
-			TRESH = ThisWorkbook.Worksheets("Crops").Cells(83, CropColNo)  'Sheet5.[B83]
+				FRTRL = ThisWorkbook.Worksheets("Crops").Cells(25, CropColNo)  'Sheet5.[b25]
+				GCF = ThisWorkbook.Worksheets("Crops").Cells(26, CropColNo)  'Sheet5.[b26]
+				PDHI = ThisWorkbook.Worksheets("Crops").Cells(27, CropColNo)  'Sheet5.[b27]
+				WDHI1 = ThisWorkbook.Worksheets("Crops").Cells(28, CropColNo)  'Sheet5.[b28]
+				WDHI2 = ThisWorkbook.Worksheets("Crops").Cells(29, CropColNo)  'Sheet5.[b29]
+				WDHI3 = ThisWorkbook.Worksheets("Crops").Cells(30, CropColNo)  'Sheet5.[b30]
+				WDHI4 = ThisWorkbook.Worksheets("Crops").Cells(31, CropColNo)  'Sheet5.[B31]
 
-			WLF = 0.5:    WST = 0.5 : WVEG = WLF + WST :
-			WGRN = 0 : iniDMD = 1 :
-			End If
+				TRESH = ThisWorkbook.Worksheets("Crops").Cells(83, CropColNo)  'Sheet5.[B83]
+				*/
+			WLF = 0.5;  
+			WST = 0.5; 
+			WVEG = WLF + WST;
+			WGRN = 0; //повторение - переинициализация
+			iniDMD = 1;
+		}
 
-			'------------------------------- Seed dry matter growth
-			If CBD <= bdBSG Then
-			TRANSL = 0 : SGR = 0 :
-			BSGDM = WTOP                'Saving WTOP at BSG
-			If BSGDM <= WDHI1 Or BSGDM >= WDHI4 Then
-			DHIF = 0
-			ElseIf BSGDM > WDHI1 And BSGDM < WDHI2 Then
-			DHIF = (BSGDM - WDHI1) / (WDHI2 - WDHI1)
-			ElseIf BSGDM > WDHI3 And BSGDM < WDHI4 Then
-			DHIF = (WDHI4 - BSGDM) / (WDHI4 - WDHI3)
-			ElseIf BSGDM >= WDHI2 And BSGDM <= WDHI3 Then
-			DHIF = 1
-			End If
-			DHI = PDHI * DHIF
-			TRLDM = BSGDM * FRTRL
+		//	'------------------------------- Seed dry matter growth
+		if (CBD <= data.data_p.ttBSG) {
+			TRANSL = 0;
+			SGR = 0;
+			BSGDM = WTOP;   //             'Saving WTOP at BSG
+			if (BSGDM <= data.data_p.WDHI1 || BSGDM >= data.data_p.WDHI4)
+				DHIF = 0;
+			else if (BSGDM > data.data_p.WDHI1 && BSGDM < data.data_p.WDHI2)
+				DHIF = (BSGDM - data.data_p.WDHI1) / (data.data_p.WDHI2 - data.data_p.WDHI1);
+			else if (BSGDM > data.data_p.WDHI3 && BSGDM < data.data_p.WDHI4)
+				DHIF = (data.data_p.WDHI4 - BSGDM) / (data.data_p.WDHI4 - data.data_p.WDHI3);
+			else if (BSGDM >= data.data_p.WDHI2 && BSGDM <= data.data_p.WDHI3)
+				DHIF = 1;
 
-			ElseIf CBD > bdBSG And CBD <= bdTSG Then
-			SGR = DHI * (WTOP + DDMP) + DDMP * HI
-			If LAI = 0 And NST <= (WST * SNCS) Then SGR = 0   'There is no N for seed filling
-			If SGR < 0 Then SGR = 0
+			DHI = data.data_p.PDHI * DHIF;
+			TRLDM = BSGDM * data.data_p.FRTRL;
+		}
+		else if (CBD > data.data_p.ttBSG && CBD <= data.data_p.ttTSG)
+		{
+			SGR = DHI * (WTOP + DDMP) + DDMP * HI;
+			if (LAI = 0 && NST <= (WST * data.data_p.SNCS))
+				SGR = 0; // 'There is no N for seed filling
+			if (SGR < 0)
+				SGR = 0;
 
-			If(SGR * GCF) > DDMP Then
-			TRANSL = (SGR * GCF) - DDMP
-			If TRANSL > TRLDM Then TRANSL = TRLDM
-			ElseIf(SGR * GCF) <= DDMP Then
-			TRANSL = 0
-			End If
+			if ((SGR * data.data_p.GCF) > DDMP)
+				TRANSL = (SGR * data.data_p.GCF) - DDMP;
+			if (TRANSL > TRLDM)
+				TRANSL = TRLDM;
+			else if ((SGR * data.data_p.GCF) <= DDMP)
+				TRANSL = 0;
 
-			TRLDM = TRLDM - TRANSL
-			If SGR > (DDMP + TRANSL) / GCF Then SGR = (DDMP + TRANSL) / GCF
+			TRLDM = TRLDM - TRANSL;
+			if (SGR > (DDMP + TRANSL) / data.data_p.GCF)
+				SGR = (DDMP + TRANSL) / data.data_p.GCF;
+		}
+		else if (CBD > data.data_p.ttTSG)
+		{
+			TRANSL = 0;
+			SGR = 0;
+		}
+			//'------------------------------- DM avail. for Leaf & stem
+		DDMP2 = DDMP - SGR * data.data_p.GCF;
+		if (DDMP2 < 0)
+			DDMP2 = 0;
 
-			ElseIf CBD > bdTSG Then
-			TRANSL = 0: SGR = 0 :
-			End If
+		//	'------------------------------- Leaf dry matter growth
+		if (CBD <= bdBLG || CBD > bdTLP)/// ?????????????????????
+			GLF = 0;
+		else if (CBD > bdBLG && CBD <= bdTLM)
+		{
+			if (WTOP < data.data_p.WTOPL)
+				FLF1 = data.data_p.FLF1A;
+			else
+				FLF1 = data.data_p.FLF1B;
+			GLF = FLF1 * DDMP2;
+		}
+		else if (CBD > bdTLM && CBD <= bdTLP)
+			GLF = data.data_p.FLF2 * DDMP2;
 
-			'------------------------------- DM avail. for Leaf & stem
-			DDMP2 = DDMP - SGR * GCF
-			If DDMP2 < 0 Then DDMP2 = 0
+		//	'------------------------------- Stem dry matter growth
+		GST = DDMP2 - GLF;
 
-			'------------------------------- Leaf dry matter growth
-			If CBD <= bdBLG Or CBD > bdTLP Then
-			GLF = 0:
-		ElseIf CBD > bdBLG And CBD <= bdTLM Then
-			If WTOP < WTOPL Then FLF1 = FLF1A Else FLF1 = FLF1B
-			GLF = FLF1 * DDMP2
-			ElseIf CBD > bdTLM And CBD <= bdTLP Then
-			GLF = FLF2 * DDMP2
-			End If
-
-			'------------------------------- Stem dry matter growth
-			GST = DDMP2 - GLF
-
-			'------------------------------- Organs accumulated mass
-			WLF = WLF + GLF
-			WST = WST + GST
-			WGRN = WGRN + SGR
-			WVEG = WVEG + DDMP - (SGR * GCF)
-			WTOP = WVEG + WGRN
-			HI = WGRN / WTOP
-			Return*/
+			//'------------------------------- Organs accumulated mass
+		WLF = WLF + GLF;
+		WST = WST + GST;
+		WGRN = WGRN + SGR;
+		WVEG = WVEG + DDMP - (SGR * data.data_p.GCF);
+		WTOP = WVEG + WGRN;
+		HI = WGRN / WTOP;
 	}
+
 	void LegumPlant(void)
 	{
-		/* If iniPNB = 0 Then
-     SLNG = ThisWorkbook.Worksheets("Crops").Cells(41, CropColNo)  'Sheet5.[b41]
-     SLNS = ThisWorkbook.Worksheets("Crops").Cells(42, CropColNo)  'Sheet5.[b42]
-     SNCG = ThisWorkbook.Worksheets("Crops").Cells(43, CropColNo)  'Sheet5.[b43]
-     SNCS = ThisWorkbook.Worksheets("Crops").Cells(44, CropColNo)  'Sheet5.[b44]
-     GNC = ThisWorkbook.Worksheets("Crops").Cells(45, CropColNo)  'Sheet5.[b45]
-     MXNUP = ThisWorkbook.Worksheets("Crops").Cells(46, CropColNo)  'Sheet5.[b46]
-     
-     INSOL = ThisWorkbook.Worksheets(1).Cells(xCntr + 45, 25)
-     
-     NST = WST * SNCG:     NLF = LAI * SLNG:   WSFN = 1:
-     CNUP = NST + NLF:     NGRN = 0:     iniPNB = 1:
-  End If
-  
-  If CBD <= bdEM Or CBD > bdTSG Then
-       NUP = 0:    XNLF = 0:   XNST = 0:
-       INLF = 0:   INST = 0:   INGRN = 0:
-  ElseIf CBD > bdEM And CBD < bdBSG Then
-       INGRN = 0
-      'NSTDF = (WST * SNCG) - NST
-      'If NSTDF < 0 Then NSTDF = 0
-       NUP = (GST * SNCG) + (GLAI * SLNG)   '+ NSTDF    '<-----
-       If CBD < bdBNF And CNUP > INSOL Then NUP = 0
-       If NUP > MXNUP Then NUP = MXNUP
-       NFC = NFC * 3 / 4 + NUP / WVEG * (1 / 4)   'from Sinclair et al. 2003
-       NUP = NUP * WSFN
-       If NUP < 0 Then NUP = 0
-      'If FTSW > 1 Then NUP = 0  'Inactivated
-       If DDMP = 0 Then NUP = 0
+		if (iniPNB == 0)
+		{
+			/*SLNG = ThisWorkbook.Worksheets("Crops").Cells(41, CropColNo)  'Sheet5.[b41]
+			SLNS = ThisWorkbook.Worksheets("Crops").Cells(42, CropColNo)  'Sheet5.[b42]
+			SNCG = ThisWorkbook.Worksheets("Crops").Cells(43, CropColNo)  'Sheet5.[b43]
+			SNCS = ThisWorkbook.Worksheets("Crops").Cells(44, CropColNo)  'Sheet5.[b44]
+			GNC = ThisWorkbook.Worksheets("Crops").Cells(45, CropColNo)  'Sheet5.[b45]
+			MXNUP = ThisWorkbook.Worksheets("Crops").Cells(46, CropColNo)  'Sheet5.[b46]
 
-       If NST <= (WST * SNCS) Then
-            INST = WST * SNCS - NST:   XNST = 0
-            If INST >= NUP Then
-                INLF = 0:   XNLF = INST - NUP
-            ElseIf INST < NUP Then
-                INLF = GLAI * SLNG
-                If INLF > (NUP - INST) Then INLF = NUP - INST
-                INST = NUP - INLF:   XNLF = 0
-            End If
-       ElseIf NST > (WST * SNCS) Then
-            INLF = GLAI * SLNG:   XNLF = 0
-            If INLF >= NUP Then
-                INST = 0:   XNST = INLF - NUP
-                If XNST > (NST - WST * SNCS) Then XNST = NST - WST * SNCS
-                INLF = NUP + XNST
-            ElseIf INLF < NUP Then
-                INST = NUP - INLF:   XNST = 0
-            End If
-       End If
-       
-'       TRLN = LAI * (SLNG - SLNS) + (NST + INST - WST * SNCS)
-'       FXLF = LAI * (SLNG - SLNS) / TRLN
-       
-  ElseIf CBD >= bdBSG And CBD <= bdTSG Then
-       INGRN = SGR * GNC
-       NUP = INGRN + (GST * SNCG) + (GLAI * SLNG)
-       If NUP > MXNUP Then NUP = MXNUP
-       PDNF = NFC * WVEG
-       If PDNF > NUP Then PDNF = NUP
-       DNF = PDNF * WSFN
-      'If FTSW > 1 Then DNF = 0  'Inactivated
-       If DNF < 0 Then DNF = 0
-       If DDMP <= (SGR * GCF) Then DNF = 0
-       If DDMP = 0 Then DNF = 0
-       NUP = DNF
-             
-       If NUP > (SGR * GNC) Then
-           'N is excess of seed needs
-            NUP2 = NUP - SGR * GNC
-            If NST <= (WST * SNCS) Then
-               INST = WST * SNCS - NST:   XNST = 0
-               If INST >= NUP2 Then
-                   INLF = 0:   XNLF = INST - NUP2
-               ElseIf INST < NUP2 Then
-                   INLF = GLAI * SLNG
-                   If INLF > (NUP2 - INST) Then INLF = NUP2 - INST
-                   INST = NUP2 - INLF:   XNLF = 0
-               End If
-            ElseIf NST > (WST * SNCS) Then
-               INLF = GLAI * SLNG:   XNLF = 0
-               If INLF >= NUP2 Then
-                   INST = 0:  XNST = INLF - NUP2
-                   If XNST > (NST - WST * SNCS) Then XNST = NST - WST * SNCS
-                   INLF = NUP2 + XNST
-               ElseIf INLF < NUP2 Then
-                   INST = NUP2 - INLF:   XNST = 0
-               End If
-            End If
-'       TRLN = LAI * (SLNG - SLNS) + (NST + INST - WST * SNCS)
-'       FXLF = LAI * (SLNG - SLNS) / TRLN
-            
-       ElseIf NUP <= (SGR * GNC) Then
-           'Need to transfer N from vegetative tissue
-            INLF = 0
-            INST = 0
-            XNLF = (SGR * GNC - NUP) * FXLF
-            XNST = (SGR * GNC - NUP) * (1 - FXLF)
-       End If
-  End If
+			INSOL = ThisWorkbook.Worksheets(1).Cells(xCntr + 45, 25)*/
+
+
+			NST = WST * data.data_p.SNCG;
+			NLF = LAI * data.data_p.SLNG;
+			WSFN = 1;
+			CNUP = NST + NLF;
+			NGRN = 0;
+			iniPNB = 1;
+
+		}
+		if (CBD <= bdEM || CBD > bdTSG)//не то
+		{
+			NUP = 0;
+			XNLF = 0;
+			XNST = 0;
+			INLF = 0;
+			INST = 0;
+			INGRN = 0;
+		}
+		
+		else if (CBD > bdEM && CBD < bdBSG)
+		{
+			INGRN = 0;
+			NUP = (GST * data.data_p.SNCG) + (GLAI * data.data_p.SLNG); // '+ NSTDF    '<---- -
+			if (CBD < bdBNF && CNUP > INSOL)
+				NUP = 0;
+			if (NUP > data.data_p.MXNUP) 
+				NUP = data.data_p.MXNUP;
+		
+			NFC = NFC * 3 / 4 + NUP / WVEG * (1 / 4);//   'from Sinclair et al. 2003
+			NUP = NUP * WSFN;
+			if (NUP < 0)
+				NUP = 0;
+			// 'If FTSW > 1 Then NUP = 0  'Inactivated
+			if (DDMP == 0)
+				NUP = 0;
+
+			if (NST <= (WST * data.data_p.SNCS))
+			{
+				INST = WST * data.data_p.SNCS - NST;
+				XNST = 0;
+				if (INST >= NUP)
+				{
+					INLF = 0;  
+					XNLF = INST - NUP;
+				}
+				else if (INST < NUP)
+					INLF = GLAI * data.data_p.SLNG;
+				if (INLF > (NUP - INST))
+					INLF = NUP - INST;
+				INST = NUP - INLF;
+				XNLF = 0;
+			}
+			else if (NST > (WST * data.data_p.SNCS))
+			{
+			
+			    INLF = GLAI * data.data_p.SLNG;
+				XNLF = 0;
+		     }
+			if (INLF >= NUP)
+			{
+				INST = 0;
+				XNST = INLF - NUP;
+				if (XNST > (NST - WST * data.data_p.SNCS))
+					XNST = NST - WST * data.data_p.SNCS;
+				INLF = NUP + XNST;
+			}
+			else if (INLF < NUP)
+			{
+				INST = NUP - INLF;
+				XNST = 0;
+			}
+
+		}
+		   //'       TRLN = LAI * (SLNG - SLNS) + (NST + INST - WST * SNCS)
+		   //'       FXLF = LAI * (SLNG - SLNS) / TRLN
+
+		else if (CBD >= bdBSG && CBD <= bdTSG)
+		{
+			INGRN = SGR * data.data_p.GNC;
+			NUP = INGRN + (GST * data.data_p.SNCG) + (GLAI * data.data_p.SLNG);
+			if (NUP > data.data_p.MXNUP)
+				NUP = data.data_p.MXNUP;
+			PDNF = NFC * WVEG;
+			if (PDNF > NUP)
+				PDNF = NUP;
+			DNF = PDNF * WSFN;
+			//   'If FTSW > 1 Then DNF = 0  'Inactivated
+			if (DNF < 0)
+				DNF = 0;
+			if (DDMP <= (SGR * data.data_p.GCF))
+				DNF = 0;
+			if (DDMP == 0)
+				DNF = 0;
+			NUP = DNF;
+			double NUP2;
+			if (NUP > (SGR * data.data_p.GNC))
+			{
+				//   'N is excess of seed needs
+				NUP2 = NUP - SGR * data.data_p.GNC;
+				if (NST <= (WST * data.data_p.SNCS))
+				{
+					INST = WST * data.data_p.SNCS - NST;
+					XNST = 0;
+
+					if (INST >= NUP2)
+					{
+						INLF = 0;
+						XNLF = INST - NUP2;
+					}
+					else if (INST < NUP2)
+					{
+						INLF = GLAI * data.data_p.SLNG;
+						if (INLF > (NUP2 - INST))
+						{
+							INLF = NUP2 - INST;
+							INST = NUP2 - INLF;   XNLF = 0;
+						}
+					}
+				}
+				else if (NST > (WST * data.data_p.SNCS))
+				{
+					INLF = GLAI * data.data_p.SLNG; 
+					XNLF = 0;
+					if (INLF >= NUP2)
+					{
+						INST = 0;
+						XNST = INLF - NUP2;
+
+						if (XNST > (NST - WST * data.data_p.SNCS))
+							XNST = NST - WST * data.data_p.SNCS;
+						INLF = NUP2 + XNST;
+					}
+					else if (INLF < NUP2)
+					{
+							INST = NUP2 - INLF;
+							XNST = 0;
+					}
+					
+				}
+
+				TRLN = LAI * (data.data_p.SLNG - data.data_p.SLNS) + (NST + INST - WST * data.data_p.SNCS);
+					FXLF = LAI * (data.data_p.SLNG - data.data_p.SLNS) / TRLN;
+			}
+			else if (NUP <= (SGR * data.data_p.GNC))
+			{
+				/// 'Need to transfer N from vegetative tissue
+				INLF = 0;
+				INST = 0;
+				XNLF = (SGR * data.data_p.GNC - NUP) * FXLF;
+				XNST = (SGR * data.data_p.GNC - NUP) * (1 - FXLF);
+			}
+
+		}
+		   NST = NST + INST - XNST;
+		   NLF = NLF + INLF - XNLF;
+		   NVEG = NLF + NST;
+		   NGRN = NGRN + INGRN;
+		   CNUP = CNUP + NUP;
   
-  NST = NST + INST - XNST
-  NLF = NLF + INLF - XNLF
-  NVEG = NLF + NST
-  NGRN = NGRN + INGRN
-  CNUP = CNUP + NUP
-  
-  TRLN = LAI * (SLNG - SLNS) + (NST - WST * SNCS)
-  FXLF = LAI * (SLNG - SLNS) / (TRLN + 0.000000000001)
-  If FXLF > 1 Then FXLF = 1
-  If FXLF < 0 Then FXLF = 0
-Return*/
+		   TRLN = LAI * (data.data_p.SLNG - data.data_p.SLNS) + (NST - WST * data.data_p.SNCS);
+		   FXLF = LAI * (data.data_p.SLNG - data.data_p.SLNS) / (TRLN + 0.000000000001);
+		   if (FXLF > 1)
+			   FXLF = 1;
+		   if (FXLF < 0 )
+			   FXLF = 0;
 	}
 	void DailyPrintOut(void)
 	{
-		/*If locno = 1 And yno = 1 Then
-   Sheet4.Cells(DAP + 1, 1) = Yr
-   Sheet4.Cells(DAP + 1, 2) = DOY
-   Sheet4.Cells(DAP + 1, 3) = DAP
-   Sheet4.Cells(DAP + 1, 4) = TMP
-   Sheet4.Cells(DAP + 1, 5) = DTT
-   Sheet4.Cells(DAP + 1, 6) = CBD
-   Sheet4.Cells(DAP + 1, 7) = MSNN
-   Sheet4.Cells(DAP + 1, 8) = GLAI
-   Sheet4.Cells(DAP + 1, 9) = DLAI
-   Sheet4.Cells(DAP + 1, 10) = LAI
-   Sheet4.Cells(DAP + 1, 11) = TCFRUE
-   Sheet4.Cells(DAP + 1, 12) = FINT
-   Sheet4.Cells(DAP + 1, 13) = DDMP
-   Sheet4.Cells(DAP + 1, 14) = GLF
-   Sheet4.Cells(DAP + 1, 15) = GST
-   Sheet4.Cells(DAP + 1, 16) = SGR
-   Sheet4.Cells(DAP + 1, 17) = WLF
-   Sheet4.Cells(DAP + 1, 18) = WST
-   Sheet4.Cells(DAP + 1, 19) = WVEG
-   Sheet4.Cells(DAP + 1, 20) = WGRN
-   Sheet4.Cells(DAP + 1, 21) = WTOP
-   Sheet4.Cells(DAP + 1, 22) = DEPORT
-   Sheet4.Cells(DAP + 1, 23) = RAIN
-   Sheet4.Cells(DAP + 1, 24) = IRGW
-   Sheet4.Cells(DAP + 1, 25) = RUNOF
-   Sheet4.Cells(DAP + 1, 26) = PET
-   Sheet4.Cells(DAP + 1, 27) = SEVP
-   Sheet4.Cells(DAP + 1, 28) = TR
-   Sheet4.Cells(DAP + 1, 29) = ATSW
-   Sheet4.Cells(DAP + 1, 30) = FTSW
-   Sheet4.Cells(DAP + 1, 31) = CRAIN
-   Sheet4.Cells(DAP + 1, 32) = CIRGW
-   Sheet4.Cells(DAP + 1, 33) = IRGNO
-   Sheet4.Cells(DAP + 1, 34) = CRUNOF
-   Sheet4.Cells(DAP + 1, 35) = CE
-   Sheet4.Cells(DAP + 1, 36) = CTR
-   Sheet4.Cells(DAP + 1, 37) = WSTORG
-   Sheet4.Cells(DAP + 1, 38) = NUP
-   Sheet4.Cells(DAP + 1, 39) = NLF
-   Sheet4.Cells(DAP + 1, 40) = NST
-   Sheet4.Cells(DAP + 1, 41) = NVEG
-   Sheet4.Cells(DAP + 1, 42) = NGRN
-   Sheet4.Cells(DAP + 1, 43) = CNUP
-End If
-Return
-*/
+		cout <<data.data_h5.years[ROW] << endl;
+		cout <<data.data_h5.doy[ROW] << endl;
+		cout << DAP<< endl;
+		cout <<TMP << endl;
+		cout <<DTT << endl;
+		cout << CBD << endl;
+		cout << MSNN << endl;
+		cout << GLAI << endl;
+		cout << DLAI << endl;
+		cout << LAI << endl;
+		cout << TCFRUE << endl;
+		cout << FINT << endl;
+		cout << DDMP << endl;
+		cout << GLF << endl;
+		cout << GST << endl;
+		cout << SGR << endl;
+		cout << WLF << endl;
+		cout << WST << endl;
+		cout << WVEG << endl;
+		cout << WGRN << endl;
+		cout << WTOP << endl;
+	//	cout << DEPORT << endl;
+		cout << RAIN << endl;
+		cout << IRGW << endl;
+		cout << RUNOF << endl;
+		cout << PET << endl;
+		cout << SEVP << endl;
+		cout << TR << endl;
+		cout << ATSW << endl;
+		cout << FTSW << endl;
+		cout << CRAIN << endl;
+		cout << CIRGW << endl;
+		cout << IRGNO << endl;
+		cout << CRUNOF << endl;
+		cout << CE << endl;
+		cout << CTR << endl;
+		cout << WSTORG << endl;
+		cout << NUP << endl;
+		cout << NLF << endl;
+		cout << NST << endl;
+		cout << NVEG << endl;
+		cout << NGRN << endl;
+		cout << CNUP << endl;
+	
 	}
 	void calculation()
 	{
