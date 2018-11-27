@@ -8,13 +8,13 @@ int main(int argc, char *argv[])
 	parser.addHelpOption();
 	parser.addVersionOption();
 	parser.addOptions({
-			{{"s", "sName"},
+/*			{{"s", "sName"},
 				QCoreApplication::translate("main", "sName."),
-				QCoreApplication::translate("main", "S")},
+				QCoreApplication::translate("main", "S")},*/
 			{{"l", "Latitude"},
 				QCoreApplication::translate("main", "Latitude.")},
-			{{"3", "VPDF"},
-				QCoreApplication::translate("main", "VPDF.")},
+/*			{{"3", "VPDF"},
+				QCoreApplication::translate("main", "VPDF.")},*/
 			{{"y", "yno"},
 				QCoreApplication::translate("main", "Number of years."),
 				QCoreApplication::translate("main", "Y")},
@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 			{{"p", "Pdoy"},
 				QCoreApplication::translate("main", "Pdoy."),
 				QCoreApplication::translate("main", "P")},
-			{{"d", "SearchDur"},
+/*			{{"d", "SearchDur"},
 				QCoreApplication::translate("main", "SearchDur.")},
 			{{"w", "SowWat"},
 				QCoreApplication::translate("main", "SowWat."),
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 			{{"1", "U"},
 				QCoreApplication::translate("main", "U.")},
 			{{"2", "CropColNo"},
-				QCoreApplication::translate("main", "CropColNo.")},
+				QCoreApplication::translate("main", "CropColNo.")},*/
 
 		});
 	parser.addPositionalArgument("file", "The file to open.");
@@ -76,16 +76,16 @@ int main(int argc, char *argv[])
 //	cout << " go1" << endl;
 	if (args.size())
 	{
-	//	cout << args.size() << endl;
+		cout << args.size() << endl;
 	    param.file_name = args.at(args.size() - 1);
-	/*
+
 		const QString nfParameter2 = parser.value("Latitude");
-		
+
 	    param.Latitude = nfParameter2.toDouble();
 
-		const QString nfParameter3 = parser.value("VPDF");
+/*		const QString nfParameter3 = parser.value("VPDF");
 		const int inf = nfParameter3.toDouble();
-		param.VPDF = inf;
+		param.VPDF = inf;*/
 		const QString nfParameter4 = parser.value("yno");
 		param.yno = nfParameter4.toDouble();
 		const QString nfParameter5 = parser.value("FirstYear");
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 		param.FixFind = nfParameter6.toInt();
 		const QString nfParameter7 = parser.value("Pdoy");
 		param.Pdoy = nfParameter7.toInt();
-		const QString nfParameter8 = parser.value("SearchDur");
+/*		const QString nfParameter8 = parser.value("SearchDur");
 		param.SearchDur = nfParameter8.toInt();
 		const QString nfParameter9 = parser.value("SowWat");
 		param.SowWat = nfParameter9.toInt();
@@ -130,6 +130,7 @@ int main(int argc, char *argv[])
 		param.U = nfParameter23.toInt();
 		const QString nfParameter24 = parser.value("CropColNo");
 		param.CropColNo = nfParameter24.toInt();*/
+		param.Print();
 		////////////////////////////////////////////////////////
 		param.Latitude = 36.41;
 		param.VPDF = 0.75;

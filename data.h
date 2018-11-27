@@ -15,7 +15,7 @@ class Data
 {
 public:
 
-	struct Data_f 
+	struct Data_f
 	{
             vector<int> years;
 			vector<int> doy;
@@ -126,7 +126,7 @@ public:
 			else if (i == 5)
 				data_xls.rain.push_back(atof(elem.c_str()));
 		}
-	} 
+	}
 	void read_xls(QString file_name)
 	{
 		int index = 0;
@@ -149,7 +149,7 @@ public:
 	};*/
 	void read_ini(void)
 	{
-		QSettings sett("C:\project\SSM\SSM_improved\SSM_improved\crops.ini.src", QSettings::IniFormat);
+		QSettings sett("crops.ini", QSettings::IniFormat);
 		sett.beginGroup("Jam");
 		data_p.phyl = sett.value("phyl", 46).toDouble();
 		data_p.PLACON = sett.value("PLACON", 1).toDouble();
@@ -240,10 +240,10 @@ public:
 			tmin_read.read(data_h5.tmin);
 			DataSet year_read = file.getDataSet("year");
 			year_read.read(data_h5.years);
-		} 
+		}
 		catch (Exception &err){
 			std::cerr << err.what() << std::endl;
 		}
-		
+
 	}
 };
