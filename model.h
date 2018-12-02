@@ -19,7 +19,7 @@ class Model : public QObject
 {
 	Q_OBJECT
 public:
-	double ROW;
+	int ROW;
 	double MAT;
 	double iniPheno;
 	double iniLai;
@@ -50,7 +50,6 @@ public:
 	double WETWAT;
 	double KET;
 	double CALB;
-	//double DYSE;
 	double CTR;
 	double CE;
 	double CRAIN;
@@ -72,21 +71,18 @@ public:
 	double DRAIN;
 	double GRTD;////
 	double CBD;///
-	double GRTDP;///
-	double MEED;///////
+
 	double EWAT;//
 	double RUNOF;//
 	double s;//
 	double SWER;//
 	double RAIN;//
-//	double CRAIN;//
 	double ETLAI;//
 	double BSGLAI;//
 	double TD;//
 	double ALBEDO;//
 	double EEQ;//
 	double PET;//
-	double SALB;//
 
 	double EOS;//
 	double SEVP;//
@@ -99,16 +95,13 @@ public:
 	double VPTMAX;
 	double VPD;
 	double TR;
-//	double DDMP;
-	double TEC;
+
 
 	double TR1;
 	double RT1;
 	double WSFN;
-	double WSSG;
 	double WSFG;
 	double WSFL;
-//	double WSFN;
 	double WSFD;
 
 	double LtDrCnt;
@@ -124,7 +117,6 @@ public:
 	double dtR7;
 	double  dtR8;
 	double  MXLAI;
-//	double  BSGLAI;
 	double BSGDM;
 	double  WTOP;
 	double WGRN;
@@ -133,22 +125,7 @@ public:
 	double  NVEG;
 	double  NGRN;
 	double  CNUP;
-	double INSOL;
 
-
-	double TBD;
-	double TP1D;
-	double TP2D;
-	double TCD;
-
-	double cpp;
-	double ppsen;
-	double bdSWEM;
-	double bdEMR1;
-	double bdR1R3;
-	double bdR3R5;
-	double bdR5R7;
-	double bdR8R8;
 	double bdEM;
 
 	double bdR1;
@@ -157,23 +134,14 @@ public:
 	double bdR5;
 	double bdR7;
 	double bdR8;
-	double   bdBRP;
-	double  bdTRP;
-	double  bdWSD;
+
 	double  bdBLG;
-	double  bdR1TLM;
-	double  bdR1TLP;
+
 	double  bdTLM;
 	double bdTLP;
 
-	double  bdRUE;
-	double bdBSG;
-	double  bdTSG;
-	double  bdBRG;
-	double bdTRG;
-	double bdBNF;
+
 	double DAP;
-	//bd <-----> tt
 	double tempfun;
 	double DTT;
 
@@ -181,7 +149,6 @@ public:
 	double Pi;
 	double RDN;
 	double ALPHA;
-//	double SABH;
 	double SMA3;
 	double LANDA;
 	double DEC;
@@ -199,22 +166,17 @@ public:
 	double MSNN;
 	double PLA2;
 	double PLA1;
-//	double  LAI;//ЗАМЕНИ LATITUDE НА ЭТУ ХЕРНЮ
+//	double  LAI;//LATITUDE 
 //	double MXLAI;
 //	double WSFL;
 //	double  SLNG;////////в data_p
 
 	double GLAI;
-//	double INLF;
 
 	double DLAI;
 
 	double INODE;
 	double GLF;
-	double SLA;
-
-//	double XNLF;
-//	double SLNS;
 
 	double TCFRUE;
 	double RUE;
@@ -286,89 +248,15 @@ public:
 	Data data;
 	Parametrs param;
 	Result res;
+
+	int Pyear;
+	int Pdoy;
+	int Yr;
 	explicit Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
 	{
 		run_h5();
 	}
 public slots:
-	/*void phenology()
-	{
-
-	}
-	void cropLain()
-	{
-
-	}
-	void dmpProduction()
-	{
-
-	}
-	void dmDistribution()
-	{
-
-	}
-	void legumPlantN()
-	{
-
-	}
-	/////сделать просто double и в конце итерации выгружать.
-	void soilWater()
-	{
-		//INITIALS
-		//iRRIGATION
-		if (param.water == 1 && data.data_p.FTSW <= param.IRGLVL)// еще условие
-		{
-			res.IRGW = res.TTSW[ind] - res.ATSW[ind];
-			res.IRGNO += 1;
-		}
-		else
-			res.IRGNO = 0;
-		res.CIRGW += res.IRGW;
-		//Drainage
-	}
-	void dailyPrintOut()
-	{
-
-	}
-	void weather()
-	{
-		res.TMP.push_back((data.data_h5.tmax[row] + data.data_h5.tmin[row])/2);
-	}
-	void soilWater()
-	{
-
-	}
-	double row;
-	double cumFind;
-	double MAT;
-	double ind;
-/*	void findSowingData()
-	{
-		
-		do
-		{
-			row += 1;/////////рано
-		} while (data.data_h5.years[row] != param.FirstYear && data.data_h5.doy[row] != param.Pdoy);
-		if (param.FixFind == 2)
-		{
-			do {
-
-			
-			row += 1;
-			cumFind = 0;
-			soilWater();
-			cumFind += 1;
-			if (cumFind > param.SearchDur)
-				MAT = 1;
-		//	if (MAT = 1)
-		//	{
-		//		data.data_h5.doy[row] = -1;
-		//		//другие данные тоже 0ж
-		//	}
-		//	} while ((res.atsw1[ind] + res.wstorg[ind]) >= (res.sowwat[ind]) || MAT = 1);
-		}
-	}*/
-
 
 	void SoilWater()
 	{
@@ -441,7 +329,7 @@ public slots:
 			WSTORG = 0;
 
 		//Water exploitation by root growth
-		GRTD = GRTDP;//
+		GRTD = data.data_p.GRTDP;//
 		if (CBD < data.data_p.ttBRG)//bdBRG)
 			GRTD = 0;
 		if (CBD > data.data_p.ttTRG)//bdTRG)
@@ -450,7 +338,7 @@ public slots:
 			GRTD = 0;
 		if (data.data_p.DEPORT >= param.SOLDEP)
 			GRTD = 0;
-		if (data.data_p.DEPORT >= MEED)
+		if (data.data_p.DEPORT >= data.data_p.EED)
 			GRTD = 0;
 		if (WSTORG = 0)
 			GRTD = 0;
@@ -488,7 +376,7 @@ public slots:
 
 		// Potential ET
 		TD = 0.6 * data.data_h5.tmax[ROW]/*TMAX*/ + 0.4 * data.data_h5.tmin[ROW];
-		ALBEDO = CALB * (1 - exp(-KET * ETLAI)) + SALB * exp(-KET * ETLAI);
+		ALBEDO = CALB * (1 - exp(-KET * ETLAI)) + param.SALB * exp(-KET * ETLAI);
 		EEQ = data.data_h5.srad[ROW] * (0.004876 - 0.004374 * ALBEDO) * (TD + 29);
 		PET = EEQ * 1.1;
 		if (data.data_h5.tmax[ROW] > 34)
@@ -569,7 +457,7 @@ public slots:
 			VPTMIN = 0.6108 * exp(17.27 * data.data_h5.tmin[ROW]/ (data.data_h5.tmin[ROW] + 237.3));
 			VPTMAX = 0.6108 * exp(17.27 * data.data_h5.tmax[ROW] / (data.data_h5.tmax[ROW] + 237.3));
 			VPD = param.VPDF * (VPTMAX - VPTMIN);
-			TR = DDMP * VPD / TEC;    //    'VPD in kPa, TEC in Pa
+			TR = DDMP * VPD / data.data_p.TEC;    //    'VPD in kPa, TEC in Pa
 		}
 		else if (vpdtp = 2 )
 		{}
@@ -614,10 +502,10 @@ public slots:
 				WSFL = 1;
 			else
 				WSFL = FTSW / data.data_p.WSSL;
-			if (FTSW > WSSG)
+			if (FTSW > data.data_p.WSSG)
 				WSFG = 1;
 			else
-				WSFG = FTSW / WSSG;
+				WSFG = FTSW / data.data_p.WSSG;
 			WSFD = (1 - WSFG) * data.data_p.WSSD + 1;
 
 			if (WATRT > (0.95 * WSAT))
@@ -646,24 +534,26 @@ public slots:
 				CBD = data.data_p.ttTSG;
 	}
 
-	void FindSowingData(int &row, int &p_year, int &p_doy)
+	void FindSowingData(void)
 	{
 		for (int i = 0; i < data.data_h5.years.size(); i++)
 		{
 			if (data.data_h5.years[i] == param.FirstYear)
 			{
-				row = i;
-				ROW = row;
-				p_year = param.FirstYear;
-				p_doy = param.Pdoy;
+				ROW = i;
+				Pyear = param.FirstYear;
+				Pdoy = param.Pdoy;
+				Yr = Pyear;
+				DOY = Pdoy;
 				break;
 			}
 			//еще какое то условие
 		}
 		if (param.FixFind == 2)
 		{
+			cout << "CAME" << endl;
 			CumFind = 0;
-			for (row; row < data.data_h5.years.size(); row++)
+			for (int row = ROW; row < data.data_h5.years.size(); row++)
 			{
 				ROW = row;
 				CDB = 0;
@@ -671,7 +561,7 @@ public slots:
 				CumFind = CumFind + 1;
 				if (CumFind > param.SearchDur)
 					MAT = 1;
-				if (MAT = 1)
+				if (MAT == 1)
 				{
 				    DOY = -1;
 					dtEM = 0;
@@ -690,17 +580,20 @@ public slots:
 					NVEG = 0;
 					NGRN = 0;
 					CNUP = 0;
-					INSOL = 0;
+					param.INSOL = 0;
 				}
 				if (ATSW1 + WSTORG >= param.SowWat || MAT == 1)
 					break;
 
 			}
+			Pdoy = data.data_h5.doy[ROW];
 		}
 	}
 	void Weather(void)
 	{
+	//	cout << "ROW =" <<  ROW << endl;
 		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2;
+	//	cout << "TMP = " << TMP <<  endl;
 	}
 	
 	void Phenology(void)
@@ -827,7 +720,7 @@ public slots:
 		}
 		else if (CBD > bdTLM && CBD <= bdTLP)
 		{
-			GLAI = GLF * SLA;
+			GLAI = GLF * data.data_p.SLA;
 			BSGLAI = LAI;
 		}
 		//Saving LAI at BSG
@@ -875,9 +768,9 @@ public slots:
 			TCFRUE = 1;
 		}
 
-		if (CBD <= bdRUE)
+		if (CBD <= data.data_p.ttRUE)
 			RUE = data.data_p.IRUE1 * TCFRUE * WSFG;
-		else if (CBD > bdRUE)
+		else if (CBD > data.data_p.ttRUE)
 			RUE = data.data_p.IRUE2 * TCFRUE * WSFG;
 
 
@@ -958,14 +851,14 @@ public slots:
 				{
 					VPTEMP1 = 0.6108 * exp(17.27 * TEMP1 / (237.3 + TEMP1));
 					VPD1 = (VPTEMP1 - VPTMIN) * (param.VPDF / 0.75);//       '(VPDF/0.75) is a correction factor when VPDF is different from 0.75
-					TR1 = DDMP1 * VPD1 / TEC;   //'VPD in kPa, TEC in Pa
+					TR1 = DDMP1 * VPD1 / data.data_p.TEC;   //'VPD in kPa, TEC in Pa
 
 					if (VPD1 > VPDcr)	//'correction of TR and DBP for VDP>VPDcr
 					{
-						TR1 = DDMP1 * VPDcr / TEC;
-						DDMP1 = TR1 * TEC / VPDcr;
-						TR1 = DDMP1 * VPDcr / TEC;
-						DDMP1 = TR1 * TEC / VPDcr;
+						TR1 = DDMP1 * VPDcr / data.data_p.TEC;
+						DDMP1 = TR1 * data.data_p.TEC / VPDcr;
+						TR1 = DDMP1 * VPDcr / data.data_p.TEC;
+						DDMP1 = TR1 * data.data_p.TEC / VPDcr;
 					}
 					TR = TR + TR1;
 
@@ -1119,7 +1012,7 @@ public slots:
 			iniPNB = 1;
 
 		}
-		if (CBD <= bdEM || CBD > bdTSG)//не то
+		if (CBD <= bdEM || CBD > data.data_p.ttTSG)//не то
 		{
 			NUP = 0;
 			XNLF = 0;
@@ -1129,11 +1022,11 @@ public slots:
 			INGRN = 0;
 		}
 		
-		else if (CBD > bdEM && CBD < bdBSG)
+		else if (CBD > bdEM && CBD < data.data_p.ttBSG)
 		{
 			INGRN = 0;
 			NUP = (GST * data.data_p.SNCG) + (GLAI * data.data_p.SLNG); // '+ NSTDF    '<---- -
-			if (CBD < bdBNF && CNUP > INSOL)
+			if (CBD < data.data_p.ttBNF && CNUP > param.INSOL)
 				NUP = 0;
 			if (NUP > data.data_p.MXNUP) 
 				NUP = data.data_p.MXNUP;
@@ -1186,7 +1079,7 @@ public slots:
 		   //'       TRLN = LAI * (SLNG - SLNS) + (NST + INST - WST * SNCS)
 		   //'       FXLF = LAI * (SLNG - SLNS) / TRLN
 
-		else if (CBD >= bdBSG && CBD <= bdTSG)
+		else if (CBD >= data.data_p.ttBSG && CBD <= data.data_p.ttTSG)
 		{
 			INGRN = SGR * data.data_p.GNC;
 			NUP = INGRN + (GST * data.data_p.SNCG) + (GLAI * data.data_p.SLNG);
@@ -1299,7 +1192,7 @@ public slots:
 		cout << WVEG << endl;
 		cout << WGRN << endl;
 		cout << WTOP << endl;
-	//	cout << DEPORT << endl;
+		cout << data.data_p.DEPORT << endl;
 		cout << RAIN << endl;
 		cout << IRGW << endl;
 		cout << RUNOF << endl;
@@ -1321,11 +1214,81 @@ public slots:
 		cout << NVEG << endl;
 		cout << NGRN << endl;
 		cout << CNUP << endl;
-	
+	}
+	void SummaryPrintOut()
+	{
+		cout << dtEM << endl;
+		cout << dtR1 << endl;
+		cout << dtR3 << endl;
+		cout << dtR5 << endl;
+		cout << dtR7 << endl;
+		cout << dtR8 << endl;
+		cout << MSNN << endl;
+		cout << MXLAI << endl;
+		cout << BSGLAI << endl;
+		cout << BSGDM << endl;
+		cout << WTOP << endl;
+		cout << WGRN << endl;
+		cout << WGRN / WTOP * 100 << endl;
+		cout << WGRN / data.data_p.TRESH << endl;
+		cout << ISATSW << endl;
+		cout << CRAIN << endl;
+		cout << CIRGW << endl;
+		cout << IRGNO << endl;
+		cout << ATSW << endl;
+		cout << CRUNOF << endl;
+		cout << CE << endl;
+		cout << CTR << endl;
+		cout << WSTORG << endl;
+		cout << CE + CTR << endl;
+		cout << CE / (CE + CTR + 0.00001) << endl;
+		cout << NLF << endl;
+		cout << NLF << endl;
+		cout << (NLF + NST) << endl;
+		cout << NGRN << endl;
+		cout << CNUP << endl;
+		cout << param.INSOL << endl;
+		cout << CIRGW << endl;
+		//////*
+	//	cout << LATX << endl;
+	//	cout << LONGX << endl;
+	/*	cout << Pyear << endl;
+		cout << Pdoy << endl;
+		cout << dtEM << endl;
+		cout << dtR1 << endl;
+		cout << dtR3 << endl;
+		cout << dtR5 << endl;
+		cout << dtR7 << endl;
+		cout << dtR8 << endl;
+		cout << MSNN << endl;
+		cout << MXLAI << endl;
+		cout << BSGLAI << endl;
+		cout << BSGDM << endl;
+		cout << WTOP << endl;
+		cout << WGRN << endl;
+		cout << WGRN / WTOP * 100 << endl;
+		cout << WGRN / data.data_p.TRESH << endl;
+		cout << ISATSW << endl;
+		cout << CRAIN << endl;
+		cout << CIRGW << endl;
+		cout << IRGNO << endl;
+		cout << ATSW << endl;
+		cout << CRUNOF << endl;
+		cout << CE << endl;
+		cout << CTR << endl;
+		cout << WSTORG << endl;
+		cout << CE + CTR << endl;
+		cout << CE / (CE + CTR + 0.00001) << endl;
+		cout << NLF << endl;
+		cout << NLF << endl;
+		cout << (NLF + NST) << endl;
+		cout << NGRN << endl;
+		cout << CNUP << endl;
+		cout << param.INSOL << endl;*/
 	}
 	void calculation()
 	{
-		
+		cout << "yno = " << param.yno << endl;
 		for (int i = 0; i < param.yno; i++)
 		{
 			//ManagInputs
@@ -1337,20 +1300,23 @@ public slots:
 			iniDMD = 0;
 			iniSW = 0;
 			iniPNB = 0;
-			int row = 0, p_year = 0, p_doy = 0;
-			FindSowingData(row, p_year, p_doy);
-			DOY = p_doy;
-			while (MAT == 1)
+			FindSowingData();
+			Pyear = param.FirstYear;
+			while (MAT != 1)
 			{
+			//	ROW += 1;
 				Weather();
 			    Phenology();
 				CropLAIN();
 				DMProduction();
-			//	DMDistribution();
-			//	LegumPlantN();
+				DMDistribution();
+				LegumPlant();
 				SoilWater();
-			//	DailyPrintOut();
+				DailyPrintOut();
 			}
+			SummaryPrintOut();
+			Pyear += 1;
+		//	DailyPrintOut();
 		}
 	}
 	void print_res()
@@ -1363,7 +1329,7 @@ public slots:
 		data.read_h5(param.file_name);
 		data.read_ini();
 		cout << "BEGIN CALC" << endl;
-		//calculation();
+		calculation();
 		cout << "END CALC" << endl;
 	//	print_res();
 	}
