@@ -76,7 +76,7 @@ public:
 	double RUNOF;//
 	double s;//
 	double SWER;//
-	double RAIN;//
+//	double RAIN;//
 	double ETLAI;//
 	double BSGLAI;//
 	double TD;//
@@ -350,14 +350,14 @@ public slots:
 
 		
 		RUNOF = 0;
-		if (param.water = 2 && RAIN > 0.01)//RAIN ИЗ ТАБЛИЦЫ
+		if (param.water = 2 && data.data_h5.rain[ROW] > 0.01)//RAIN ИЗ ТАБЛИЦЫ
 		{
 			s = 254 * (100 / param.CN2 - 1);//CN
 			SWER = 0.15 * ((WSAT1 - WAT1) / (WSAT1 - WLL1));
 			if (SWER < 0)
 				SWER = 0;
-			if ((RAIN - SWER * s) > 0)
-				RUNOF = pow((RAIN - SWER * s),2 )/ (RAIN + (1 - SWER) * s);
+			if ((data.data_h5.rain[ROW] - SWER * s) > 0)
+				RUNOF = pow((data.data_h5.rain[ROW] - SWER * s),2 )/ (data.data_h5.rain[ROW] + (1 - SWER) * s);
 			else
 				RUNOF = 0;
 		}
@@ -365,7 +365,7 @@ public slots:
 		if ((WAT1 - DRAIN1) > WSAT1)
 			RUNOF = RUNOF + (WAT1 - DRAIN1 - WSAT1);
 
-		CRAIN = CRAIN + RAIN;
+		CRAIN = CRAIN + data.data_h5.rain[ROW];
 		CRUNOF = CRUNOF + RUNOF;
 
 		//LAI for soil evaporation
@@ -390,7 +390,7 @@ public slots:
 			EOS = EOSMIN;
 
 		SEVP = EOS;
-		if ((RAIN + IRGW) > WETWAT)
+		if ((data.data_h5.rain[ROW] + IRGW) > WETWAT)
 			DYSE = 1;
 		if (DYSE > 1 || FTSW < 0.5 || ATSW1 <= 2)
 		{
@@ -430,7 +430,7 @@ public slots:
 					SSE = SSE + SEVP;
 				}
 
-				FLUX1 = RAIN + IRGW - RUNOF;
+				FLUX1 = data.data_h5.rain[ROW] + IRGW - RUNOF;
 				if (FLUX1 >= SSE1)
 				{
 					SSE = SSE - FLUX1;
@@ -477,13 +477,13 @@ public slots:
 				TR1 = TR * RT1;
 		}
        //  Updating
-			ATSW1 = ATSW1 + RAIN + IRGW - DRAIN1 - RUNOF - TR1 - SEVP;
+			ATSW1 = ATSW1 + data.data_h5.rain[ROW] + IRGW - DRAIN1 - RUNOF - TR1 - SEVP;
 			if (ATSW1 < 0)
 				ATSW1 = 0;
 			FTSW1 = ATSW1 / TTSW1;
 			WAT1 = WLL1 + ATSW1;
 
-			ATSW = ATSW + RAIN + IRGW + EWAT - DRAIN - RUNOF - TR - SEVP;
+			ATSW = ATSW + data.data_h5.rain[ROW] + IRGW + EWAT - DRAIN - RUNOF - TR - SEVP;
 			if (ATSW < 0)
 				ATSW = 0;
 			TTSW = data.data_p.DEPORT  * param.EXTR;
@@ -538,7 +538,7 @@ public slots:
 	{
 		for (int i = 0; i < data.data_h5.years.size(); i++)
 		{
-			if (data.data_h5.years[i] == param.FirstYear)
+			if (data.data_h5.years[i] == param.FirstYear && data.data_h5.doy[i] == param.Pdoy )
 			{
 				ROW = i;
 				Pyear = param.FirstYear;
@@ -592,6 +592,7 @@ public slots:
 	void Weather(void)
 	{
 	//	cout << "ROW =" <<  ROW << endl;
+		ROW += 1;
 		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2;
 	//	cout << "TMP = " << TMP <<  endl;
 	}
@@ -1171,49 +1172,49 @@ public slots:
 	}
 	void DailyPrintOut(void)
 	{
-		cout <<data.data_h5.years[ROW] << endl;
-		cout <<data.data_h5.doy[ROW] << endl;
-		cout << DAP<< endl;
-		cout <<TMP << endl;
-		cout <<DTT << endl;
-		cout << CBD << endl;
-		cout << MSNN << endl;
-		cout << GLAI << endl;
-		cout << DLAI << endl;
-		cout << LAI << endl;
-		cout << TCFRUE << endl;
-		cout << FINT << endl;
-		cout << DDMP << endl;
-		cout << GLF << endl;
-		cout << GST << endl;
-		cout << SGR << endl;
-		cout << WLF << endl;
-		cout << WST << endl;
-		cout << WVEG << endl;
-		cout << WGRN << endl;
-		cout << WTOP << endl;
-		cout << data.data_p.DEPORT << endl;
-		cout << RAIN << endl;
-		cout << IRGW << endl;
-		cout << RUNOF << endl;
-		cout << PET << endl;
-		cout << SEVP << endl;
-		cout << TR << endl;
-		cout << ATSW << endl;
-		cout << FTSW << endl;
-		cout << CRAIN << endl;
-		cout << CIRGW << endl;
-		cout << IRGNO << endl;
-		cout << CRUNOF << endl;
-		cout << CE << endl;
-		cout << CTR << endl;
-		cout << WSTORG << endl;
-		cout << NUP << endl;
-		cout << NLF << endl;
-		cout << NST << endl;
-		cout << NVEG << endl;
-		cout << NGRN << endl;
-		cout << CNUP << endl;
+		cout << " YEARS= " << data.data_h5.years[ROW] << endl;
+		cout << " DOY= " << data.data_h5.doy[ROW] << endl;
+		cout << "DAP= " << DAP<< endl;
+		cout << " TMP= " << TMP << endl;
+		cout << " DTT= " << DTT << endl;
+		cout << "CDB= " << CBD << endl;
+		cout << "MSNN= " << MSNN << endl;
+		cout << "GLAI= " << GLAI << endl;
+		cout << " DLAI= " << DLAI << endl;
+		cout << "LAI= " << LAI << endl;
+		cout << "TCFRUE= " << TCFRUE << endl;
+		cout << "FINT= " << FINT << endl;
+		cout << " DDMP= " << DDMP << endl;
+		cout << "GLF= " << GLF << endl;
+		cout << "GST= " << GST << endl;
+		cout << " SGR= " << SGR << endl;
+		cout << "WLF= " << WLF << endl;
+		cout << "WST= " << WST << endl;
+		cout << "WVEG=  " << WVEG << endl;
+		cout << " WGRN= " << WGRN << endl;
+		cout << "WTOP= " << WTOP << endl;
+		cout << "DEPORT= " << data.data_p.DEPORT << endl;
+		cout << "RAIN= " << data.data_h5.rain[ROW] << endl;////////////RAIN из таблицы
+		cout << "IRGW= " << IRGW << endl;
+		cout << "RUNOF= " << RUNOF << endl;
+		cout << "PET= " << PET << endl;
+		cout << "SEVP= " << SEVP << endl;
+		cout << "TR= " << TR << endl;
+		cout << "ATSW= " << ATSW << endl;
+		cout << " FTSW=  " << FTSW << endl;
+		cout << " CRAIN= " << CRAIN << endl;
+		cout << " CIRGW= " << CIRGW << endl;
+		cout << "IRGNO= " << IRGNO << endl;
+		cout << " CRUNOF= " << CRUNOF << endl;
+		cout << "CE= " << CE << endl;
+		cout << " CTR= " << CTR << endl;
+		cout << "WSTORG= " << WSTORG << endl;
+		cout << "NUP= " << NUP << endl;
+		cout << " NLF= " << NLF << endl;
+		cout << "NST= " << NST << endl;
+		cout << "NVEG= " << NVEG << endl;
+		cout << " NGRN= " << NGRN << endl;
+		cout << "CNUP= " << CNUP << endl;
 	}
 	void SummaryPrintOut()
 	{
