@@ -166,7 +166,7 @@ public:
 	double MSNN;
 	double PLA2;
 	double PLA1;
-//	double  LAI;//LATITUDE 
+//	double  LAI;//LATITUDE
 //	double MXLAI;
 //	double WSFL;
 //	double  SLNG;////////в data_p
@@ -297,7 +297,7 @@ public slots:
 			LtDrCntr = 0;
 
 			SE2C = 3.5;
-			SE1MX = param.U; 
+			SE1MX = param.U;
 			DSR = 1;
 			SSE1 = param.U;
 			SSE = param.U + SE2C;
@@ -348,7 +348,7 @@ public slots:
 		if (EWAT > WSTORG)
 			EWAT = WSTORG;
 
-		
+
 		RUNOF = 0;
 		if (param.water = 2 && data.data_h5.rain[ROW] > 0.01)//RAIN ИЗ ТАБЛИЦЫ
 		{
@@ -398,7 +398,7 @@ public slots:
 			DYSE = DYSE + 1;
 		}
 		//////////////
-		if (semethod = 2) 
+		if (semethod = 2)
 		{
 			if (ATSW1 < 0)
 				SEVP = 0;
@@ -510,9 +510,9 @@ public slots:
 
 			if (WATRT > (0.95 * WSAT))
 			{
-				WSFN = 0; 
+				WSFN = 0;
 				WSFG = 0;
-				WSFL = 0; 
+				WSFL = 0;
 				WSFD = 0;
 			}
 
@@ -596,7 +596,7 @@ public slots:
 		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2;
 	//	cout << "TMP = " << TMP <<  endl;
 	}
-	
+
 	void Phenology(void)
 	{
 		if (iniPheno == 0)
@@ -730,7 +730,7 @@ public slots:
 		DLAI = XNLF / (data.data_p.SLNG - data.data_p.SLNS);
 	}
 	//dmproduction
-	
+
 	void DMProduction(void)
 	{
 		//'------------------------------- Parameters and Initials
@@ -890,7 +890,7 @@ public slots:
 				DDMP = 0;
 
 	}
-	
+
 	void DMDistribution(void)
 	{
 
@@ -912,8 +912,8 @@ public slots:
 
 				TRESH = ThisWorkbook.Worksheets("Crops").Cells(83, CropColNo)  'Sheet5.[B83]
 				*/
-			WLF = 0.5;  
-			WST = 0.5; 
+			WLF = 0.5;
+			WST = 0.5;
 			WVEG = WLF + WST;
 			WGRN = 0; //повторение - переинициализация
 			iniDMD = 1;
@@ -1022,16 +1022,16 @@ public slots:
 			INST = 0;
 			INGRN = 0;
 		}
-		
+
 		else if (CBD > bdEM && CBD < data.data_p.ttBSG)
 		{
 			INGRN = 0;
 			NUP = (GST * data.data_p.SNCG) + (GLAI * data.data_p.SLNG); // '+ NSTDF    '<---- -
 			if (CBD < data.data_p.ttBNF && CNUP > param.INSOL)
 				NUP = 0;
-			if (NUP > data.data_p.MXNUP) 
+			if (NUP > data.data_p.MXNUP)
 				NUP = data.data_p.MXNUP;
-		
+
 			NFC = NFC * 3 / 4 + NUP / WVEG * (1 / 4);//   'from Sinclair et al. 2003
 			NUP = NUP * WSFN;
 			if (NUP < 0)
@@ -1046,7 +1046,7 @@ public slots:
 				XNST = 0;
 				if (INST >= NUP)
 				{
-					INLF = 0;  
+					INLF = 0;
 					XNLF = INST - NUP;
 				}
 				else if (INST < NUP)
@@ -1058,7 +1058,7 @@ public slots:
 			}
 			else if (NST > (WST * data.data_p.SNCS))
 			{
-			
+
 			    INLF = GLAI * data.data_p.SLNG;
 				XNLF = 0;
 		     }
@@ -1125,7 +1125,7 @@ public slots:
 				}
 				else if (NST > (WST * data.data_p.SNCS))
 				{
-					INLF = GLAI * data.data_p.SLNG; 
+					INLF = GLAI * data.data_p.SLNG;
 					XNLF = 0;
 					if (INLF >= NUP2)
 					{
@@ -1141,7 +1141,7 @@ public slots:
 							INST = NUP2 - INLF;
 							XNST = 0;
 					}
-					
+
 				}
 
 				TRLN = LAI * (data.data_p.SLNG - data.data_p.SLNS) + (NST + INST - WST * data.data_p.SNCS);
@@ -1162,7 +1162,7 @@ public slots:
 		   NVEG = NLF + NST;
 		   NGRN = NGRN + INGRN;
 		   CNUP = CNUP + NUP;
-  
+
 		   TRLN = LAI * (data.data_p.SLNG - data.data_p.SLNS) + (NST - WST * data.data_p.SNCS);
 		   FXLF = LAI * (data.data_p.SLNG - data.data_p.SLNS) / (TRLN + 0.000000000001);
 		   if (FXLF > 1)
@@ -1172,49 +1172,101 @@ public slots:
 	}
 	void DailyPrintOut(void)
 	{
-		cout << " YEARS= " << data.data_h5.years[ROW] << endl;
-		cout << " DOY= " << data.data_h5.doy[ROW] << endl;
-		cout << "DAP= " << DAP<< endl;
-		cout << " TMP= " << TMP << endl;
-		cout << " DTT= " << DTT << endl;
-		cout << "CDB= " << CBD << endl;
-		cout << "MSNN= " << MSNN << endl;
-		cout << "GLAI= " << GLAI << endl;
-		cout << " DLAI= " << DLAI << endl;
-		cout << "LAI= " << LAI << endl;
-		cout << "TCFRUE= " << TCFRUE << endl;
-		cout << "FINT= " << FINT << endl;
-		cout << " DDMP= " << DDMP << endl;
-		cout << "GLF= " << GLF << endl;
-		cout << "GST= " << GST << endl;
-		cout << " SGR= " << SGR << endl;
-		cout << "WLF= " << WLF << endl;
-		cout << "WST= " << WST << endl;
-		cout << "WVEG=  " << WVEG << endl;
-		cout << " WGRN= " << WGRN << endl;
-		cout << "WTOP= " << WTOP << endl;
-		cout << "DEPORT= " << data.data_p.DEPORT << endl;
-		cout << "RAIN= " << data.data_h5.rain[ROW] << endl;////////////RAIN из таблицы
-		cout << "IRGW= " << IRGW << endl;
-		cout << "RUNOF= " << RUNOF << endl;
-		cout << "PET= " << PET << endl;
-		cout << "SEVP= " << SEVP << endl;
-		cout << "TR= " << TR << endl;
-		cout << "ATSW= " << ATSW << endl;
-		cout << " FTSW=  " << FTSW << endl;
-		cout << " CRAIN= " << CRAIN << endl;
-		cout << " CIRGW= " << CIRGW << endl;
-		cout << "IRGNO= " << IRGNO << endl;
-		cout << " CRUNOF= " << CRUNOF << endl;
-		cout << "CE= " << CE << endl;
-		cout << " CTR= " << CTR << endl;
-		cout << "WSTORG= " << WSTORG << endl;
-		cout << "NUP= " << NUP << endl;
-		cout << " NLF= " << NLF << endl;
-		cout << "NST= " << NST << endl;
-		cout << "NVEG= " << NVEG << endl;
-		cout << " NGRN= " << NGRN << endl;
-		cout << "CNUP= " << CNUP << endl;
+		static int flag = 0;
+		if (flag == 0) {
+			flag = 1;
+			cout << "ROW ";
+			cout << " YEARS= ";
+			cout << " DOY= ";
+			cout << "DAP= ";
+			cout << " TMP= ";
+			cout << " DTT= ";
+			cout << "CDB= ";
+			cout << "MSNN= ";
+			cout << "GLAI= ";
+			cout << " DLAI= ";
+			cout << "LAI= ";
+			cout << "TCFRUE= ";
+			cout << "FINT= ";
+			cout << " DDMP= ";
+			cout << "GLF= ";
+			cout << "GST= ";
+			cout << " SGR= ";
+			cout << "WLF= ";
+			cout << "WST= ";
+			cout << "WVEG=  ";
+			cout << " WGRN= ";
+			cout << "WTOP= ";
+			cout << "DEPORT= ";
+			cout << "RAIN= ";////////////RAIN из таблицы
+			cout << "IRGW= ";
+			cout << "RUNOF= ";
+			cout << "PET= ";
+			cout << "SEVP= ";
+			cout << "TR= ";
+			cout << "ATSW= ";
+			cout << " FTSW=  ";
+			cout << " CRAIN= ";
+			cout << " CIRGW= ";
+			cout << "IRGNO= ";
+			cout << " CRUNOF= ";
+			cout << "CE= ";
+			cout << " CTR= ";
+			cout << "WSTORG= ";
+			cout << "NUP= ";
+			cout << " NLF= ";
+			cout << "NST= ";
+			cout << "NVEG= ";
+			cout << " NGRN= ";
+			cout << "CNUP= ";
+			cout << endl;
+		} else {
+			cout << ROW;
+			cout << " " << data.data_h5.years[ROW];
+			cout << " " << data.data_h5.doy[ROW];
+			cout << " " << DAP;
+			cout << " " << TMP;
+			cout << " " << DTT;
+			cout << " " << CBD;
+			cout << " " << MSNN;
+			cout << " " << GLAI;
+			cout << " " << DLAI;
+			cout << " " << LAI;
+			cout << " " << TCFRUE;
+			cout << " " << FINT;
+			cout << " " << DDMP;
+			cout << " " << GLF;
+			cout << " " << GST;
+			cout << " " << SGR;
+			cout << " " << WLF;
+			cout << " " << WST;
+			cout << " " << WVEG;
+			cout << " " << WGRN;
+			cout << " " << WTOP;
+			cout << " " << data.data_p.DEPORT;
+			cout << " " << data.data_h5.rain[ROW];////////////RAIN из таблицы
+			cout << " " << IRGW;
+			cout << " " << RUNOF;
+			cout << " " << PET;
+			cout << " " << SEVP;
+			cout << " " << TR;
+			cout << " " << ATSW;
+			cout << "  " << FTSW;
+			cout << " " << CRAIN;
+			cout << " " << CIRGW;
+			cout << " " << IRGNO;
+			cout << " " << CRUNOF;
+			cout << " " << CE;
+			cout << " " << CTR;
+			cout << " " << WSTORG;
+			cout << " " << NUP;
+			cout << " " << NLF;
+			cout << " " << NST;
+			cout << " " << NVEG;
+			cout << " " << NGRN;
+			cout << " " << CNUP;
+			cout << endl;
+		}
 	}
 	void SummaryPrintOut()
 	{
