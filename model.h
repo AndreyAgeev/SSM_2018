@@ -515,7 +515,7 @@ public slots:
 				WSFL = 0;
 				WSFD = 0;
 			}
-
+//cout << "ROW=" << ROW << " WATRT=" << WATRT << " WSAT=" << WSAT << " WSFD=" << WSFD << " CLL=" << CLL << endl;
 		// Crop termination by water stress
 			if (CBD > data.data_p.ttDKill/*bdDKill*/ && (CBD < data.data_p.ttTSG/*bdTSG*/))
 			{
@@ -646,12 +646,13 @@ public slots:
 		SOCRA = (cos(ALPHA * RDN) * TALSOC * CEDSOC) - (tan(LAI * RDN) * tan(DEC * RDN));
 		DL = Pi / 2 - (atan(SOCRA / sqrt(1.0 - pow(SOCRA, 2))));
 		DL = DL / RDN;
-		pp = 2 / 15 * DL;
-
+		pp = 2.0 / 15.0 * DL;
+//cout << "ROW=" << ROW << " pp=" << pp << " DL=" << DL << " RDN=" << RDN << " SOCRA=" << SOCRA << " TALSOC=" << TALSOC << endl;
 		if (data.data_p.ppsen >= 0)
 			ppfun = 1 - data.data_p.ppsen * (data.data_p.CPP - pp);
 		else if (data.data_p.ppsen < 0)
 			ppfun = 1 - (-data.data_p.ppsen) * (pp - data.data_p.CPP);
+//cout << "ROW=" << ROW << " pp=" << pp << " ppfun=" << ppfun << " tempfun=" << tempfun << endl;
 		if (ppfun > 1)
 			ppfun = 1;
 		if (ppfun < 0)
