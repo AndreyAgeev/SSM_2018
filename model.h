@@ -29,7 +29,7 @@ public:
 	double iniSW;
 	double iniPNB;
 	double CumFind;//FindSowingData
-	double CDB;
+	//double CDB;
 
 	//SoilWater
 	double CLL;
@@ -88,9 +88,9 @@ public:
 	double SEVP;//
 	double DYSE;//
 
-	double semethod = 1;
+	int semethod = 1;
 	double FLUX1;
-	double vpdtp;
+	int vpdtp;
 	double VPTMIN;
 	double VPTMAX;
 	double VPD;
@@ -286,20 +286,20 @@ public slots:
 			KET = 0.5;
 			CALB = 0.23;
 
-			DYSE = 1;
-			CTR = 0;
-			CE = 0;
-			CRAIN = 0;
-			CRUNOF = 0;
-			CIRGW = 0;
-			IRGNO = 0;
-			DDMP = 0;
-			LAI = 0;
-			LtDrCntr = 0;
+			DYSE = 1.0;
+			CTR = 0.0;
+			CE = 0.0;
+			CRAIN = 0.0;
+			CRUNOF = 0.0;
+			CIRGW = 0.0;
+			IRGNO = 0.0;
+			DDMP = 0.0;
+			LAI = 0.0;
+			LtDrCntr = 0.0;
 
 			SE2C = 3.5;
 			SE1MX = param.U; 
-			DSR = 1;
+			DSR = 1.0;
 			SSE1 = param.U;
 			SSE = param.U + SE2C;
 			iniSW = 1;
@@ -308,41 +308,41 @@ public slots:
 		if (param.water == 1 && FTSW <= param.IRGLVL && CBD < data.data_p.ttTSG)
 		{
 			IRGW = (TTSW - ATSW);
-			IRGNO = IRGNO + 1;
+			IRGNO = IRGNO + 1.0;
 		}
 		else
-			IRGW = 0;
+			IRGW = 0.0;
 
 		CIRGW = CIRGW + IRGW;
 
 		// Drainage
 		if (ATSW1 <= TTSW1)
-			DRAIN1 = 0;
+			DRAIN1 = 0.0;
 		else if (ATSW1 > TTSW1)
 			DRAIN1 = (ATSW1 - TTSW1) * param.DRAINF;
 
 		if (ATSW <= TTSW)
-			DRAIN = 0;
+			DRAIN = 0.0;
 		else if (ATSW > TTSW)
 			DRAIN = (ATSW - TTSW) * param.DRAINF;
 		WSTORG = WSTORG + DRAIN - EWAT;//ИСПОЛЬЗОВАНИЕ ДО ИНИЦИАЛИЗАЦИИ
-		if (WSTORG < 0)
-			WSTORG = 0;
+		if (WSTORG < 0.0)
+			WSTORG = 0.0;
 
 		//Water exploitation by root growth
 		GRTD = data.data_p.GRTDP;//
 		if (CBD < data.data_p.ttBRG)//bdBRG)
-			GRTD = 0;
+			GRTD = 0.0;
 		if (CBD > data.data_p.ttTRG)//bdTRG)
-			GRTD = 0;
-		if (DDMP = 0)
-			GRTD = 0;
+			GRTD = 0.0;
+		if (DDMP == 0.0)
+			GRTD = 0.0;
 		if (data.data_p.DEPORT >= param.SOLDEP)
-			GRTD = 0;
+			GRTD = 0.0;
 		if (data.data_p.DEPORT >= data.data_p.EED)
-			GRTD = 0;
-		if (WSTORG = 0)
-			GRTD = 0;
+			GRTD = 0.0;
+		if (WSTORG == 0.0)
+			GRTD = 0.0;
 		data.data_p.DEPORT = data.data_p.DEPORT + GRTD;
 
 		EWAT = GRTD * param.EXTR;
@@ -355,12 +355,12 @@ public slots:
 		{
 			s = 254.0 * (100.0 / param.CN2 - 1.0);
 			SWER = 0.15 * ((WSAT1 - WAT1) / (WSAT1 - WLL1));
-			if (SWER < 0)
-				SWER = 0;
-			if ((data.data_h5.rain[ROW] - SWER * s) > 0)
-				RUNOF = pow((data.data_h5.rain[ROW] - SWER * s),2 )/ (data.data_h5.rain[ROW] + (1 - SWER) * s);
+			if (SWER < 0.0)
+				SWER = 0.0;
+			if ((data.data_h5.rain[ROW] - SWER * s) > 0.0)
+				RUNOF = pow((data.data_h5.rain[ROW] - SWER * s),2.0 )/ (data.data_h5.rain[ROW] + (1.0 - SWER) * s);
 			else
-				RUNOF = 0;
+				RUNOF = 0.0;
 		}
 
 		if ((WAT1 - DRAIN1) > WSAT1)
@@ -377,10 +377,10 @@ public slots:
 
 		// Potential ET
 		TD = 0.6 * data.data_h5.tmax[ROW]/*TMAX*/ + 0.4 * data.data_h5.tmin[ROW];
-		ALBEDO = CALB * (1.0 - exp(-KET * ETLAI)) + param.SALB * exp(-KET * ETLAI);
+		ALBEDO = CALB * (1.0 - exp(-KET * ETLAI)) + param.SALB * exp((-KET) * ETLAI);
 		EEQ = data.data_h5.srad[ROW] * (0.004876 - 0.004374 * ALBEDO) * (TD + 29.0);
 		PET = EEQ * 1.1;
-		if (data.data_h5.tmax[ROW] > 34)
+		if (data.data_h5.tmax[ROW] > 34.0)
 			PET = EEQ * ((data.data_h5.tmax[ROW] - 34) * 0.05 + 1.1);
 		if (data.data_h5.tmax[ROW] < 5.0)
 			PET = EEQ * 0.01 * exp(0.18 * (data.data_h5.tmax[ROW] + 20.0));
@@ -395,14 +395,14 @@ public slots:
 			DYSE = 1.0;
 		if (DYSE > 1.0 || FTSW < 0.5 || ATSW1 <= 2.0)
 		{
-			SEVP = EOS * (pow((DYSE + 1), 0.5 )- pow(DYSE,0.5));
+			SEVP = EOS * (pow((DYSE + 1.0), 0.5 )- pow(DYSE,0.5));
 			DYSE = DYSE + 1.0;
 		}
 		//////////////
 		if (semethod == 2) 
 		{
-			if (ATSW1 < 0)
-				SEVP = 0;
+			if (ATSW1 < 0.0)
+				SEVP = 0.0;
 			else
 			{
 
@@ -463,10 +463,10 @@ public slots:
 			VPD = param.VPDF * (VPTMAX - VPTMIN);
 			TR = DDMP * VPD / data.data_p.TEC;    //    'VPD in kPa, TEC in Pa
 		}
-		else if (vpdtp = 2 )
+		else if (vpdtp == 2 )
 		{}
 
-		if (TR < 0)
+		if (TR < 0.0)
 			TR = 0.0;
 		CTR = CTR + TR;
 
@@ -475,7 +475,7 @@ public slots:
 		else if (data.data_p.DEPORT > param.DEP1)
 		{
 			if (FTSW1 > data.data_p.WSSG)
-				RT1 = 1;
+				RT1 = 1.0;
 			else
 				RT1 = FTSW1 / data.data_p.WSSG;
 			TR1 = TR * RT1;
@@ -548,17 +548,18 @@ public slots:
 			//	Pyear = param.FirstYear;
 			//	Pdoy = param.Pdoy;
 			//	Yr = Pyear;
-			//	DOY = Pdoy;
+				DOY = data.data_h5.doy[ROW];
 				break;
 			}
 		}
 		if (param.FixFind == 2)
 		{
 			cout << "CAME" << endl;
-			CumFind = 0;
+			CumFind = 0.0;
 			for (int row = ROW; row < data.data_h5.years.size(); row++)
 			{
 				ROW = row;
+				DOY = data.data_h5.doy[ROW];;
 				CBD = 0.0;
 				SoilWater();
 				CumFind = CumFind + 1;
@@ -567,23 +568,23 @@ public slots:
 				if (MAT == 1)
 				{
 				    DOY = -1;
-					dtEM = 0;
-					dtR1 = 0;
-					dtR3 = 0;
-					dtR5 = 0;
-					dtR7 = 0;
-					dtR8 = 0;
-				    MXLAI = 0;
-					BSGLAI = 0;
-					BSGDM = 0;
-					WTOP = 0;
-					WGRN = 0;
-					NLF = 0;
-					NST = 0;
-					NVEG = 0;
-					NGRN = 0;
-					CNUP = 0;
-					param.INSOL = 0;
+					dtEM = 0.0;
+					dtR1 = 0.0;
+					dtR3 = 0.0;
+					dtR5 = 0.0;
+					dtR7 = 0.0;
+					dtR8 = 0.0;
+				    MXLAI = 0.0;
+					BSGLAI = 0.0;
+					BSGDM = 0.0;
+					WTOP = 0.0;
+					WGRN = 0.0;
+					NLF = 0.0;
+					NST = 0.0;
+					NVEG = 0.0;
+					NGRN = 0.0;
+					CNUP = 0.0;
+					param.INSOL = 0.0;
 				}
 				if (ATSW1 + WSTORG >= param.SowWat || MAT == 1)
 					break;
@@ -595,7 +596,7 @@ public slots:
 	void Weather(void)
 	{
 		ROW += 1;
-		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2;
+		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2.0;
 	}
 	
 	void Phenology(void)
@@ -611,9 +612,9 @@ public slots:
 			bdBLG = bdEM;
 			bdTLM = bdR1 + data.data_p.ttR1TLM;
 			bdTLP = bdR1 + data.data_p.ttR1TLP;
-			DAP = 0;
-			CBD = 0;
-			WSFD = 0;
+			DAP = 0.0;
+			CBD = 0.0;
+			WSFD = 1.0;
 			iniPheno = 1;
 		}
 		// Thermal time calculation
@@ -651,7 +652,7 @@ public slots:
 
 		if (data.data_p.ppsen >= 0.0)
 			ppfun = 1.0 - data.data_p.ppsen * (data.data_p.CPP - pp);
-		else if (data.data_p.ppsen < 0)
+		else if (data.data_p.ppsen < 0.0)
 			ppfun = 1.0 - (-data.data_p.ppsen) * (pp - data.data_p.CPP);
 		if (ppfun > 1.0)
 			ppfun = 1.0;
@@ -696,12 +697,13 @@ public slots:
 		{
 			PLAPOW = data.data_p.PLAPOW30 * (-0.002 * param.PDEN + 1.0612);//       'Valid for (10<pden<70)
 
-			MSNN = 1;
-			PLA2 = 0;
-			PLA1 = 0;
-			LAI = 0;
-			MXLAI = 0; WSFL = 1;
-			data.data_p.SLNG = 2;
+			MSNN = 1.0;
+			PLA2 = 0.0;
+			PLA1 = 0.0;
+			LAI = 0.0;
+			MXLAI = 0.0;
+			WSFL = 1.0;
+			data.data_p.SLNG = 2.0;
 			iniLai = 1;
 		}
 		// Yesterday LAI to intercept PAR today
@@ -720,8 +722,8 @@ public slots:
 		{
 			INODE = DTT / data.data_p.phyl;
 			MSNN = MSNN + INODE * WSFL;
-			PLA2 = (int)data.data_p.PLACON * pow(MSNN,PLAPOW);
-			GLAI = ((PLA2 - PLA1) * param.PDEN / 10000);
+			PLA2 = data.data_p.PLACON * pow(MSNN,PLAPOW);
+			GLAI = ((PLA2 - PLA1) * (double)param.PDEN / 10000.0);
 			PLA1 = PLA2;
 		}
 		else if (CBD > bdTLM && CBD <= bdTLP)
@@ -731,7 +733,7 @@ public slots:
 		}
 		//Saving LAI at BSG
 		else if (CBD > bdTLP)
-			GLAI = 0;
+			GLAI = 0.0;
 		DLAI = XNLF / (data.data_p.SLNG - data.data_p.SLNS);
 	}
 	//dmproduction
@@ -752,7 +754,7 @@ public slots:
 
 				TEC = ThisWorkbook.Worksheets("Crops").Cells(36, CropColNo)  'Sheet5.[b36]*/
 
-			WSFG = 1;
+			WSFG = 1.0;
 			iniDMP = 1;
 		}
 
@@ -789,14 +791,14 @@ public slots:
 			Pi = 3.141592654;   
 			RDN = Pi / 180.0;
 			DEC = sin(23.45 * RDN) * cos(2.0 * Pi * (DOY + 10.0) / 365.0);
-			DEC = atan(DEC / sqrt(1.0 - pow(DEC, 2))) * -1.0;
+			DEC = atan(DEC / sqrt(1.0 - pow(DEC, 2.0))) * (-1.0);
 			DECL = DEC * 57.29578;
 			SINLD = sin(RDN * LAT) * sin(DEC);
 			COSLD = cos(RDN * LAT) * cos(DEC);
 			AOB = SINLD / COSLD;
 			AOB2 = atan(AOB / sqrt(1.0 - pow(AOB, 2.0)));
 			DAYL = 12.0 * (1.0 + 2.0 * AOB2 / Pi);
-			DSINB = 3600 * (DAYL * SINLD + 24 * COSLD * sqrt(1.0 - AOB * AOB) / Pi);
+			DSINB = 3600.0 * (DAYL * SINLD + 24.0 * COSLD * sqrt(1.0 - AOB * AOB) / Pi);
 			DSINBE = 3600.0 * (DAYL * (SINLD + 0.4 * (SINLD * SINLD + COSLD * COSLD * 0.5)) + 12.0 * COSLD * (2.0 + 3.0 * 0.4 * SINLD) * sqrt(1.0 - AOB * AOB) / Pi);
 			SC = 1370.0 * (1.0 + 0.033 * cos(2.0 * Pi * DOY / 365.0));
 			DSO = SC * DSINB;
@@ -810,41 +812,41 @@ public slots:
 			if (vpdtp == 2)
 			{
 				VPTMIN = 0.6108 * exp(17.27 * data.data_h5.tmin[ROW] / (237.3 + data.data_h5.tmin[ROW]));
-				TR = 0;
+				TR = 0.0;
 			}
 
-			DDMP = 0;
+			DDMP = 0.0;
 
 			for (int H = 1; H <= 24; H++)
 			{
-				if (H > SUNRIS && H < SUNSET)//TMINA?????
+				if ((double)H > SUNRIS && (double)H < SUNSET)//TMINA?????
 				{
-					if (H < SUNRIS)
+					if ((double)H < SUNRIS)
 					{
 						TSUNST = data.data_h5.tmin[ROW] + (TMAXB - data.data_h5.tmin[ROW]) * sin(Pi * (DAYL / (DAYL + 2.0 * P)));
-						NIGHTL = 24 - DAYL;
-						TEMP1 = (data.data_h5.tmin[ROW] - TSUNST * exp(-NIGHTL / TC) + (TSUNST - data.data_h5.tmin[ROW]) * exp(-(H + 24.0 - SUNSET) / TC)) / (1.0 - exp(-NIGHTL / TC));
+						NIGHTL = 24.0 - DAYL;
+						TEMP1 = (data.data_h5.tmin[ROW] - TSUNST * exp(-NIGHTL / TC) + (TSUNST - data.data_h5.tmin[ROW]) * exp(-((double)H + 24.0 - SUNSET) / TC)) / (1.0 - exp(-NIGHTL / TC));
 					}
-					else if (H < 13.5)
+					else if ((double)H < 13.5)
 					{
-						TEMP1 = data.data_h5.tmin[ROW] + (data.data_h5.tmax[ROW] - data.data_h5.tmin[ROW]) * sin(Pi * (H - SUNRIS) / (DAYL + 2.0 * P));
+						TEMP1 = data.data_h5.tmin[ROW] + (data.data_h5.tmax[ROW] - data.data_h5.tmin[ROW]) * sin(Pi * ((double)H - SUNRIS) / (DAYL + 2.0 * P));
 					}
-					else if (H < SUNSET)
+					else if ((double)H < SUNSET)
 					{
-						TEMP1 = TMINA + (data.data_h5.tmax[ROW] - TMINA) * sin(Pi * (H - SUNRIS) / (DAYL + 2.0 * P));
+						TEMP1 = TMINA + (data.data_h5.tmax[ROW] - TMINA) * sin(Pi * ((double)H - SUNRIS) / (DAYL + 2.0 * P));
 					}
 					else
 					{
 						TSUNST = TMINA + (data.data_h5.tmax[ROW] - TMINA) * sin(Pi * (DAYL / (DAYL + 2.0 * P)));
 						NIGHTL = 24.0 - DAYL;
-						TEMP1 = (TMINA - TSUNST * exp(-NIGHTL / TC) + (TSUNST - TMINA) * exp(-(H - SUNSET) / TC)) / (1.0 - exp(-NIGHTL / TC));
+						TEMP1 = (TMINA - TSUNST * exp(-NIGHTL / TC) + (TSUNST - TMINA) * exp(-((double)H - SUNSET) / TC)) / (1.0 - exp(-NIGHTL / TC));
 					}
 
-					SINB = SINLD + COSLD * cos(2.0 * Pi * (H + 12.0) / 24.0);
+					SINB = SINLD + COSLD * cos(2.0 * Pi * ((double)H + 12.0) / 24.0);
 					if (SINB < 0.0)
 						SINB = 0.0;
 
-					BET = atan(SINB / sqrt(1 - pow(SINB, 2.0)));     //      'BETA IN RADIAN
+					BET = atan(SINB / sqrt(1.0 - pow(SINB, 2.0)));     //      'BETA IN RADIAN
 					BETA = BET * 57.29578;         //       'BETA IN DEGREE
 					SRAD1 = DTR * SINB * (1.0 + 0.4 * SINB) / DSINBE; // 'J m-2 s-1
 					SRAD1 = SRAD1 * 3600.0 / 1000000.0;      //   'to J m-2 h-1; then MJ m-2 h-1
@@ -854,6 +856,7 @@ public slots:
 					FINT = 1.0 - exp(-data.data_p.KPAR * LAI);
 					DDMP1 = SRAD1 * 0.48 * FINT * RUE;
 				}
+			//}
 				if (vpdtp == 2)
 				{
 					VPTEMP1 = 0.6108 * exp(17.27 * TEMP1 / (237.3 + TEMP1));
@@ -892,8 +895,8 @@ public slots:
 				DDMP = data.data_h5.srad[ROW] * 0.48 * FINT * RUE;
 			}
 
-			if (CBD < data.data_p.ttSWEM/*bdEM */ || CBD > data.data_p.ttTSG)
-				DDMP = 0;
+			if (CBD < bdEM/*bdEM */ || CBD > data.data_p.ttTSG)
+				DDMP = 0.0;
 
 	}
 	
@@ -921,23 +924,23 @@ public slots:
 			WLF = 0.5;  
 			WST = 0.5; 
 			WVEG = WLF + WST;
-			WGRN = 0; //повторение - переинициализация
+			WGRN = 0.0; //повторение - переинициализация
 			iniDMD = 1;
 		}
 
 		//	'------------------------------- Seed dry matter growth
 		if (CBD <= data.data_p.ttBSG) {
-			TRANSL = 0;
-			SGR = 0;
+			TRANSL = 0.0;
+			SGR = 0.0;
 			BSGDM = WTOP;   //             'Saving WTOP at BSG
 			if (BSGDM <= data.data_p.WDHI1 || BSGDM >= data.data_p.WDHI4)
-				DHIF = 0;
+				DHIF = 0.0;
 			else if (BSGDM > data.data_p.WDHI1 && BSGDM < data.data_p.WDHI2)
 				DHIF = (BSGDM - data.data_p.WDHI1) / (data.data_p.WDHI2 - data.data_p.WDHI1);
 			else if (BSGDM > data.data_p.WDHI3 && BSGDM < data.data_p.WDHI4)
 				DHIF = (data.data_p.WDHI4 - BSGDM) / (data.data_p.WDHI4 - data.data_p.WDHI3);
 			else if (BSGDM >= data.data_p.WDHI2 && BSGDM <= data.data_p.WDHI3)
-				DHIF = 1;
+				DHIF = 1.0;
 
 			DHI = data.data_p.PDHI * DHIF;
 			TRLDM = BSGDM * data.data_p.FRTRL;
@@ -946,34 +949,36 @@ public slots:
 		{
 			SGR = DHI * (WTOP + DDMP) + DDMP * HI;
 			if (LAI == 0.0 && NST <= (WST * data.data_p.SNCS))
-				SGR = 0; // 'There is no N for seed filling
-			if (SGR < 0)
-				SGR = 0;
+				SGR = 0.0; // 'There is no N for seed filling
+			if (SGR < 0.0)
+				SGR = 0.0;
 
 			if ((SGR * data.data_p.GCF) > DDMP)
+			{
 				TRANSL = (SGR * data.data_p.GCF) - DDMP;
-			if (TRANSL > TRLDM)
-				TRANSL = TRLDM;
+				if (TRANSL > TRLDM)
+					TRANSL = TRLDM;
+			}
 			else if ((SGR * data.data_p.GCF) <= DDMP)
-				TRANSL = 0;
+				TRANSL = 0.0;
 
 			TRLDM = TRLDM - TRANSL;
-			if (SGR > (DDMP + TRANSL) / data.data_p.GCF)
+			if (SGR > ((DDMP + TRANSL) / data.data_p.GCF))
 				SGR = (DDMP + TRANSL) / data.data_p.GCF;
 		}
 		else if (CBD > data.data_p.ttTSG)
 		{
-			TRANSL = 0;
-			SGR = 0;
+			TRANSL = 0.0;
+			SGR = 0.0;
 		}
 			//'------------------------------- DM avail. for Leaf & stem
 		DDMP2 = DDMP - SGR * data.data_p.GCF;
-		if (DDMP2 < 0)
-			DDMP2 = 0;
+		if (DDMP2 < 0.0)
+			DDMP2 = 0.0;
 
 		//	'------------------------------- Leaf dry matter growth
 		if (CBD <= bdBLG || CBD > bdTLP)/// ?????????????????????
-			GLF = 0;
+			GLF = 0.0;
 		else if (CBD > bdBLG && CBD <= bdTLM)
 		{
 			if (WTOP < data.data_p.WTOPL)
@@ -1013,46 +1018,46 @@ public slots:
 
 			NST = WST * data.data_p.SNCG;
 			NLF = LAI * data.data_p.SLNG;
-			WSFN = 1;
+			WSFN = 1.0;
 			CNUP = NST + NLF;
-			NGRN = 0;
+			NGRN = 0.0;
 			iniPNB = 1;
 
 		}
 		if (CBD <= bdEM || CBD > data.data_p.ttTSG)
 		{
-			NUP = 0;
-			XNLF = 0;
-			XNST = 0;
-			INLF = 0;
-			INST = 0;
-			INGRN = 0;
+			NUP = 0.0;
+			XNLF = 0.0;
+			XNST = 0.0;
+			INLF = 0.0;
+			INST = 0.0;
+			INGRN = 0.0;
 		}
 		
 		else if (CBD > bdEM && CBD < data.data_p.ttBSG)
 		{
-			INGRN = 0;
+			INGRN = 0.0;
 			NUP = (GST * data.data_p.SNCG) + (GLAI * data.data_p.SLNG); // '+ NSTDF    '<---- -
 			if (CBD < data.data_p.ttBNF && CNUP > param.INSOL)
-				NUP = 0;
+				NUP = 0.0;
 			if (NUP > data.data_p.MXNUP) 
 				NUP = data.data_p.MXNUP;
 		
 			NFC = NFC * 3.0 / 4.0 + NUP / WVEG * (1.0 / 4.0);//   'from Sinclair et al. 2003
 			NUP = NUP * WSFN;
-			if (NUP < 0)
-				NUP = 0;
+			if (NUP < 0.0)
+				NUP = 0.0;
 			// 'If FTSW > 1 Then NUP = 0  'Inactivated
-			if (DDMP == 0)
-				NUP = 0;
+			if (DDMP == 0.0)
+				NUP = 0.0;
 
 			if (NST <= (WST * data.data_p.SNCS))
 			{
 				INST = WST * data.data_p.SNCS - NST;
-				XNST = 0;
+				XNST = 0.0;
 				if (INST >= NUP)
 				{
-					INLF = 0;  
+					INLF = 0.0;  
 					XNLF = INST - NUP;
 				}
 				else if (INST < NUP)
@@ -1060,17 +1065,17 @@ public slots:
 				if (INLF > (NUP - INST))
 					INLF = NUP - INST;
 				INST = NUP - INLF;
-				XNLF = 0;
+				XNLF = 0.0;
 			}
 			else if (NST > (WST * data.data_p.SNCS))
 			{
 			
 			    INLF = GLAI * data.data_p.SLNG;
-				XNLF = 0;
+				XNLF = 0.0;
 		     }
 			if (INLF >= NUP)
 			{
-				INST = 0;
+				INST = 0.0;
 				XNST = INLF - NUP;
 				if (XNST > (NST - WST * data.data_p.SNCS))
 					XNST = NST - WST * data.data_p.SNCS;
@@ -1079,7 +1084,7 @@ public slots:
 			else if (INLF < NUP)
 			{
 				INST = NUP - INLF;
-				XNST = 0;
+				XNST = 0.0;
 			}
 
 		}
@@ -1098,7 +1103,7 @@ public slots:
 			DNF = PDNF * WSFN;
 			//   'If FTSW > 1 Then DNF = 0  'Inactivated
 			if (DNF < 0.0)
-				DNF = 0;
+				DNF = 0.0;
 			if (DDMP <= (SGR * data.data_p.GCF))
 				DNF = 0.0;
 			if (DDMP == 0.0)
@@ -1112,11 +1117,11 @@ public slots:
 				if (NST <= (WST * data.data_p.SNCS))
 				{
 					INST = WST * data.data_p.SNCS - NST;
-					XNST = 0;
+					XNST = 0.0;
 
 					if (INST >= NUP2)
 					{
-						INLF = 0;
+						INLF = 0.0;
 						XNLF = INST - NUP2;
 					}
 					else if (INST < NUP2)
@@ -1125,17 +1130,18 @@ public slots:
 						if (INLF > (NUP2 - INST))
 						{
 							INLF = NUP2 - INST;
-							INST = NUP2 - INLF;   XNLF = 0;
+							INST = NUP2 - INLF;   
+							XNLF = 0;
 						}
 					}
 				}
 				else if (NST > (WST * data.data_p.SNCS))
 				{
 					INLF = GLAI * data.data_p.SLNG; 
-					XNLF = 0;
+					XNLF = 0.0;
 					if (INLF >= NUP2)
 					{
-						INST = 0;
+						INST = 0.0;
 						XNST = INLF - NUP2;
 
 						if (XNST > (NST - WST * data.data_p.SNCS))
@@ -1156,8 +1162,8 @@ public slots:
 			else if (NUP <= (SGR * data.data_p.GNC))
 			{
 				/// 'Need to transfer N from vegetative tissue
-				INLF = 0;
-				INST = 0;
+				INLF = 0.0;
+				INST = 0.0;
 				XNLF = (SGR * data.data_p.GNC - NUP) * FXLF;
 				XNST = (SGR * data.data_p.GNC - NUP) * (1.0- FXLF);
 			}
@@ -1172,9 +1178,9 @@ public slots:
 		   TRLN = LAI * (data.data_p.SLNG - data.data_p.SLNS) + (NST - WST * data.data_p.SNCS);
 		   FXLF = LAI * (data.data_p.SLNG - data.data_p.SLNS) / (TRLN + 0.000000000001);
 		   if (FXLF > 1.0)
-			   FXLF = 1;
-		   if (FXLF < 0 )
-			   FXLF = 0;
+			   FXLF = 1.0;
+		   if (FXLF < 0.0 )
+			   FXLF = 0.0;
 	}
 	void DailyPrintOut(void)
 	{
@@ -1233,38 +1239,39 @@ public slots:
 	void SummaryPrintOut()
 	{
 		out_s.open("output_summary.txt", std::ios::app);
-		out_s << dtEM << endl;
-		out_s << dtR1 << endl;
-		out_s << dtR3 << endl;
-		out_s << dtR5 << endl;
-		out_s << dtR7 << endl;
-		out_s << dtR8 << endl;
-		out_s << MSNN << endl;
-		out_s << MXLAI << endl;
-		out_s << BSGLAI << endl;
-		out_s << BSGDM << endl;
-		out_s << WTOP << endl;
-		out_s << WGRN << endl;
-		out_s << WGRN / WTOP * 100 << endl;
-		out_s << WGRN / data.data_p.TRESH << endl;
-		out_s << ISATSW << endl;
-		out_s << CRAIN << endl;
-		out_s << CIRGW << endl;
-		out_s << IRGNO << endl;
-		out_s << ATSW << endl;
-		out_s << CRUNOF << endl;
-		out_s << CE << endl;
-		out_s << CTR << endl;
-		out_s << WSTORG << endl;
-		out_s << CE + CTR << endl;
-		out_s << CE / (CE + CTR + 0.00001) << endl;
-		out_s << NLF << endl;
-		out_s << NLF << endl;
-		out_s << (NLF + NST) << endl;
-		out_s << NGRN << endl;
-		out_s << CNUP << endl;
-		out_s << param.INSOL << endl;
-		out_s << CIRGW << endl;
+		out_s << "year = " << data.data_h5.years[ROW] << endl;
+		out_s << "dtEM = "  << dtEM << endl;
+		out_s << "dtR1 = " << dtR1 << endl;
+		out_s << "dtR3 = " << dtR3 << endl;
+		out_s << "dtR5 = " << dtR5 << endl;
+		out_s << "dtR7 = " << dtR7 << endl;
+		out_s << "dtR8 = " << dtR8 << endl;
+		out_s << "MSNN = " << MSNN << endl;
+		out_s << "MXLAI = " << MXLAI << endl;
+		out_s << "BSGLAI = " << BSGLAI << endl;
+		out_s << "BSGDM = " << BSGDM << endl;
+		out_s << "WTOP = " << WTOP << endl;
+		out_s << "WGRN = " << WGRN << endl;
+		out_s << " WGRN / WTOP * 100 = " << WGRN / WTOP * 100 << endl;
+		out_s << "WGRN / data.data_p.TRESH = " << WGRN / data.data_p.TRESH << endl;
+		out_s << "ISATSW = " << ISATSW << endl;
+		out_s << "CRAIN = " << CRAIN << endl;
+		out_s << "CIRGW = " << CIRGW << endl;
+		out_s << "IRGNO = " << IRGNO << endl;
+		out_s << "ATSW = " << ATSW << endl;
+		out_s << "CRUNOF = " << CRUNOF << endl;
+		out_s << "CE = " << CE << endl;
+		out_s << "CTR" << CTR << endl;
+		out_s << "WSTORG = " << WSTORG << endl;
+		out_s << "CE + CTR = " << CE + CTR << endl;
+		out_s << "CE / (CE + CTR + 0.00001) = " << CE / (CE + CTR + 0.00001) << endl;
+		out_s << "NLF = " << NLF << endl;
+	//	out_s << NLF << endl;
+		out_s << "(NLF + NST) = " << (NLF + NST) << endl;
+		out_s << " NGRN = " << NGRN << endl;
+		out_s << "CNUP = " << CNUP << endl;
+		out_s << " param.INSOL = " << param.INSOL << endl;
+		out_s << "CIRGW = " << CIRGW << endl;
 		out_s.close();
 	}
 	void calculation()
