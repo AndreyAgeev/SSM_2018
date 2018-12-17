@@ -10,7 +10,6 @@
 #include <highfive/H5DataSpace.hpp>
 #include "data.h"
 #include "parametrs.h"
-#include "result.h"
 #include <iostream>
 #include <fstream>
 #include <math.h>
@@ -28,8 +27,7 @@ public:
 	double iniDMD;
 	double iniSW;
 	double iniPNB;
-	double CumFind;//FindSowingData
-	//double CDB;
+	double CumFind;
 
 	//SoilWater
 	double CLL;
@@ -197,6 +195,11 @@ public:
 	double SUNSET;
 	std::ofstream out;
 	std::ofstream out_s;
+	std::ofstream out_grap;
+	std::ofstream out_DAP;
+	std::ofstream out_FTSW;
+	std::ofstream out_CE;
+	std::ofstream out_CTR;
 
 	double TSUNST;
 	double NIGHTL;
@@ -245,8 +248,6 @@ public:
 	double HI;
 	Data data;
 	Parametrs param;
-	Result res;
-
 	int Pyear;
 	int Pdoy;
 	int Yr;
@@ -325,15 +326,15 @@ public slots:
 			DRAIN = 0.0;
 		else if (ATSW > TTSW)
 			DRAIN = (ATSW - TTSW) * param.DRAINF;
-		WSTORG = WSTORG + DRAIN - EWAT;//ИСПОЛЬЗОВАНИЕ ДО ИНИЦИАЛИЗАЦИИ
+		WSTORG = WSTORG + DRAIN - EWAT;
 		if (WSTORG < 0.0)
 			WSTORG = 0.0;
 
 		//Water exploitation by root growth
 		GRTD = data.data_p.GRTDP;//
-		if (CBD < data.data_p.ttBRG)//bdBRG)
+		if (CBD < data.data_p.ttBRG)
 			GRTD = 0.0;
-		if (CBD > data.data_p.ttTRG)//bdTRG)
+		if (CBD > data.data_p.ttTRG)
 			GRTD = 0.0;
 		if (DDMP == 0.0)
 			GRTD = 0.0;
@@ -351,14 +352,15 @@ public slots:
 
 		
 		RUNOF = 0;
-		if (param.water == 2 && data.data_h5.rain[ROW] > 0.01)//RAIN ИЗ ТАБЛИЦЫ
+		if (param.water == 2 && data.data_h5.rain[ROW] > 0.01)
 		{
 			s = 254.0 * (100.0 / param.CN2 - 1.0);
 			SWER = 0.15 * ((WSAT1 - WAT1) / (WSAT1 - WLL1));
 			if (SWER < 0.0)
 				SWER = 0.0;
 			if ((data.data_h5.rain[ROW] - SWER * s) > 0.0)
-				RUNOF = pow((data.data_h5.rain[ROW] - SWER * s),2.0 )/ (data.data_h5.rain[ROW] + (1.0 - SWER) * s);
+				RUNOF = ((data.data_h5.rain[ROW] - SWER * s) * (data.data_h5.rain[ROW] - SWER * s)) / (data.data_h5.rain[ROW] + (1.0 - SWER) * s);
+			//	RUNOF = pow((data.data_h5.rain[ROW] - SWER * s),2.0 )/ (data.data_h5.rain[ROW] + (1.0 - SWER) * s);
 			else
 				RUNOF = 0.0;
 		}
@@ -376,17 +378,17 @@ public slots:
 			ETLAI = BSGLAI;
 
 		// Potential ET
-		TD = 0.6 * data.data_h5.tmax[ROW]/*TMAX*/ + 0.4 * data.data_h5.tmin[ROW];
+		TD = 0.6 * data.data_h5.tmax[ROW]+ 0.4 * data.data_h5.tmin[ROW];
 		ALBEDO = CALB * (1.0 - exp(-KET * ETLAI)) + param.SALB * exp((-KET) * ETLAI);
 		EEQ = data.data_h5.srad[ROW] * (0.004876 - 0.004374 * ALBEDO) * (TD + 29.0);
 		PET = EEQ * 1.1;
 		if (data.data_h5.tmax[ROW] > 34.0)
-			PET = EEQ * ((data.data_h5.tmax[ROW] - 34) * 0.05 + 1.1);
+			PET = EEQ * ((data.data_h5.tmax[ROW] - 34.0) * 0.05 + 1.1);
 		if (data.data_h5.tmax[ROW] < 5.0)
 			PET = EEQ * 0.01 * exp(0.18 * (data.data_h5.tmax[ROW] + 20.0));
 
 	   // Soil evaporation
-		EOS = PET * exp(-KET * ETLAI);
+		EOS = PET * exp(((-KET) * ETLAI));
 		if (PET > EOSMIN && EOS < EOSMIN)
 			EOS = EOSMIN;
 
@@ -398,7 +400,6 @@ public slots:
 			SEVP = EOS * (pow((DYSE + 1.0), 0.5 )- pow(DYSE,0.5));
 			DYSE = DYSE + 1.0;
 		}
-		//////////////
 		if (semethod == 2) 
 		{
 			if (ATSW1 < 0.0)
@@ -451,10 +452,8 @@ public slots:
 			}
 		}
 		CE = CE + SEVP;
-		//////////////////Проинициализировали дважды( то есть еще до этого была инициализация)
 		vpdtp = data.data_p.vpd_resp;
 		VPDcr = data.data_p.vpd_cr;
-		//////////////
 		//Plant transpiration
 		if (vpdtp == 1 || vpdtp == 3)
 		{
@@ -545,16 +544,12 @@ public slots:
 			if (data.data_h5.years[i] == Pyear && data.data_h5.doy[i] == Pdoy )
 			{
 				ROW = i;
-			//	Pyear = param.FirstYear;
-			//	Pdoy = param.Pdoy;
-			//	Yr = Pyear;
 				DOY = data.data_h5.doy[ROW];
 				break;
 			}
 		}
 		if (param.FixFind == 2)
 		{
-			cout << "CAME" << endl;
 			CumFind = 0.0;
 			for (int row = ROW; row < data.data_h5.years.size(); row++)
 			{
@@ -641,12 +636,15 @@ public slots:
 		SMA3 = 0.9856 * DOY - 3.251;
 		LANDA = SMA3 + 1.916 * sin(SMA3 * RDN) + 0.02 * sin(2.0 * SMA3 * RDN) + 282.565;
 		DEC = 0.39779 * sin(LANDA * RDN);
-		DEC = atan(DEC / sqrt(1.0 - pow(DEC, 2.0)));
+		DEC = atan(DEC / sqrt(1.0 - (DEC * DEC)));
+	//	DEC = atan(DEC / ((1.0 - (DEC * DEC)) * (1.0 - (DEC * DEC))));
 		DEC = DEC / RDN;
 		TALSOC = 1.0 / cos(LAI * RDN);
 		CEDSOC = 1.0 / cos(DEC * RDN);
 		SOCRA = (cos(ALPHA * RDN) * TALSOC * CEDSOC) - (tan(LAI * RDN) * tan(DEC * RDN));
-		DL = Pi / 2.0 - (atan(SOCRA / sqrt(1.0 - pow(SOCRA, 2.0))));
+	//	DL = Pi / 2.0 - (atan(SOCRA / (((1.0 - (SOCRA *  SOCRA))) * (1.0 - (SOCRA *  SOCRA)))));
+
+		DL = Pi / 2.0 - (atan(SOCRA / sqrt(1.0 - (SOCRA * SOCRA))));
 		DL = DL / RDN;
 		pp = 2.0/ 15.0 * DL;
 
@@ -665,11 +663,11 @@ public slots:
 			ppfun = 1.0;
 
 	     //  Biological day
-		cout << "ROW = " << ROW << endl;
-		bd = tempfun * ppfun;
-		cout << "ppfun = " <<  ppfun << endl;
+	//	cout << "ROW = " << ROW << endl;
+		bd = tempfun * ppfun;///////////////////////////
+	//	cout << "ppfun = " <<  ppfun << endl;
 		CBD = CBD + bd;
-		cout << "CBD = " << CBD << endl;
+	//	cout << "CBD = " << CBD << endl;
 	//	cout << "ROW = " << ROW << endl;
 		DAP = DAP + 1.0;
 
@@ -723,7 +721,7 @@ public slots:
 			INODE = DTT / data.data_p.phyl;
 			MSNN = MSNN + INODE * WSFL;
 			PLA2 = data.data_p.PLACON * pow(MSNN,PLAPOW);
-			GLAI = ((PLA2 - PLA1) * (double)param.PDEN / 10000.0);
+			GLAI = (((PLA2 - PLA1) * (double)param.PDEN )/ 10000.0);
 			PLA1 = PLA2;
 		}
 		else if (CBD > bdTLM && CBD <= bdTLP)
@@ -743,17 +741,6 @@ public slots:
 		//'------------------------------- Parameters and Initials
 		if (iniDMP == 0)
 		{
-			//data_p
-			   /* TBRUE = ThisWorkbook.Worksheets("Crops").Cells(12, CropColNo)  'Sheet5.[b12]
-				TP1RUE = ThisWorkbook.Worksheets("Crops").Cells(13, CropColNo)  'Sheet5.[b13]
-				TP2RUE = ThisWorkbook.Worksheets("Crops").Cells(14, CropColNo)  'Sheet5.[b14]
-				TCRUE = ThisWorkbook.Worksheets("Crops").Cells(15, CropColNo)  'Sheet5.[b15]
-				KPAR = ThisWorkbook.Worksheets("Crops").Cells(16, CropColNo)  'Sheet5.[b16]
-				IRUE1 = ThisWorkbook.Worksheets("Crops").Cells(17, CropColNo)  'Sheet5.[b17]
-				IRUE2 = ThisWorkbook.Worksheets("Crops").Cells(18, CropColNo)  'Sheet5.[b18]
-
-				TEC = ThisWorkbook.Worksheets("Crops").Cells(36, CropColNo)  'Sheet5.[b36]*/
-
 			WSFG = 1.0;
 			iniDMP = 1;
 		}
@@ -791,12 +778,14 @@ public slots:
 			Pi = 3.141592654;   
 			RDN = Pi / 180.0;
 			DEC = sin(23.45 * RDN) * cos(2.0 * Pi * (DOY + 10.0) / 365.0);
-			DEC = atan(DEC / sqrt(1.0 - pow(DEC, 2.0))) * (-1.0);
+		//	DEC = atan(DEC / sqrt(1.0 - pow(DEC, 2.0))) * (-1.0);
+			DEC = atan(DEC / sqrt(1.0 - (DEC *  DEC))) * (-1.0);
 			DECL = DEC * 57.29578;
 			SINLD = sin(RDN * LAT) * sin(DEC);
 			COSLD = cos(RDN * LAT) * cos(DEC);
 			AOB = SINLD / COSLD;
-			AOB2 = atan(AOB / sqrt(1.0 - pow(AOB, 2.0)));
+		//	AOB2 = atan(AOB / sqrt(1.0 - pow(AOB, 2.0)));
+			AOB2 = atan(AOB / sqrt(1.0 - (AOB *  AOB)));
 			DAYL = 12.0 * (1.0 + 2.0 * AOB2 / Pi);
 			DSINB = 3600.0 * (DAYL * SINLD + 24.0 * COSLD * sqrt(1.0 - AOB * AOB) / Pi);
 			DSINBE = 3600.0 * (DAYL * (SINLD + 0.4 * (SINLD * SINLD + COSLD * COSLD * 0.5)) + 12.0 * COSLD * (2.0 + 3.0 * 0.4 * SINLD) * sqrt(1.0 - AOB * AOB) / Pi);
@@ -846,7 +835,8 @@ public slots:
 					if (SINB < 0.0)
 						SINB = 0.0;
 
-					BET = atan(SINB / sqrt(1.0 - pow(SINB, 2.0)));     //      'BETA IN RADIAN
+				//	BET = atan(SINB / sqrt(1.0 - pow(SINB, 2.0)));     //      'BETA IN RADIAN
+					BET = atan(SINB / sqrt(1.0 - (SINB *  SINB)));     //      'BETA IN RADIAN
 					BETA = BET * 57.29578;         //       'BETA IN DEGREE
 					SRAD1 = DTR * SINB * (1.0 + 0.4 * SINB) / DSINBE; // 'J m-2 s-1
 					SRAD1 = SRAD1 * 3600.0 / 1000000.0;      //   'to J m-2 h-1; then MJ m-2 h-1
@@ -856,7 +846,6 @@ public slots:
 					FINT = 1.0 - exp(-data.data_p.KPAR * LAI);
 					DDMP1 = SRAD1 * 0.48 * FINT * RUE;
 				}
-			//}
 				if (vpdtp == 2)
 				{
 					VPTEMP1 = 0.6108 * exp(17.27 * TEMP1 / (237.3 + TEMP1));
@@ -871,31 +860,18 @@ public slots:
 						DDMP1 = TR1 * data.data_p.TEC / VPDcr;
 					}
 					TR = TR + TR1;
-
-					//       If DAP = 75 Then
-					//         Sheet8.Cells(H + 2, 1) = H
-				//          Sheet8.Cells(H + 2, 2) = TEMP1
-					//          Sheet8.Cells(H + 2, 3) = SRAD1
-					//          Sheet8.Cells(H + 2, 4) = VPD1
-					//         Sheet8.Cells(H + 2, 5) = DDMP1
-					//          Sheet8.Cells(H + 2, 6) = TR1
-					//          Sheet8.Cells(H + 2, 7) = TR
-					//       End If
 				}
 				DDMP = DDMP + DDMP1;
 			}
 		}
 		else if (vpdtp == 1)
 			{
-		//	'_________________________daily______________
-		//			'  KPAR = 0.9655 * Exp(-1.6721 * LAI) + 0.3032      'KPAR as a function of LAI
-		//			'  KPAR = 0.6082 - 0.0073 * PDEN                    'KPAR as a function of PDEN
 
-					FINT = 1.0 - exp(-data.data_p.KPAR * LAI);
+				FINT = 1.0 - exp(-data.data_p.KPAR * LAI);
 				DDMP = data.data_h5.srad[ROW] * 0.48 * FINT * RUE;
 			}
 
-			if (CBD < bdEM/*bdEM */ || CBD > data.data_p.ttTSG)
+			if (CBD < bdEM || CBD > data.data_p.ttTSG)
 				DDMP = 0.0;
 
 	}
@@ -906,25 +882,10 @@ public slots:
 		//	'------------------------------- Parameters and Initials
 		if (iniDMD == 0)
 		{
-			/*FLF1A = ThisWorkbook.Worksheets("Crops").Cells(20, CropColNo)  'Sheet5.[b20]
-				FLF1B = ThisWorkbook.Worksheets("Crops").Cells(21, CropColNo)  'Sheet5.[b21]
-				WTOPL = ThisWorkbook.Worksheets("Crops").Cells(22, CropColNo)  'Sheet5.[b22]
-				FLF2 = ThisWorkbook.Worksheets("Crops").Cells(23, CropColNo)  'Sheet5.[b23]
-
-				FRTRL = ThisWorkbook.Worksheets("Crops").Cells(25, CropColNo)  'Sheet5.[b25]
-				GCF = ThisWorkbook.Worksheets("Crops").Cells(26, CropColNo)  'Sheet5.[b26]
-				PDHI = ThisWorkbook.Worksheets("Crops").Cells(27, CropColNo)  'Sheet5.[b27]
-				WDHI1 = ThisWorkbook.Worksheets("Crops").Cells(28, CropColNo)  'Sheet5.[b28]
-				WDHI2 = ThisWorkbook.Worksheets("Crops").Cells(29, CropColNo)  'Sheet5.[b29]
-				WDHI3 = ThisWorkbook.Worksheets("Crops").Cells(30, CropColNo)  'Sheet5.[b30]
-				WDHI4 = ThisWorkbook.Worksheets("Crops").Cells(31, CropColNo)  'Sheet5.[B31]
-
-				TRESH = ThisWorkbook.Worksheets("Crops").Cells(83, CropColNo)  'Sheet5.[B83]
-				*/
 			WLF = 0.5;  
 			WST = 0.5; 
 			WVEG = WLF + WST;
-			WGRN = 0.0; //повторение - переинициализация
+			WGRN = 0.0; 
 			iniDMD = 1;
 		}
 
@@ -977,7 +938,7 @@ public slots:
 			DDMP2 = 0.0;
 
 		//	'------------------------------- Leaf dry matter growth
-		if (CBD <= bdBLG || CBD > bdTLP)/// ?????????????????????
+		if (CBD <= bdBLG || CBD > bdTLP)
 			GLF = 0.0;
 		else if (CBD > bdBLG && CBD <= bdTLM)
 		{
@@ -1006,16 +967,6 @@ public slots:
 	{
 		if (iniPNB == 0)
 		{
-			/*SLNG = ThisWorkbook.Worksheets("Crops").Cells(41, CropColNo)  'Sheet5.[b41]
-			SLNS = ThisWorkbook.Worksheets("Crops").Cells(42, CropColNo)  'Sheet5.[b42]
-			SNCG = ThisWorkbook.Worksheets("Crops").Cells(43, CropColNo)  'Sheet5.[b43]
-			SNCS = ThisWorkbook.Worksheets("Crops").Cells(44, CropColNo)  'Sheet5.[b44]
-			GNC = ThisWorkbook.Worksheets("Crops").Cells(45, CropColNo)  'Sheet5.[b45]
-			MXNUP = ThisWorkbook.Worksheets("Crops").Cells(46, CropColNo)  'Sheet5.[b46]
-
-			INSOL = ThisWorkbook.Worksheets(1).Cells(xCntr + 45, 25)*/
-
-
 			NST = WST * data.data_p.SNCG;
 			NLF = LAI * data.data_p.SLNG;
 			WSFN = 1.0;
@@ -1131,7 +1082,7 @@ public slots:
 						{
 							INLF = NUP2 - INST;
 							INST = NUP2 - INLF;   
-							XNLF = 0;
+							XNLF = 0.0;
 						}
 					}
 				}
@@ -1151,7 +1102,7 @@ public slots:
 					else if (INLF < NUP2)
 					{
 							INST = NUP2 - INLF;
-							XNST = 0;
+							XNST = 0.0;
 					}
 					
 				}
@@ -1176,7 +1127,7 @@ public slots:
 		   CNUP = CNUP + NUP;
   
 		   TRLN = LAI * (data.data_p.SLNG - data.data_p.SLNS) + (NST - WST * data.data_p.SNCS);
-		   FXLF = LAI * (data.data_p.SLNG - data.data_p.SLNS) / (TRLN + 0.000000000001);
+		   FXLF = LAI * (data.data_p.SLNG - data.data_p.SLNS) / (TRLN + 0.000000000001);///////////
 		   if (FXLF > 1.0)
 			   FXLF = 1.0;
 		   if (FXLF < 0.0 )
@@ -1184,11 +1135,22 @@ public slots:
 	}
 	void DailyPrintOut(void)
 	{
+		out_grap.open("graph_LAI.txt", std::ios::app);
+		out_DAP.open("DAP.txt", std::ios::app);
 		out.open("output.txt", std::ios::app);
+		out_FTSW.open("output_ftsw.txt", std::ios::app);
+		out_CE.open("output_CE.txt", std::ios::app);
+		out_CTR.open("output_CTR.txt", std::ios::app);
+
 		if (write_check == false) {
 			out << " YEARS= " << " DOY= " << "DAP= " << " TMP= " << " DTT= " << "CBD= " << "MSNN= " << "GLAI= " << " DLAI=" << "LAI = " << "TCFRUE = " << "FINT= " << " DDMP= " << "GLF= " <<	"GST= " << " SGR= " << " WLF= " << "WST= " << "WVEG=  " << " WGRN= " << "WTOP= " << "DEPORT= " << "RAIN= " << "IRGW= " << "RUNOF= " << "PET= " << "SEVP= " << "TR= " << "ATSW= " << " FTSW=  " <<" CRAIN= " << " CIRGW= " << "IRGNO= " << " CRUNOF= " << "CE= " << " CTR= " << "WSTORG= " << "NUP= " << " NLF= " << "NST= " << "NVEG= " << " NGRN= " << "CNUP= " << endl;
 			write_check = true;
 		}
+		out_grap << LAI << endl;
+		out_DAP << DAP << endl;
+		out_FTSW << FTSW << endl;
+		out_CE << CE << endl;
+		out_CTR << CTR << endl;
 		out << "ROW = " <<  ROW << endl;
 		out << data.data_h5.years[ROW] << endl;
 		out << data.data_h5.doy[ROW] << endl;
@@ -1235,6 +1197,11 @@ public slots:
 		out  << CNUP << "  " << endl;
 		out << "MAT =" << MAT << endl;
 		out.close();
+		out_grap.close();
+		out_DAP.close();
+		out_FTSW.close();
+		out_CE.close();
+		out_CTR.close();
 	}
 	void SummaryPrintOut()
 	{
@@ -1266,7 +1233,6 @@ public slots:
 		out_s << "CE + CTR = " << CE + CTR << endl;
 		out_s << "CE / (CE + CTR + 0.00001) = " << CE / (CE + CTR + 0.00001) << endl;
 		out_s << "NLF = " << NLF << endl;
-	//	out_s << NLF << endl;
 		out_s << "(NLF + NST) = " << (NLF + NST) << endl;
 		out_s << " NGRN = " << NGRN << endl;
 		out_s << "CNUP = " << CNUP << endl;
@@ -1279,6 +1245,7 @@ public slots:
 		cout << "yno = " << param.yno << endl;
 		Pyear = param.FirstYear;
 		Pdoy = param.Pdoy;
+		param.yno = 1;////////////
 		for (int i = 0; i < param.yno; i++)
 		{
 			//ManagInputs
