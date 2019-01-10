@@ -21,6 +21,7 @@ class Model : public QObject
 public:
 	int ROW = 0;
 	int MAT;
+	int index_lai = -1;
 	double iniPheno;
 	double iniLai;
 	double iniDMP;
@@ -56,6 +57,7 @@ public:
 	double CIRGW;
 	double IRGNO;
 	double DDMP;
+	//vector<double> LAI;
 	double LAI;
 	double LtDrCntr;
 	double SE2C;
@@ -154,7 +156,7 @@ public:
 
 	double CEDSOC;
 	double SOCRA;
-	double DL;
+	vector <double> DL;
 	double pp;
 	double ppfun;
 	double bd;///bio days;
@@ -195,12 +197,15 @@ public:
 	double SUNSET;
 	std::ofstream out;
 	std::ofstream out_s;
-	std::ofstream out_grap;
+	std::ofstream out_LAI;
 	std::ofstream out_DAP;
 	std::ofstream out_FTSW;
 	std::ofstream out_CE;
 	std::ofstream out_CTR;
-
+	std::ofstream out_MSNN;
+	std::ofstream out_CNUP;
+	std::ofstream out_NVEG;
+	std::ofstream out_NGRN;
 	double TSUNST;
 	double NIGHTL;
 	double TEMP1;
@@ -296,6 +301,7 @@ public slots:
 			IRGNO = 0.0;
 			DDMP = 0.0;
 			LAI = 0.0;
+		//	LAI[index_lai] = 0.0;
 			LtDrCntr = 0.0;
 
 			SE2C = 3.5;
@@ -374,6 +380,7 @@ public slots:
 		//LAI for soil evaporation
 		if (CBD <= data.data_p.ttBSG)//bdBSG)
 			ETLAI = LAI;
+			//ETLAI = LAI[index_lai];
 		else
 			ETLAI = BSGLAI;
 
@@ -534,7 +541,7 @@ public slots:
 
 		}
 		if (LtDrCntr >= data.data_p.LtWdDur && CBD < data.data_p.ttTSG/*bdTSG*/)
-			CBD = data.data_p.ttTSG;
+			CBD = data.data_p.ttTSG;/////////////НА 180 ШАГЕ ЗАХОДИМ СЮДА
 	}
 
 	void FindSowingData(void)
@@ -591,6 +598,7 @@ public slots:
 	void Weather(void)
 	{
 		ROW += 1;
+		index_lai += 1;////////////
 		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2.0;
 	}
 	
@@ -614,13 +622,13 @@ public slots:
 		}
 		// Thermal time calculation
 		if (TMP <= data.data_p.TBD || TMP >= data.data_p.TCD)
-			tempfun = 0;
+			tempfun = 0.0;
 		else if (TMP > data.data_p.TBD && TMP < data.data_p.TP1D)
 			tempfun = (TMP - data.data_p.TBD) / (data.data_p.TP1D - data.data_p.TBD);
 		else if (TMP > data.data_p.TP2D && TMP < data.data_p.TCD)
 			tempfun = (data.data_p.TCD - TMP) / (data.data_p.TCD - data.data_p.TP2D);
 		else if (TMP >= data.data_p.TP1D && TMP <= data.data_p.TP2D)
-			tempfun = 1;
+			tempfun = 1.0;
 
 		DTT = (data.data_p.TP1D - data.data_p.TBD) * tempfun;
 		if (CBD > data.data_p.ttWSD)
@@ -644,10 +652,12 @@ public slots:
 		SOCRA = (cos(ALPHA * RDN) * TALSOC * CEDSOC) - (tan(LAI * RDN) * tan(DEC * RDN));
 	//	DL = Pi / 2.0 - (atan(SOCRA / (((1.0 - (SOCRA *  SOCRA))) * (1.0 - (SOCRA *  SOCRA)))));
 
-		DL = Pi / 2.0 - (atan(SOCRA / sqrt(1.0 - (SOCRA * SOCRA))));
-		DL = DL / RDN;
-		pp = 2.0/ 15.0 * DL;
-
+	//	DL = Pi / 2.0 - (atan(SOCRA / sqrt(1.0 - (SOCRA * SOCRA))));
+	//	DL = DL / RDN;
+	//	pp = 2.0/ 15.0 * DL;
+		//cout << DL[index_lai];
+		pp = 2.0 / 15.0 * DL[index_lai];
+		cout << "HERE";
 		if (data.data_p.ppsen >= 0.0)
 			ppfun = 1.0 - data.data_p.ppsen * (data.data_p.CPP - pp);
 		else if (data.data_p.ppsen < 0.0)
@@ -664,9 +674,12 @@ public slots:
 
 	     //  Biological day
 	//	cout << "ROW = " << ROW << endl;
+		
 		bd = tempfun * ppfun;///////////////////////////
+		cout << "for ROW = " << ROW << " << bd = " << bd << " because tempfun = " << tempfun << " and ppfun = " << ppfun << endl;
 	//	cout << "ppfun = " <<  ppfun << endl;
 		CBD = CBD + bd;
+		cout << "CBD = " << CBD << endl;
 	//	cout << "CBD = " << CBD << endl;
 	//	cout << "ROW = " << ROW << endl;
 		DAP = DAP + 1.0;
@@ -712,7 +725,7 @@ public slots:
 			LAI = 0.0;
 		if (LAI > MXLAI)
 			MXLAI = LAI;  //'Saving maximum LAI
-
+		
 		// Daily increase and decrease in LAI
 		if (CBD <= bdBLG)
 			GLAI = 0.0;
@@ -1135,22 +1148,31 @@ public slots:
 	}
 	void DailyPrintOut(void)
 	{
-		out_grap.open("graph_LAI.txt", std::ios::app);
+		out_LAI.open("output_LAI.txt", std::ios::app);
 		out_DAP.open("DAP.txt", std::ios::app);
-		out.open("output.txt", std::ios::app);
 		out_FTSW.open("output_ftsw.txt", std::ios::app);
 		out_CE.open("output_CE.txt", std::ios::app);
 		out_CTR.open("output_CTR.txt", std::ios::app);
+		out_MSNN.open("output_MSNN.txt", std::ios::app);
+		out_CNUP.open("output_CNUP.txt", std::ios::app);
+		out_NVEG.open("output_NVEG.txt", std::ios::app);
+		out_NGRN.open("output_NGRN.txt", std::ios::app);
 
+		out.open("output.txt", std::ios::app);
 		if (write_check == false) {
 			out << " YEARS= " << " DOY= " << "DAP= " << " TMP= " << " DTT= " << "CBD= " << "MSNN= " << "GLAI= " << " DLAI=" << "LAI = " << "TCFRUE = " << "FINT= " << " DDMP= " << "GLF= " <<	"GST= " << " SGR= " << " WLF= " << "WST= " << "WVEG=  " << " WGRN= " << "WTOP= " << "DEPORT= " << "RAIN= " << "IRGW= " << "RUNOF= " << "PET= " << "SEVP= " << "TR= " << "ATSW= " << " FTSW=  " <<" CRAIN= " << " CIRGW= " << "IRGNO= " << " CRUNOF= " << "CE= " << " CTR= " << "WSTORG= " << "NUP= " << " NLF= " << "NST= " << "NVEG= " << " NGRN= " << "CNUP= " << endl;
 			write_check = true;
 		}
-		out_grap << LAI << endl;
+		out_LAI << LAI << endl;
 		out_DAP << DAP << endl;
 		out_FTSW << FTSW << endl;
 		out_CE << CE << endl;
 		out_CTR << CTR << endl;
+		out_MSNN << MSNN << endl;
+		out_CNUP << CNUP << endl;
+		out_NVEG << NVEG << endl;
+		out_NGRN << NGRN << endl;
+
 		out << "ROW = " <<  ROW << endl;
 		out << data.data_h5.years[ROW] << endl;
 		out << data.data_h5.doy[ROW] << endl;
@@ -1197,11 +1219,15 @@ public slots:
 		out  << CNUP << "  " << endl;
 		out << "MAT =" << MAT << endl;
 		out.close();
-		out_grap.close();
+		out_LAI.close();
 		out_DAP.close();
 		out_FTSW.close();
 		out_CE.close();
 		out_CTR.close();
+		out_MSNN.close();
+		out_CNUP.close();
+		out_NVEG.close();
+		out_NGRN.close();
 	}
 	void SummaryPrintOut()
 	{
@@ -1308,10 +1334,30 @@ public slots:
 			Pyear += 1;
 		}
 	}
+	void readLai(void)
+	{
+		//std::ifstream in_lai;
+		//in_lai.open("LAI_input.txt");
+		double val;
+		//cout << "go";
+		//while (in_lai >> val)
+		//	LAI.push_back(val);
+		
+		std::ifstream in_dl;
+		in_dl.open("DL_input.txt");
+		//double val;
+		cout << "go";
+		while (in_dl >> val)
+			DL.push_back(val);
+	//	in_lai.close();
+		in_dl.close();
+	//	for (int c = 0; c < LAI.size(); ++c) cout << LAI[c] << '\n';
+	}
 	void run_h5()
 	{
 		data.read_h5(param.file_name);
 		data.read_ini();
+		readLai();
 		cout << "BEGIN CALC" << endl;
 		calculation();
 		cout << "END CALC" << endl;
