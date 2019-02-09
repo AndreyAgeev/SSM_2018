@@ -57,7 +57,7 @@ public:
 	double CIRGW;
 	double IRGNO;
 	double DDMP;
-	//vector<double> LAI;
+
 	double LAI;
 	double LtDrCntr;
 	double SE2C;
@@ -158,7 +158,7 @@ public:
 	vector <double> DL;
 	double pp;
 	double ppfun;
-	double bd;///bio days;
+	double bd;
 
 
 	double PLAPOW;
@@ -249,6 +249,9 @@ public:
 	double FLF1;
 	double GST;
 	double HI;
+
+
+
 	Data data;
 	Parametrs param;
 	int Pyear;
@@ -596,6 +599,9 @@ public slots:
 	void Weather(void)
 	{
 		ROW += 1;
+		if (ROW > data.data_h5.tmax.size())
+			cout << "END" << endl;
+			return;
 		index_lai += 1;
 		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2.0;
 	}
@@ -1262,6 +1268,7 @@ public slots:
 		Pyear = param.FirstYear;
 		Pdoy = param.Pdoy;
 		param.yno = 1;////////////
+		cout << "go "<< endl;
 		for (int i = 0; i < param.yno; i++)
 		{
 			//ManagInputs
@@ -1279,9 +1286,13 @@ public slots:
 			out.close();
 			while (MAT != 1)
 			{
+				cout << ROW << endl;
+				if (ROW > data.data_h5.srad.size())
+					return;
 				out.open("output.txt", std::ios::app);
 				out << "begin  Weather();" << endl;
 				Weather();
+			//	cout << "go1" << endl;
 				out.close();
 				out.open("output.txt", std::ios::app);
 				out << "begin  Phenology()" << endl;
@@ -1322,6 +1333,7 @@ public slots:
 			out.close();
 			SummaryPrintOut();
 			Pyear += 1;
+			cout << Pyear << endl;
 		}
 	}
 	void readLai(void)
@@ -1333,11 +1345,14 @@ public slots:
 			DL.push_back(val);
 		in_dl.close();
 	}
+
 	void run_h5()
 	{
-		data.read_h5(param.file_name);
+		cout << "begin read" << endl;
+		data.read_h5(param.file_name, param.file_mode, DL);
 		data.read_ini();
-		readLai();
+		if(param.file_mode == false)
+		    readLai();
 		cout << "BEGIN CALC" << endl;
 		calculation();
 		cout << "END CALC" << endl;
