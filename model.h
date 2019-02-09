@@ -599,9 +599,7 @@ public slots:
 	void Weather(void)
 	{
 		ROW += 1;
-		if (ROW > data.data_h5.tmax.size())
-			cout << "END" << endl;
-			return;
+
 		index_lai += 1;
 		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2.0;
 	}
@@ -1268,7 +1266,7 @@ public slots:
 		Pyear = param.FirstYear;
 		Pdoy = param.Pdoy;
 		param.yno = 1;////////////
-		cout << "go "<< endl;
+
 		for (int i = 0; i < param.yno; i++)
 		{
 			//ManagInputs
@@ -1286,13 +1284,10 @@ public slots:
 			out.close();
 			while (MAT != 1)
 			{
-				cout << ROW << endl;
-				if (ROW > data.data_h5.srad.size())
-					return;
+
 				out.open("output.txt", std::ios::app);
 				out << "begin  Weather();" << endl;
 				Weather();
-			//	cout << "go1" << endl;
 				out.close();
 				out.open("output.txt", std::ios::app);
 				out << "begin  Phenology()" << endl;
@@ -1329,7 +1324,7 @@ public slots:
 			}
 			out.open("output.txt", std::ios::app);
 			out << "END YNO = " << i << endl;
-			cout << "END" << endl;
+			//cout << "END" << endl;
 			out.close();
 			SummaryPrintOut();
 			Pyear += 1;
@@ -1351,7 +1346,7 @@ public slots:
 		cout << "begin read" << endl;
 		data.read_h5(param.file_name, param.file_mode, DL);
 		data.read_ini();
-		if(param.file_mode == false)
+		if (param.file_mode == false)
 		    readLai();
 		cout << "BEGIN CALC" << endl;
 		calculation();
