@@ -13,15 +13,15 @@ public:
 	int FirstYear; // First year of weather data.
 	int FixFind; // 1=fixed sowing date, 2=first possible sowing date based on pre-defined conditions.
 	int Pdoy; // Sowing date as Day of Year if Fix/Find=1 and day of year that model must start searching for sowing date from if Fix/Find=2.
-	int SearchDur; // Specifies the end of sowing window
-	int SowWat; // Amount of water in the soil that makes sowing possible (mm) 
-	int PDEN; // Plant density (# per m2)
+	double SearchDur; // Specifies the end of sowing window
+	double SowWat; // Amount of water in the soil that makes sowing possible (mm) 
+	double PDEN; // Plant density (# per m2)
 	int water; //  1= irrigated 2 = rainfed
 	double IRGLVL; // Irrigation level based on FTSW if the farming is irrigated. 
-	int SOLDEP; // Soil depth (mm)
-	int DEP1; // Depth of top layer (mm)
+	double SOLDEP; // Soil depth (mm)
+	double DEP1; // Depth of top layer (mm)
 	double SALB; // Soil albedo
-	int CN2; // Soil curve number. 
+	double CN2; // Soil curve number. 
 	double DRAINF; // Drainage factor
 	double SAT; // Soil saturation limit (m3 m-3 or mm mm-1).
 	double DUL;// Soil drained upper limit (m3 m-3 or mm mm-1).
@@ -29,9 +29,10 @@ public:
 	int MAI1; // Soil moisture availabilty index for top layer. 1=DUL, 0=LL. 
 	int MAI;// Soil moisture availability index (1=DUL, 0=LL). 
 	int INSOL; // Initial soil nitrogen that can be uptaken by the crop before BNF is activated (g N m-2)
-	int U;// Cumulative evaporation that stage I terminates and stage II starts. Not used by the model (inactive)
+	double U;// Cumulative evaporation that stage I terminates and stage II starts. Not used by the model (inactive)
 	int CropColNo; // Column number in "Crops" sheeet that contains cultivar parameters estimates
 	int ROW;
+	bool file_mode;// true - with dl or false - without dl
 	Parametrs() {}
 	void Print()
 	{
@@ -59,5 +60,6 @@ public:
 		std::cout << INSOL << std::endl;
 		std::cout << U << std::endl;
 		std::cout << CropColNo << std::endl;
+		std::cout << file_mode << endl;
 	}
 };
