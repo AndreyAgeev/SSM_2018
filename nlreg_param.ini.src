@@ -1,0 +1,16 @@
+[Params]
+n = 6 
+l = 10 
+e = 0.003 
+a = 0.05 
+t = 1 
+f = 1
+i = 1
+c = 1 
+m = 1
+d = 1 
+r = 1
+q = 1
+g  = 1 
+b = 20 
+file_name = chickpea-csminds.h5
