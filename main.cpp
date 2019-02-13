@@ -3,6 +3,7 @@
 #define add(name) param.## name
 int main(int argc, char *argv[])
 {
+	///ADD FILE PARAM FOR NLREG
 	QCoreApplication a(argc, argv);
 	QCommandLineParser parser;
 	parser.addHelpOption();
@@ -153,8 +154,9 @@ int main(int argc, char *argv[])
 		param.INSOL = 3;
 		param.U = 6;
 		param.CropColNo = 3;
-		param.ROW = 1;
-		param.file_mode = true;
+		param.ROW = 7;
+		param.file_mode = false;
+		param.nlreg_file_name = "nlreg_param.ini.src";///////////////
 	//	param.Print();
 	}
 	model = new Model(param);
