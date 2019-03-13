@@ -76,7 +76,10 @@ int main(int argc, char *argv[])
 	Parametrs param;
 	if (args.size())
 	{
+		param.nlreg_file_name = args.at(0);
 	    param.file_name = args.at(args.size() - 1);
+
+
 	/*
 		const QString nfParameter2 = parser.value("Latitude");
 		
@@ -156,7 +159,6 @@ int main(int argc, char *argv[])
 		param.CropColNo = 3;
 		param.ROW = 7;
 		param.file_mode = false;
-		param.nlreg_file_name = "nlreg_param.ini.src";///////////////
 	//	param.Print();
 	}
 	model = new Model(param);
