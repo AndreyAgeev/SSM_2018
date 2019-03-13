@@ -13,6 +13,7 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
+#include <nlreg.h>
 using namespace std;
 using namespace HighFive;
 class Model : public QObject
@@ -258,7 +259,7 @@ public:
 	int Pdoy;
 	int Yr;
 	bool write_check = false;
-
+	Nlreg nl;
 
 
 	explicit Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
@@ -599,7 +600,9 @@ public slots:
 	void Weather(void)
 	{
 		ROW += 1;
-
+	//	if (ROW > data.data_h5.tmax.size())
+	//		cout << "END" << endl;
+	//		return;
 		index_lai += 1;
 		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2.0;
 	}
@@ -674,10 +677,8 @@ public slots:
 
 		
 		bd = tempfun * ppfun;
-	//	cout << "for ROW = " << ROW << " << bd = " << bd << " because tempfun = " << tempfun << " and ppfun = " << ppfun << endl;
-	//	cout << "ppfun = " <<  ppfun << endl;
+
 		CBD = CBD + bd;
-	//	cout << "CBD = " << CBD << endl;
 	
 		DAP = DAP + 1.0;
 
@@ -1262,11 +1263,10 @@ public slots:
 	}
 	void calculation()
 	{
-	//	cout << "yno = " << param.yno << endl;
 		Pyear = param.FirstYear;
 		Pdoy = param.Pdoy;
 		param.yno = 1;////////////
-
+		cout << "go "<< endl;
 		for (int i = 0; i < param.yno; i++)
 		{
 			//ManagInputs
@@ -1284,7 +1284,6 @@ public slots:
 			out.close();
 			while (MAT != 1)
 			{
-
 				out.open("output.txt", std::ios::app);
 				out << "begin  Weather();" << endl;
 				Weather();
@@ -1344,6 +1343,7 @@ public slots:
 	void run_h5()
 	{
 		cout << "begin read" << endl;
+	//	nl.createFunction(param.nlreg_file_name, param);
 		data.read_h5(param.file_name, param.file_mode, DL);
 		data.read_ini();
 		if (param.file_mode == false)
