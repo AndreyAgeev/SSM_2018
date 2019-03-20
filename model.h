@@ -259,9 +259,10 @@ public:
 	int Pdoy;
 	int Yr;
 	bool write_check = false;
-	Nlreg nl;
-
-
+	//Nlreg nl;
+	vector<vector<double> > func_temp_photo;
+	vector<vector<double> > func_genotype;
+	int index_ftp;
 	explicit Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
 	{
 		run_h5();
@@ -676,12 +677,15 @@ public slots:
 
 
 		
-		bd = tempfun * ppfun;
-
+	//	bd = tempfun * ppfun;
+	//	cout << "HERE" << endl;
+		bd = 0.0;
+		for (int i = 0; i < func_temp_photo.size(); i++)
+			bd += func_temp_photo[i][index_ftp];//добавить бета и генетические данные
 		CBD = CBD + bd;
-	
+	//	cout << "HERE is OK" << endl;
 		DAP = DAP + 1.0;
-
+		index_ftp += 1;
 		if (CBD < bdEM)
 			dtEM = DAP + 1.0;  // 'Saving days to EMR
 		if (CBD < bdR1)
@@ -1279,6 +1283,15 @@ public slots:
 			iniSW = 0;
 			iniPNB = 0;
 			FindSowingData();
+			cout << "end read data" << endl;
+			cout << "begin nlreg" << endl;
+			Nlreg nl(param.file_name, param.func_file_name, 6, 10);
+			cout << "create nlreg class" << endl;
+			cout << "begin func nlreg" << endl;
+			func_temp_photo = nl.createFunction(data, ROW);
+			cout << "end nlreg" << endl;
+			index_ftp = 0;
+			
 			out.open("output.txt", std::ios::app);
 			out << "BEGIN MAT = " << MAT << endl;
 			out.close();
@@ -1343,7 +1356,6 @@ public slots:
 	void run_h5()
 	{
 		cout << "begin read" << endl;
-	//	nl.createFunction(param.nlreg_file_name, param);
 		data.read_h5(param.file_name, param.file_mode, DL);
 		data.read_ini();
 		if (param.file_mode == false)
