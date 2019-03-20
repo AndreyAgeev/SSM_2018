@@ -3,7 +3,7 @@
 class Parametrs
 {
 public:
-	struct Nlreg_param
+	/*struct Nlreg_param
 	{
 		double alpha;
 		double b;
@@ -29,9 +29,10 @@ public:
 		bool make_corrections;
 		QString h5_file_name;
 		QString funcs_file_name;////?
-	};
-	Nlreg_param nl_param;
-	QString nlreg_file_name;
+	};*/
+	//Nlreg_param nl_param;
+	//QString nlreg_file_name;
+	QString func_file_name;
 	QString file_name;
 	QString sName;//Name of site or scenario. This name will appear in output
 	double Latitude;//Latitude of location. NOTE: south latitude should be NEGETIVE
