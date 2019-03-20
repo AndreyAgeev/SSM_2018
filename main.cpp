@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 	Parametrs param;
 	if (args.size())
 	{
-		param.nlreg_file_name = args.at(0);
+		param.func_file_name = args.at(0);
 	    param.file_name = args.at(args.size() - 1);
 
 
