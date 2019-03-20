@@ -13,6 +13,7 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
+#include <nlreg.h>
 using namespace std;
 using namespace HighFive;
 class Model : public QObject
@@ -57,7 +58,7 @@ public:
 	double CIRGW;
 	double IRGNO;
 	double DDMP;
-	//vector<double> LAI;
+
 	double LAI;
 	double LtDrCntr;
 	double SE2C;
@@ -70,23 +71,23 @@ public:
 
 	double DRAIN1;
 	double DRAIN;
-	double GRTD;////
-	double CBD;///
+	double GRTD;
+	double CBD;
 
-	double EWAT;//
-	double RUNOF;//
-	double s;//
-	double SWER;//
-	double ETLAI;//
-	double BSGLAI;//
-	double TD;//
-	double ALBEDO;//
-	double EEQ;//
-	double PET;//
+	double EWAT;
+	double RUNOF;
+	double s;
+	double SWER;
+	double ETLAI;
+	double BSGLAI;
+	double TD;
+	double ALBEDO;
+	double EEQ;
+	double PET;
 
-	double EOS;//
-	double SEVP;//
-	double DYSE;//
+	double EOS;
+	double SEVP;
+	double DYSE;
 
 	int semethod = 1;
 	double FLUX1;
@@ -106,7 +107,6 @@ public:
 
 	double LtDrCnt;
 
-	//WEATHER
 	double TMP;
 
 	double DOY;
@@ -159,7 +159,7 @@ public:
 	vector <double> DL;
 	double pp;
 	double ppfun;
-	double bd;///bio days;
+	double bd;
 
 
 	double PLAPOW;
@@ -222,7 +222,7 @@ public:
 	double VPD1;
 
 
-	//LEGUMpLANT
+
 	double NUP;
 	double XNLF;
 	double XNST;
@@ -237,7 +237,6 @@ public:
 	double FXLF;
 	double NUP2;
 
-	//dmddistribution
 	double WLF;
 	double WST;
 	double WVEG;
@@ -250,12 +249,18 @@ public:
 	double FLF1;
 	double GST;
 	double HI;
+
+
+
 	Data data;
 	Parametrs param;
 	int Pyear;
 	int Pdoy;
 	int Yr;
 	bool write_check = false;
+	Nlreg nl;
+
+
 	explicit Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
 	{
 		run_h5();
@@ -300,7 +305,6 @@ public slots:
 			IRGNO = 0.0;
 			DDMP = 0.0;
 			LAI = 0.0;
-		//	LAI[index_lai] = 0.0;
 			LtDrCntr = 0.0;
 
 			SE2C = 3.5;
@@ -365,7 +369,6 @@ public slots:
 				SWER = 0.0;
 			if ((data.data_h5.rain[ROW] - SWER * s) > 0.0)
 				RUNOF = ((data.data_h5.rain[ROW] - SWER * s) * (data.data_h5.rain[ROW] - SWER * s)) / (data.data_h5.rain[ROW] + (1.0 - SWER) * s);
-			//	RUNOF = pow((data.data_h5.rain[ROW] - SWER * s),2.0 )/ (data.data_h5.rain[ROW] + (1.0 - SWER) * s);
 			else
 				RUNOF = 0.0;
 		}
@@ -379,7 +382,6 @@ public slots:
 		//LAI for soil evaporation
 		if (CBD <= data.data_p.ttBSG)//bdBSG)
 			ETLAI = LAI;
-			//ETLAI = LAI[index_lai];
 		else
 			ETLAI = BSGLAI;
 
@@ -539,8 +541,8 @@ public slots:
 				LtDrCnt = 0.0;
 
 		}
-		if (LtDrCntr >= data.data_p.LtWdDur && CBD < data.data_p.ttTSG/*bdTSG*/)
-			CBD = data.data_p.ttTSG;/////////////НА 180 ШАГЕ ЗАХОДИМ СЮДА
+		if (LtDrCntr >= data.data_p.LtWdDur && CBD < data.data_p.ttTSG)
+			CBD = data.data_p.ttTSG;
 	}
 
 	void FindSowingData(void)
@@ -597,7 +599,10 @@ public slots:
 	void Weather(void)
 	{
 		ROW += 1;
-		index_lai += 1;////////////
+	//	if (ROW > data.data_h5.tmax.size())
+	//		cout << "END" << endl;
+	//		return;
+		index_lai += 1;
 		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2.0;
 	}
 
@@ -644,19 +649,16 @@ public slots:
 		LANDA = SMA3 + 1.916 * sin(SMA3 * RDN) + 0.02 * sin(2.0 * SMA3 * RDN) + 282.565;
 		DEC = 0.39779 * sin(LANDA * RDN);
 		DEC = atan(DEC / sqrt(1.0 - (DEC * DEC)));
-	//	DEC = atan(DEC / ((1.0 - (DEC * DEC)) * (1.0 - (DEC * DEC))));
 		DEC = DEC / RDN;
 		TALSOC = 1.0 / cos(LAI * RDN);
 		CEDSOC = 1.0 / cos(DEC * RDN);
 		SOCRA = (cos(ALPHA * RDN) * TALSOC * CEDSOC) - (tan(LAI * RDN) * tan(DEC * RDN));
 	//	DL = Pi / 2.0 - (atan(SOCRA / (((1.0 - (SOCRA *  SOCRA))) * (1.0 - (SOCRA *  SOCRA)))));
-
 	//	DL = Pi / 2.0 - (atan(SOCRA / sqrt(1.0 - (SOCRA * SOCRA))));
 	//	DL = DL / RDN;
 	//	pp = 2.0/ 15.0 * DL;
-		//cout << DL[index_lai];
 		pp = 2.0 / 15.0 * DL[index_lai];
-		cout << "HERE";
+
 		if (data.data_p.ppsen >= 0.0)
 			ppfun = 1.0 - data.data_p.ppsen * (data.data_p.CPP - pp);
 		else if (data.data_p.ppsen < 0.0)
@@ -671,16 +673,10 @@ public slots:
 		if (CBD > data.data_p.ttTRP)
 			ppfun = 1.0;
 
-	     //  Biological day
-	//	cout << "ROW = " << ROW << endl;
-
-		bd = tempfun * ppfun;///////////////////////////
-		cout << "for ROW = " << ROW << " << bd = " << bd << " because tempfun = " << tempfun << " and ppfun = " << ppfun << endl;
-	//	cout << "ppfun = " <<  ppfun << endl;
+		
+		bd = tempfun * ppfun;
 		CBD = CBD + bd;
-		cout << "CBD = " << CBD << endl;
-	//	cout << "CBD = " << CBD << endl;
-	//	cout << "ROW = " << ROW << endl;
+	
 		DAP = DAP + 1.0;
 
 		if (CBD < bdEM)
@@ -790,13 +786,11 @@ public slots:
 			Pi = 3.141592654;
 			RDN = Pi / 180.0;
 			DEC = sin(23.45 * RDN) * cos(2.0 * Pi * (DOY + 10.0) / 365.0);
-		//	DEC = atan(DEC / sqrt(1.0 - pow(DEC, 2.0))) * (-1.0);
 			DEC = atan(DEC / sqrt(1.0 - (DEC *  DEC))) * (-1.0);
 			DECL = DEC * 57.29578;
 			SINLD = sin(RDN * LAT) * sin(DEC);
 			COSLD = cos(RDN * LAT) * cos(DEC);
 			AOB = SINLD / COSLD;
-		//	AOB2 = atan(AOB / sqrt(1.0 - pow(AOB, 2.0)));
 			AOB2 = atan(AOB / sqrt(1.0 - (AOB *  AOB)));
 			DAYL = 12.0 * (1.0 + 2.0 * AOB2 / Pi);
 			DSINB = 3600.0 * (DAYL * SINLD + 24.0 * COSLD * sqrt(1.0 - AOB * AOB) / Pi);
@@ -847,7 +841,6 @@ public slots:
 					if (SINB < 0.0)
 						SINB = 0.0;
 
-				//	BET = atan(SINB / sqrt(1.0 - pow(SINB, 2.0)));     //      'BETA IN RADIAN
 					BET = atan(SINB / sqrt(1.0 - (SINB *  SINB)));     //      'BETA IN RADIAN
 					BETA = BET * 57.29578;         //       'BETA IN DEGREE
 					SRAD1 = DTR * SINB * (1.0 + 0.4 * SINB) / DSINBE; // 'J m-2 s-1
@@ -1267,10 +1260,10 @@ public slots:
 	}
 	void calculation()
 	{
-		cout << "yno = " << param.yno << endl;
 		Pyear = param.FirstYear;
 		Pdoy = param.Pdoy;
 		param.yno = 1;////////////
+		cout << "go "<< endl;
 		for (int i = 0; i < param.yno; i++)
 		{
 			//ManagInputs
@@ -1327,36 +1320,31 @@ public slots:
 			}
 			out.open("output.txt", std::ios::app);
 			out << "END YNO = " << i << endl;
-			cout << "END" << endl;
+			//cout << "END" << endl;
 			out.close();
 			SummaryPrintOut();
 			Pyear += 1;
+			cout << Pyear << endl;
 		}
 	}
 	void readLai(void)
 	{
-		//std::ifstream in_lai;
-		//in_lai.open("LAI_input.txt");
 		double val;
-		//cout << "go";
-		//while (in_lai >> val)
-		//	LAI.push_back(val);
-
 		std::ifstream in_dl;
 		in_dl.open("DL_input.txt");
-		//double val;
-		cout << "go";
 		while (in_dl >> val)
 			DL.push_back(val);
-	//	in_lai.close();
 		in_dl.close();
-	//	for (int c = 0; c < LAI.size(); ++c) cout << LAI[c] << '\n';
 	}
+
 	void run_h5()
 	{
-		data.read_h5(param.file_name);
+		cout << "begin read" << endl;
+	//	nl.createFunction(param.nlreg_file_name, param);
+		data.read_h5(param.file_name, param.file_mode, DL);
 		data.read_ini();
-		readLai();
+		if (param.file_mode == false)
+		    readLai();
 		cout << "BEGIN CALC" << endl;
 		calculation();
 		cout << "END CALC" << endl;

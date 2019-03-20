@@ -1,4 +1,5 @@
 #pragma once
+//#include <QStandardItemModel>
 #include <QtSql/qsqldatabase.h>
 #include <QtSql/qsqlquery.h>
 
@@ -13,8 +14,29 @@ using namespace HighFive;
 class Data
 {
 public:
-
-	struct Data_f
+	struct Nlreg_param
+	{
+		double a;
+		double b;
+		double c;
+		double d;
+		double e;
+		double f;
+		double g;
+		double i;
+		double k;
+		double n;
+		double m;
+		double l;
+		double p;
+		double q;
+		double r;
+		double s;
+		double t;
+		QString file;
+		QString funcsfile;////?
+	};
+	struct Data_f 
 	{
             vector<int> years;
 			vector<int> doy;
@@ -22,6 +44,7 @@ public:
 			vector<double> tmax;
 			vector<double> tmin;
 			vector<double> rain;
+			vector<int> month;
 	};
 	struct Data_phen
 	{
@@ -98,11 +121,12 @@ public:
 		double  ttDKill;
 		double  LtFtsw;
 		double  LtWdDur;
-		double  vpd_resp;
+		int  vpd_resp;
 		double  vpd_cr;
 	};
 	Data_f data_h5;
 	Data_phen data_p;
+	Nlreg_param param_nlreg;
 	Data() {}
 	void read_ini(void)
 	{
@@ -151,7 +175,7 @@ public:
 
 		data_p.TCD = sett.value("TCD", 40).toDouble();
 		data_p.CPP = sett.value("CPP", 18).toDouble();
-		data_p.ppsen = sett.value("ppsen", 0.1).toDouble();
+		data_p.ppsen = sett.value("ppsen", 0.11).toDouble();
 		data_p.ttSWEM = sett.value("ttSWEM", 5.0).toDouble();
 		data_p.ttEMR1 = sett.value("ttEMR1", 23.0).toDouble();
 		data_p.ttR1R3 = sett.value("ttR1R3", 9.0).toDouble();
@@ -179,14 +203,35 @@ public:
 		data_p.vpd_cr = sett.value("vpd_cr", 20.0).toDouble();
 		sett.endGroup();
 	}
-	void read_h5(QString file_name)
+	void read_ini_nlreg_param(QString file_name)
+	{
+		QSettings sett(file_name, QSettings::IniFormat);
+		sett.beginGroup("Params");
+
+		param_nlreg.n = sett.value("n", 6).toDouble();
+		param_nlreg.e = sett.value("PLACON", 10).toDouble();
+		param_nlreg.l = sett.value("PLAPOW30", 0.003).toDouble();
+		param_nlreg.a = sett.value("SLA", 0.05).toDouble();
+		param_nlreg.t = sett.value("TBRUE", 0).toDouble();
+		param_nlreg.f = sett.value("TP1RUE", 0).toDouble();
+		param_nlreg.i = sett.value("TP2RUE", 0).toDouble();
+		param_nlreg.c = sett.value("TCRUE", 0).toDouble();
+		param_nlreg.m = sett.value("KPAR", 0).toDouble();
+		param_nlreg.d = sett.value("IRUE1", 0).toDouble();
+		param_nlreg.r = sett.value("IRUE2", 1).toDouble();
+		param_nlreg.q = sett.value("FLF1A",0).toDouble();
+		param_nlreg.g = sett.value("FLF1B", 0).toDouble();
+		param_nlreg.b = sett.value("WTOPL",20).toDouble();
+		param_nlreg.file = sett.value("file_name", QString("chickpea-csminds.h5")).toString();
+		
+		sett.endGroup();
+	}
+	void read_h5(QString file_name, bool mode, vector<double>& dl)
 	{
 		try {
-			cout << "BEGIN READ" << endl;
             File file(file_name.toStdString(), File::ReadOnly);
 			DataSet doy_read = file.getDataSet("doy");
 			doy_read.read(data_h5.doy);
-			cout << "END READ" << endl;
 			DataSet rain_read = file.getDataSet("rain");
 			rain_read.read(data_h5.rain);
 			DataSet srad_read = file.getDataSet("srad");
@@ -197,10 +242,19 @@ public:
 			tmin_read.read(data_h5.tmin);
 			DataSet year_read = file.getDataSet("year");
 			year_read.read(data_h5.years);
-		}
+			if (mode == true)
+			{
+				DataSet dl_read = file.getDataSet("dl");
+				dl_read.read(dl);
+				DataSet month_read = file.getDataSet("month");
+				month_read.read(data_h5.month);
+			}
+		} 
 		catch (Exception &err){
 			std::cerr << err.what() << std::endl;
 		}
 
 	}
+
+
 };
