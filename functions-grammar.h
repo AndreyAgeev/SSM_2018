@@ -7,12 +7,12 @@
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * nlreg is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -24,12 +24,15 @@
 
 #include <string>
 #include <vector>
+
+void set_print_trace (int arg);
+
 using namespace std;
 
 class GrammarNode
 {
 public:
-	string label;
+	string label = "GrammarNode";
 	int precendence;
 	int numChildren;
 	GrammarNode* children[2];
@@ -38,6 +41,7 @@ public:
 	virtual ~GrammarNode() { } // to be used later
 	virtual double eval(vector<double>& inVal) = 0;  //setting the 0 makes it a PURE
 	virtual void coprint() = 0;
+	virtual GrammarNode* prune() = 0;
 	virtual GrammarNode* clone() = 0; //make a deep copy of the current tree
 	virtual void setScale(vector<double>& a, vector<double>& b) = 0;
 	virtual string getLabel() {	return label; }
@@ -54,18 +58,19 @@ inline ostream& operator << (ostream& os, GrammarNode& gnd)
 
 //class for storing constant values
 class ConstNode : public GrammarNode {
-	double constVal;
+	double *constVal;
 	int constInd;
 public:
 	ConstNode();
 	ConstNode(int preSetVal);
-	ConstNode(int ind, double preSetVal);
+	ConstNode(int ind, double *preSetVal);
 	virtual double eval(vector<double>& inVal);
 	ConstNode* clone();
 	virtual void coprint();
+	virtual ConstNode* prune();
 	virtual void setScale(vector<double>& a, vector<double>& b) { }
 //	virtual string getLabel();
-//	virtual void printOn (ostream& os);
+//	virtual void printOn (ostream& os) { os << "Const" << endl; };
 };
 
 //class for using inputs
@@ -81,16 +86,17 @@ public:
 	virtual double eval(vector<double>& inVal);
 	InputNode* clone();
 	virtual void coprint();
-	virtual void setScale(vector<double>& a, vector<double>& b) { 
+	virtual InputNode* prune();
+	virtual void setScale(vector<double>& a, vector<double>& b) {
 		if (inputIndex >= 0) {
-			scale = a[inputIndex]; offset = b[inputIndex]; scalePresent = true; 
+			scale = a[inputIndex]; offset = b[inputIndex]; scalePresent = true;
 		} else if (children[0]) {
 			children[0]->setScale(a, b);
 		}
 	}
 //	void setValues(int inIndex);
 //	virtual string getLabel();
-//	virtual void printOn (ostream& os);
+//	virtual void printOn (ostream& os) { os << "Input" << endl; };
 };
 
 //addition
@@ -100,12 +106,13 @@ public:
 	virtual double eval(vector<double>& inVal);
 	Add* clone();
 	virtual void coprint();
-	virtual void setScale(vector<double>& a, vector<double>& b) { 
-		children[0]->setScale(a, b);
-		children[1]->setScale(a, b);
+	virtual Add* prune();
+	virtual void setScale(vector<double>& a, vector<double>& b) {
+		if (children[0]) children[0]->setScale(a, b);
+		if (children[1]) children[1]->setScale(a, b);
 	}
 //	virtual string getLabel();
-//	virtual void printOn (ostream& os);
+//	virtual void printOn (ostream& os) { os << "Add" << endl; };
 };
 
 //subtraction
@@ -115,12 +122,13 @@ public:
 	virtual double eval(vector<double>& inVal);
 	Subtract* clone();
 	virtual void coprint();
-	virtual void setScale(vector<double>& a, vector<double>& b) { 
-		children[0]->setScale(a, b);
-		children[1]->setScale(a, b);
+	virtual Subtract* prune();
+	virtual void setScale(vector<double>& a, vector<double>& b) {
+		if (children[0]) children[0]->setScale(a, b);
+		if (children[1]) children[1]->setScale(a, b);
 	}
 //	virtual string getLabel();
-//	virtual void printOn (ostream& os);
+//	virtual void printOn (ostream& os) { os << "Subtract" << endl; };
 };
 
 //multiplication
@@ -130,12 +138,13 @@ public:
 	virtual double eval(vector<double>& inVal);
 	Multiply* clone();
 	virtual void coprint();
-	virtual void setScale(vector<double>& a, vector<double>& b) { 
-		children[0]->setScale(a, b);
-		children[1]->setScale(a, b);
+	virtual Multiply* prune();
+	virtual void setScale(vector<double>& a, vector<double>& b) {
+		if (children[0]) children[0]->setScale(a, b);
+		if (children[1]) children[1]->setScale(a, b);
 	}
 //	virtual string getLabel();
-//	virtual void printOn (ostream& os);
+//	virtual void printOn (ostream& os) { os << "Multiply" << endl; };
 };
 
 //division
@@ -145,12 +154,13 @@ public:
 	virtual double eval(vector<double>& inVal);
 	Divide* clone();
 	virtual void coprint();
-	virtual void setScale(vector<double>& a, vector<double>& b) { 
-		children[0]->setScale(a, b);
-		children[1]->setScale(a, b);
+	virtual Divide* prune();
+	virtual void setScale(vector<double>& a, vector<double>& b) {
+		if (children[0]) children[0]->setScale(a, b);
+		if (children[1]) children[1]->setScale(a, b);
 	}
 //	virtual string getLabel();
-//	virtual void printOn (ostream& os);
+//	virtual void printOn (ostream& os) { os << "Divide" << endl; };
 };
 
 //subtraction of const
@@ -160,12 +170,13 @@ public:
 	virtual double eval(vector<double>& inVal);
 	InputMinusConst* clone();
 	virtual void coprint();
-	virtual void setScale(vector<double>& a, vector<double>& b) { 
-		children[0]->setScale(a, b);
-		children[1]->setScale(a, b);
+	virtual InputMinusConst* prune();
+	virtual void setScale(vector<double>& a, vector<double>& b) {
+		if (children[0]) children[0]->setScale(a, b);
+		if (children[1]) children[1]->setScale(a, b);
 	}
 //	virtual string getLabel();
-//	virtual void printOn (ostream& os);
+//	virtual void printOn (ostream& os) { os << "InputMinusConst" << endl; };
 };
 
 //rec subtraction of const
@@ -175,26 +186,25 @@ public:
 	virtual double eval(vector<double>& inVal);
 	RecInputMinusConst* clone();
 	virtual void coprint();
-	virtual void setScale(vector<double>& a, vector<double>& b) { 
-		children[0]->setScale(a, b);
-		children[1]->setScale(a, b);
+	virtual RecInputMinusConst* prune();
+	virtual void setScale(vector<double>& a, vector<double>& b) {
+		if (children[0]) children[0]->setScale(a, b);
+		if (children[1]) children[1]->setScale(a, b);
 	}
 //	virtual string getLabel();
-//	virtual void printOn (ostream& os);
+//	virtual void printOn (ostream& os) { os << "RecInputMinusConst" << endl; };
 };
-	
+
 class GrammarContainer {
-public:	
-	GrammarContainer (vector<string>& measurements, int n_t, int n_c = 3, bool m_c = false) : predictors(measurements), tree(n_t) {
+public:
+	GrammarContainer (vector<string>& measurements, int n_t) : predictors(measurements), tree(n_t) {
 		n_trees = n_t;
 		n_predictors = predictors.size();
 		n_nodes_type_0 = 7;
 		n_nodes_type_1 = 1;
 		n_nodes_type_2 = 1;
-		n_cycles = n_c;
-		make_corrections = m_c;
 	}
-	void build_nth_tree(vector<int>& genotype, vector<double>& conc, int n, double *phenotype);
+	void build_nth_tree(vector<int>& genotype, vector<double>& conc, int n, double *phenotype, int *phenomask);
 	GrammarNode*get_nth_tree(int n) { return tree[n]; }
 private:
 	vector<string> predictors;
@@ -204,13 +214,12 @@ private:
 	int n_nodes_type_0;
 	int n_nodes_type_1;
 	int n_nodes_type_2;
-	int n_cycles;
-	bool make_corrections;
-	GrammarNode* build_tree(vector<int>& genotype, vector<double>& conc, double *phenotype);
-	GrammarNode* find_node(int type, int gen, double conc, double& phenotype);
-	GrammarNode* find_node_type_0(int gen, double& phenotype);
-	GrammarNode* find_node_type_1(int gen, double conc, double& phenotype);
-	GrammarNode* find_node_type_2(int gen, double& phenotype);
+	int last_predictor;
+	GrammarNode* build_tree(vector<int>& genotype, vector<double>& conc, double *phenotype, int *phenomask);
+	GrammarNode* find_node(int type, int gen, double conc, double *phenotype, int& phenomask);
+	GrammarNode* find_node_type_0(int gen, double *phenotype);
+	GrammarNode* find_node_type_1(int gen, double conc, double *phenotype);
+	GrammarNode* find_node_type_2(int gen, double *phenotype);
 };
 
 #endif // _FUNCTIONS_GRAMMAR_H_
