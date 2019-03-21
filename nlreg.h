@@ -20,11 +20,47 @@ class Nlreg
 /*		std::cout << "Got " << h5_file_name.toStdString() << " file" << std::endl;
 		std::cout << "Got " << funcs_file_name.toStdString() << " funcs" << std::endl;*/
 		nFunctions = nF;
-		wordlength = wl;
+		wordLength = wl;
 		num_of_climate_vars = nC;
 		num_of_gt_vars = nG;
 		PRINT_TRACE = print_trace;
 	}
+		double get_func_value(vector<double> clim_arg)
+		{
+			double val = 0;
+			GrammarNode *retFtn;
+			for (size_t i = 0; i < nFunctions; ++i) {
+				retFtn = grc->get_nth_tree(i);
+				double fval = retFtn->eval(clim_arg);
+				val += beta[i] * fval;
+				for (size_t j = 0; j < num_of_gt_vars; ++j) {
+					val += beta[j + nFunctions] * fval;
+				}
+			}
+			return val;
+		}
+		void nlreg_build()
+		{
+			GrammarNode *retFtn;
+			vector<int> genotype = read_genotype(climate_var, beta);
+			grc = new GrammarContainer(measurements, nFunctions);
+			phenotype = new double[nFunctions * (wordLength + 1) + nFunctions * num_of_gt_vars];
+			phenomask = new int[nFunctions * (wordLength + 1) + nFunctions * num_of_gt_vars];
+			int first = 0, last = wordLength;
+			for (int i = 0; i < nFunctions; ++i) {
+				std::vector<int> gt = std::vector<int>(genotype.begin() + first, genotype.begin() + last);
+				first += wordLength;
+				last += wordLength;
+				grc->build_nth_tree(gt, climate_var, i, &phenotype[i * wordLength], &phenomask[i * wordLength]);
+				if (PRINT_TRACE > 0) {
+					for (size_t i = 0; i < nFunctions; ++i) {
+						retFtn = grc->get_nth_tree(i);
+						cout << i << " ";
+						retFtn->coprint();
+					}
+				}
+			}
+		}
     private:
 		int num_of_climate_vars; // Number of columns in the weather table == number of consts to read after func's and betas
 		int num_of_gt_vars; // Number of genotype data columns (snp or qtl or locations). Number of betas=number of funcs + number of func * number of gt vars
@@ -53,7 +89,7 @@ class Nlreg
 				/*			cout << nnm.toStdString () << endl;*/
 /*			}
 */
-			for (size_t i = 0; i < _param.nl_param.nFunctions * _param.nl_param.wordLength; ++i) {
+			for (size_t i = 0; i < nFunctions * wordLength; ++i) {
 				int arg;
 				in >> arg;
 				gt.push_back(arg);
@@ -66,7 +102,7 @@ class Nlreg
 				be.push_back(arg);
 				//			cout << gt[i] << endl;
 			}
-			beta = concs;
+			beta = be;
 			vector<double> concs;
 			for (size_t i = 0; i < num_of_climate_vars; ++i) {
 				double arg;
@@ -78,41 +114,7 @@ class Nlreg
 			//		for (size_t i = 0; i < nFunctions * wordlength; ++i) { cout << gt[i] << endl; }
 			return gt;
 		};
-		double get_func_value(vector<double> clim_arg)
-		{
-			double val = 0;
-			GrammarNode *retFtn;
-			for (size_t i = 0; i < nFunctions; ++i) {
-				retFtn = grc->get_nth_tree(i);
-				double fval = retFtn->eval(clim_arg);
-				val += beta[i] * fval
-				for (size_t j = 0; j < num_of_gt_vars; ++j) {
-					val += beta[j + nFunctions] * fval;
-				}
-			}
-			return val;
-		}
-		void nlreg_build()
-		{
-			vector<int> genotype = read_genotype(climate_var, beta);
-			grc = new GrammarContainer(measurements, nFunctions);
-			phenotype = new double[nFunctions * (wordlength + 1) + nFunctions * num_of_gt_vars];
-			phenomask = new int[nFunctions * (wordlength + 1) + nFunctions * num_of_gt_vars];
-			int first = 0, last = wordLength;
-			for (int i = 0; i < nFunctions; ++i) {
-				std::vector<int> gt = std::vector<int>(genotype.begin() + first, genotype.begin() + last);
-				first += wordLength;
-				last += wordLength;
-				grc->build_nth_tree(gt, climate_var, i, &phenotype[i * wordLength], &phenomask[i * wordlength]);
-				if (PRINT_TRACE > 0) {
-					for (size_t i = 0; i < nFunctions; ++i) {
-						retFtn = grc->get_nth_tree(i);
-						cout << i << " ";
-						retFtn->coprint();
-					}
-				}
-			}
-		}
+
 };
 
 

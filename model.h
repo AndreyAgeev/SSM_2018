@@ -261,7 +261,7 @@ public:
 	Nlreg nl;
 
 
-	explicit Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
+	explicit Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param), nl(param.nlreg_file_name, {"T", "P", "U", "H", "S"}, 5, 12, 5, 6)
 	{
 		run_h5();
 	}
@@ -673,10 +673,18 @@ public slots:
 		if (CBD > data.data_p.ttTRP)
 			ppfun = 1.0;
 
-		
+
 		bd = tempfun * ppfun;
+/*
+ * 		vector<double> day_weather;
+ * 		day_weather.push_back(TMP);
+ * etc
+ * 		bd = nl->get_func_value(day_weather);
+ *
+*/
+
 		CBD = CBD + bd;
-	
+
 		DAP = DAP + 1.0;
 
 		if (CBD < bdEM)
@@ -1340,6 +1348,8 @@ public slots:
 	void run_h5()
 	{
 		cout << "begin read" << endl;
+//		nl = new Nlreg(param.nlreg_file_name, vector<std::string> meas, param_nlreg.n, param_nlreg.l, 5, 6);
+		nl.nlreg_build();
 	//	nl.createFunction(param.nlreg_file_name, param);
 		data.read_h5(param.file_name, param.file_mode, DL);
 		data.read_ini();
