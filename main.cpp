@@ -3,7 +3,7 @@
 #define add(name) param.## name
 int main(int argc, char *argv[])
 {
-	///ADD FILE PARAM FOR NLREG
+
 	QCoreApplication a(argc, argv);
 	QCommandLineParser parser;
 	parser.addHelpOption();
@@ -77,9 +77,9 @@ int main(int argc, char *argv[])
 	if (args.size())
 	{
 		param.func_file_name = args.at(0);
-	    param.file_name = args.at(args.size() - 1);
-
-
+	    param.h5_file_name = args.at(args.size() - 1);
+		param.h5_table_name = args.at(args.size() - 2);
+		cout << "name file: " << param.func_file_name.toStdString() << " " << param.h5_file_name.toStdString() << " " << param.h5_table_name.toStdString() << endl;
 	/*
 		const QString nfParameter2 = parser.value("Latitude");
 		
@@ -159,8 +159,15 @@ int main(int argc, char *argv[])
 		param.CropColNo = 3;
 		param.ROW = 7;
 		param.file_mode = false;
+		param.nF = 5;
+		param.wL = 12;
+		param.nD = 90;
+		param.rT = 1;
+		param.ecovar = true;
+		param.print_trace = 0;
 	//	param.Print();
 	}
+	
 	model = new Model(param);
 	return a.exec();
 }
