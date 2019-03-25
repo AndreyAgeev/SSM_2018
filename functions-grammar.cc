@@ -7,17 +7,18 @@
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * nlreg is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// based on github.com:pbharrin/Genetic-Prog.git
+ // based on github.com:pbharrin/Genetic-Prog.git
+
 #include <iostream>
 #include <math.h>
 #include <QStack>
@@ -735,6 +736,7 @@ GrammarNode* GrammarContainer::find_node_type_2(int gen, double *phenotype)
 {
 	GrammarNode*n;
 	int ge = gen % n_predictors;
+	this->last_predictor = ge;
 	n = new InputNode(ge, predictors[ge]);
 	(*phenotype) = (double)ge;
 	return n;
@@ -784,12 +786,11 @@ GrammarNode* GrammarContainer::build_tree(vector<int>& genotype, vector<double>&
 	GrammarNode*root_expr, *child;
 	StackNode *curr;
 	QStack<StackNode*> stack;
-
+	this->last_predictor = 0;
 	int i = 0;
 	int curr_type = 0;
-	int cycle = 0;
 
-	root_expr = find_node(curr_type, genotype[i], conc[i], &phenotype[i], phenomask[i]);
+	root_expr = find_node(curr_type, genotype[i], conc[this->last_predictor], &phenotype[i], phenomask[i]);
 	i++;
 	//	cout << "g " << genotype[i - 1] << ' ' << i - 1 << ' ' << *root_expr << endl;
 
@@ -800,10 +801,10 @@ GrammarNode* GrammarContainer::build_tree(vector<int>& genotype, vector<double>&
 		stack.push(new StackNode(root_expr, 0, root_expr->child_type[0]));
 	}
 	i = (i < genotype.size()) ? i : 0;
-	while (!stack.isEmpty() && cycle < n_cycles) {
+	while (!stack.isEmpty() && i < genotype.size()) {
 		curr = stack.pop();
 		curr_type = curr->child_type;
-		child = find_node(curr_type, genotype[i], conc[i], &phenotype[i], phenomask[i]);
+		child = find_node(curr_type, genotype[i], conc[this->last_predictor], &phenotype[i], phenomask[i]);
 		i++;
 		//		cout << "g " << genotype[i - 1] << ' ' << i - 1 << ' ' << *child << endl;
 		curr->kernel->children[curr->side] = child;
@@ -813,31 +814,13 @@ GrammarNode* GrammarContainer::build_tree(vector<int>& genotype, vector<double>&
 		if (child->numChildren > 0) {
 			stack.push(new StackNode(child, 0, child->child_type[0]));
 		}
-		if (i >= genotype.size()) {
-			i = 0;
-			cycle++;
-		}
 	}
-	/*
-		while(make_corrections == true && !stack.isEmpty()) {
-			curr = stack.pop();
-			curr->kernel->children[curr->side] = new ConstNode(-1, curr->side);
-		}
-	*/
-	/**/
-	if (make_corrections == true) {
-		while (!stack.isEmpty()) {
-			curr = stack.pop();
-			curr->kernel->children[curr->side] = new ConstNode(-1, new double(curr->side));
-		}
+
+	while (!stack.isEmpty()) {
+		curr = stack.pop();
+		curr->kernel->children[curr->side] = NULL;
 	}
-	else {
-		while (!stack.isEmpty()) {
-			curr = stack.pop();
-			curr->kernel->children[curr->side] = NULL;
-		}
-	}
-	/**/
+
 	root_expr = root_expr->prune();
 	if (!root_expr) root_expr = new ConstNode(-1, new double(0.0));
 	return root_expr;
