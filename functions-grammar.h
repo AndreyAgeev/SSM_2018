@@ -7,12 +7,12 @@
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * nlreg is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -198,14 +198,12 @@ public:
 
 class GrammarContainer {
 public:
-	GrammarContainer(vector<string>& measurements, int n_t, int n_c = 3, bool m_c = false) : predictors(measurements), tree(n_t) {
+	GrammarContainer(vector<string>& measurements, int n_t) : predictors(measurements), tree(n_t) {
 		n_trees = n_t;
 		n_predictors = predictors.size();
 		n_nodes_type_0 = 7;
 		n_nodes_type_1 = 1;
 		n_nodes_type_2 = 1;
-		n_cycles = n_c;
-		make_corrections = m_c;
 	}
 	void build_nth_tree(vector<int>& genotype, vector<double>& conc, int n, double *phenotype, int *phenomask);
 	GrammarNode*get_nth_tree(int n) { return tree[n]; }
@@ -217,14 +215,12 @@ private:
 	int n_nodes_type_0;
 	int n_nodes_type_1;
 	int n_nodes_type_2;
-	int n_cycles;
-	bool make_corrections;
+	int last_predictor;
 	GrammarNode* build_tree(vector<int>& genotype, vector<double>& conc, double *phenotype, int *phenomask);
 	GrammarNode* find_node(int type, int gen, double conc, double *phenotype, int& phenomask);
 	GrammarNode* find_node_type_0(int gen, double *phenotype);
 	GrammarNode* find_node_type_1(int gen, double conc, double *phenotype);
 	GrammarNode* find_node_type_2(int gen, double *phenotype);
 };
-
 #endif // _FUNCTIONS_GRAMMAR_H_
 
