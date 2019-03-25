@@ -252,17 +252,25 @@ public:
 	double HI;
 
 
-
+	
+	Nlreg *nl;
 	Data data;
 	Parametrs param;
+
+
 	int Pyear;
 	int Pdoy;
 	int Yr;
 	bool write_check = false;
+
+
+	int nsam = 0;
 	//Nlreg nl;
-	vector<vector<double> > func_temp_photo;
-	vector<vector<double> > func_genotype;
-	int index_ftp;
+	//vector<vector<double> > func_temp_photo;
+	//vector<vector<double> > func_genotype;
+	//int index_ftp;
+
+
 	explicit Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
 	{
 		run_h5();
@@ -547,13 +555,21 @@ public slots:
 			CBD = data.data_p.ttTSG;
 	}
 
-	void FindSowingData(void)
+	void FindSowingData(int geo_id, int start_day, int start_year)
 	{
-		for (int i = 0; i < data.data_h5.years.size(); i++)
+		/*for (int i = 0; i < data.data_h5.years.size(); i++)
 		{
-			if (data.data_h5.years[i] == Pyear && data.data_h5.doy[i] == Pdoy )
+			if (data.data_h5.years[i] == Pyear && data.data_h5.doy[i] == Pdoy )//просто добавить локацию, и по локации смотреть ген данные
 			{
 				ROW = i;
+				DOY = data.data_h5.doy[ROW];
+				break;
+			}
+		}*/
+		for (size_t nd = 0; nd < data.data_h5.nWeather; ++nd)
+		{
+			if (geo_id == data.data_h5.geo_id[nd] && data.data_h5.doy[nd] == start_day && data.data_h5.years[nd] == start_year) {
+				ROW = nd;
 				DOY = data.data_h5.doy[ROW];
 				break;
 			}
@@ -601,10 +617,7 @@ public slots:
 	void Weather(void)
 	{
 		ROW += 1;
-	//	if (ROW > data.data_h5.tmax.size())
-	//		cout << "END" << endl;
-	//		return;
-		index_lai += 1;
+	//	index_lai += 1;
 		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2.0;
 	}
 	
@@ -641,7 +654,6 @@ public slots:
 			tempfun = tempfun * WSFD;
 		if (CBD > data.data_p.ttWSD)
 			DTT = DTT * WSFD;
-
 			// Photoperiod function
 		SABH = 6.0;
 		Pi = 3.141592654;
@@ -659,7 +671,7 @@ public slots:
 	//	DL = Pi / 2.0 - (atan(SOCRA / sqrt(1.0 - (SOCRA * SOCRA))));
 	//	DL = DL / RDN;
 	//	pp = 2.0/ 15.0 * DL;
-		pp = 2.0 / 15.0 * DL[index_lai];
+	//	pp = 2.0 / 15.0 * DL[index_lai];
 
 		if (data.data_p.ppsen >= 0.0)
 			ppfun = 1.0 - data.data_p.ppsen * (data.data_p.CPP - pp);
@@ -677,15 +689,13 @@ public slots:
 
 
 		
-	//	bd = tempfun * ppfun;
-	//	cout << "HERE" << endl;
-		bd = 0.0;
-		for (int i = 0; i < func_temp_photo.size(); i++)
-			bd += func_temp_photo[i][index_ftp];//добавить бета и генетические данные
+		//DL НЕ НУЖЕН.
+		vector<double> clim_covar = { data.data_h5.tmax[ROW], data.data_h5.tmin[ROW], data.data_h5.rain[ROW], data.data_h5.dl[ROW], data.data_h5.srad[ROW] };
+	    bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[nsam]);
 		CBD = CBD + bd;
-	//	cout << "HERE is OK" << endl;
 		DAP = DAP + 1.0;
-		index_ftp += 1;
+
+	//	index_ftp += 1;
 		if (CBD < bdEM)
 			dtEM = DAP + 1.0;  // 'Saving days to EMR
 		if (CBD < bdR1)
@@ -1270,96 +1280,150 @@ public slots:
 		Pyear = param.FirstYear;
 		Pdoy = param.Pdoy;
 		param.yno = 1;////////////
-		cout << "go "<< endl;
-		for (int i = 0; i < param.yno; i++)
-		{
+
+		double phase_change = 0.6;
+		double training_error = 0;
+		double curr_error = 0;
+		bool mode = true;
+	//	for (int i = 0; i < param.yno; i++)
+	//	{
 			//ManagInputs
 		    //INITIALS
 			MAT = 0;
+			CBD = 0.0;
 			iniPheno = 0;
 			iniLai = 0;
 			iniDMP = 0;
 			iniDMD = 0;
 			iniSW = 0;
 			iniPNB = 0;
-			FindSowingData();
-			cout << "end read data" << endl;
-			cout << "begin nlreg" << endl;
-			Nlreg nl(param.file_name, param.func_file_name, 6, 10);
-			cout << "create nlreg class" << endl;
-			cout << "begin func nlreg" << endl;
-			func_temp_photo = nl.createFunction(data, ROW);
-			cout << "end nlreg" << endl;
-			index_ftp = 0;
-			
-			out.open("output.txt", std::ios::app);
-			out << "BEGIN MAT = " << MAT << endl;
-			out.close();
-			while (MAT != 1)
+			//IF(EXTRA_COVAR)
+			for (size_t _nsam = 0; _nsam < data.data_a5.nSamples; ++_nsam)
 			{
-				out.open("output.txt", std::ios::app);
-				out << "begin  Weather();" << endl;
-				Weather();
-				out.close();
-				out.open("output.txt", std::ios::app);
-				out << "begin  Phenology()" << endl;
-			    Phenology();
-				out.close();
-				out.open("output.txt", std::ios::app);
-				out << "begin  CropLAIN()" << endl;
-				CropLAIN();
-				out.close();
-				out.open("output.txt", std::ios::app);
-				out << "begin  DMProduction()" << endl;
-				DMProduction();
-				out.close();
-				out.open("output.txt", std::ios::app);
-				out << "begin  DMDistribution()" << endl;
-				DMDistribution();
-				out.close();
-				out.open("output.txt", std::ios::app);
-				out << "begin  LegumPlant()" << endl;
-				LegumPlant();
-				out.close();
-				out.open("output.txt", std::ios::app);
-				out << "begin SoilWater()" << endl;
-				SoilWater();
-				out.close();
-				out.open("output.txt", std::ios::app);
-				out << "begin  DailyPrintOut()" << endl;
-				out.close();
-				DailyPrintOut();
-				
-				out.open("output.txt", std::ios::app);
-				out << "end  WHILE" << endl;
-				out.close();
-			}
-			out.open("output.txt", std::ios::app);
-			out << "END YNO = " << i << endl;
-			//cout << "END" << endl;
-			out.close();
-			SummaryPrintOut();
-			Pyear += 1;
-			cout << Pyear << endl;
-		}
-	}
-	void readLai(void)
-	{
-		double val;
-		std::ifstream in_dl;
-		in_dl.open("DL_input.txt");
-		while (in_dl >> val)
-			DL.push_back(val);
-		in_dl.close();
-	}
+			//	CBD = 0.0;
+				int start_day = data.data_a5.doy[_nsam];
+				int start_year = data.data_a5.years[_nsam];
+				int geo_id = data.data_a5.geo_id[_nsam];
+				double event_day = data.data_a5.response[_nsam];
+				nsam = _nsam;
+				FindSowingData(geo_id, start_day, start_year);
+				cout << ROW << endl;
+				int curr_day = 0;
+				if (mode == true)
+				{
+					for (size_t nd = 0; nd < param.nD; nd++)
+					{
+						cout << nd << endl;
+						if (CBD >= phase_change) {/////////////////////////////не верно скорее всего
+							curr_day = nd;
+							break;
+						}
+						out.open("output.txt", std::ios::app);
+						out << "BEGIN MAT = " << MAT << endl;
+						out.close();
+						out.open("output.txt", std::ios::app);
+						out << "begin  Weather();" << endl;
+						Weather();
+						out.close();
+						out.open("output.txt", std::ios::app);
+						out << "begin  Phenology()" << endl;
+						Phenology();
+						out.close();
+						out.open("output.txt", std::ios::app);
+						out << "begin  CropLAIN()" << endl;
+						CropLAIN();
+						out.close();
+						out.open("output.txt", std::ios::app);
+						out << "begin  DMProduction()" << endl;
+						DMProduction();
+						out.close();
+						out.open("output.txt", std::ios::app);
+						out << "begin  DMDistribution()" << endl;
+						DMDistribution();
+						out.close();
+						out.open("output.txt", std::ios::app);
+						out << "begin  LegumPlant()" << endl;
+						LegumPlant();
+						out.close();
+						out.open("output.txt", std::ios::app);
+						out << "begin SoilWater()" << endl;
+						SoilWater();
+						out.close();
+						out.open("output.txt", std::ios::app);
+						out << "begin  DailyPrintOut()" << endl;
+						out.close();
+						DailyPrintOut();
 
+						out.open("output.txt", std::ios::app);
+						out << "end  WHILE" << endl;
+						out.close();
+
+					}
+					out.open("output.txt", std::ios::app);
+					out.close();
+					SummaryPrintOut();
+					training_error += (curr_day - event_day) * (curr_day - event_day);
+					curr_error += (CBD - phase_change) * (CBD - phase_change);
+				}
+				else
+				{
+					while (MAT != 1)
+					{
+						out.open("output.txt", std::ios::app);
+						out << "begin  Weather();" << endl;
+						Weather();
+						out.close();
+						out.open("output.txt", std::ios::app);
+						out << "begin  Phenology()" << endl;
+						Phenology();
+						out.close();
+						out.open("output.txt", std::ios::app);
+						out << "begin  CropLAIN()" << endl;
+						CropLAIN();
+						out.close();
+						out.open("output.txt", std::ios::app);
+						out << "begin  DMProduction()" << endl;
+						DMProduction();
+						out.close();
+						out.open("output.txt", std::ios::app);
+						out << "begin  DMDistribution()" << endl;
+						DMDistribution();
+						out.close();
+						out.open("output.txt", std::ios::app);
+						out << "begin  LegumPlant()" << endl;
+						LegumPlant();
+						out.close();
+						out.open("output.txt", std::ios::app);
+						out << "begin SoilWater()" << endl;
+						SoilWater();
+						out.close();
+						out.open("output.txt", std::ios::app);
+						out << "begin  DailyPrintOut()" << endl;
+						out.close();
+						DailyPrintOut();
+
+						out.open("output.txt", std::ios::app);
+						out << "end  WHILE" << endl;
+						out.close();
+					}
+					out.open("output.txt", std::ios::app);
+					out.close();
+					SummaryPrintOut();
+					curr_error += (CBD - phase_change) * (CBD - phase_change);
+				}
+			}
+	//	}
+		cout << "ERROR = " << training_error << endl;
+	}
 	void run_h5()
 	{
 		cout << "begin read" << endl;
-		data.read_h5(param.file_name, param.file_mode, DL);
+
+		data.read_h5(param.h5_file_name);
+		data.read_spieces(param.h5_table_name, param.ecovar);
 		data.read_ini();
-		if (param.file_mode == false)
-		    readLai();
+		nl = new Nlreg(param.func_file_name, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace);
+		nl->nlreg_build();
 		cout << "BEGIN CALC" << endl;
 		calculation();
 		cout << "END CALC" << endl;
