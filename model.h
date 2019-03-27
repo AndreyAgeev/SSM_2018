@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _MODEL_H_
+#define _MODEL_H_
 #include <string>
 #include <iostream>
 #include <QtCore>
@@ -270,11 +271,16 @@ public:
 	//int index_ftp;
 
 
-	explicit Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
+	Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
 	{
-		run_h5();
+		if (param.print_trace > 0) cout << "begin read" << endl;
+		data.read_h5(param.h5_file_name);
+		data.read_spieces(param.h5_table_name, param.ecovar);
+		data.read_ini(param.crops_ini_file);
+		nl = new Nlreg(param.func_file_name, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace);
+		nl->nlreg_build();
+		if (param.print_trace > 0) cout << "end read" << endl;
 	}
-public slots:
 
 	void SoilWater()
 	{
@@ -1306,13 +1312,13 @@ public slots:
 				double event_day = data.data_a5.response[_nsam];
 				nsam = _nsam;
 				FindSowingData(geo_id, start_day, start_year);
-				cout << ROW << endl;
+				if (param.print_trace > 0) cout << ROW << endl;
 				int curr_day = 0;
 				if (mode == true)
 				{
 					for (size_t nd = 0; nd < param.nD; nd++)
 					{
-						cout << nd << endl;
+						if (param.print_trace > 0) cout << nd << endl;
 						if (CBD >= phase_change) {/////////////////////////////не верно скорее всего
 							curr_day = nd;
 							break;
@@ -1414,18 +1420,16 @@ public slots:
 	//	}
 		cout << "ERROR = " << training_error << endl;
 	}
+public slots:
 	void run_h5()
 	{
-		cout << "begin read" << endl;
-
-		data.read_h5(param.h5_file_name);
-		data.read_spieces(param.h5_table_name, param.ecovar);
-		data.read_ini();
-		nl = new Nlreg(param.func_file_name, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace);
-		nl->nlreg_build();
 		cout << "BEGIN CALC" << endl;
 		calculation();
 		cout << "END CALC" << endl;
+		emit finished();
 	}
-
+signals:
+	void finished();
 };
+
+#endif // _MODEL_H_

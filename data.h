@@ -131,7 +131,7 @@ public:
 	Data_phen data_p;
 	//Nlreg_param param_nlreg;
 	Data() {}
-	void read_ini(void)
+	void read_ini(QString file_name)
 	{
 		/*QSettings sett("C:\project\SSM\SSM_improved\SSM_improved\crops.ini.src", QSettings::IniFormat);
 		sett.beginGroup("Jam");
@@ -205,7 +205,7 @@ public:
 		data_p.vpd_resp = sett.value("vpd_resp ", 1).toDouble();
 		data_p.vpd_cr = sett.value("vpd_cr", 20.0).toDouble();
 		sett.endGroup();*/
-		QSettings sett("crops.ini.src", QSettings::IniFormat);
+		QSettings sett(file_name, QSettings::IniFormat);
 		sett.beginGroup("Jam");
 		data_p.phyl = sett.value("phyl", 46).toDouble();
 		data_p.PLACON = sett.value("PLACON", 1).toDouble();

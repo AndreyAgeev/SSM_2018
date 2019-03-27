@@ -27,6 +27,9 @@ int main(int argc, char *argv[])
 			{{"p", "Pdoy"},
 				QCoreApplication::translate("main", "Pdoy."),
 				QCoreApplication::translate("main", "P")},
+			{{"T", "print-trace"},
+				QCoreApplication::translate("main", "Print trace."),
+				QCoreApplication::translate("main", "T")},
 /*			{{"d", "SearchDur"},
 				QCoreApplication::translate("main", "SearchDur.")},
 			{{"w", "SowWat"},
@@ -69,6 +72,7 @@ int main(int argc, char *argv[])
 				QCoreApplication::translate("main", "CropColNo.")},*/
 
 		});
+	parser.addPositionalArgument("cropsoinifile", "The file to open.");
 	parser.addPositionalArgument("samplesfile", "The file to open.");
 	parser.addPositionalArgument("weatherfile", "The file to open.");
 	parser.addPositionalArgument("funcsfile", "The file to read funcs.");
@@ -78,10 +82,16 @@ int main(int argc, char *argv[])
 	Parametrs param;
 	if (args.size())
 	{
-		param.func_file_name = args.at(2); // funcs
-	    param.h5_file_name = args.at(1); // samples
-		param.h5_table_name = args.at(0); // weather
-		cout << "name file: " << param.func_file_name.toStdString() << " " << param.h5_file_name.toStdString() << " " << param.h5_table_name.toStdString() << endl;
+		param.func_file_name = args.at(3); // funcs
+	    param.h5_file_name = args.at(2); // samples
+		param.h5_table_name = args.at(1); // weather
+		param.crops_ini_file = args.at(0); // weather
+		cout << "name file: " << param.func_file_name.toStdString() << " " << param.h5_file_name.toStdString() << " " << param.h5_table_name.toStdString() << param.crops_ini_file.toStdString() << endl;
+		const QString TParameter = parser.value("print-trace");
+		const int T = TParameter.toInt();
+		if (T < 0) {
+			std::cout << "Bad p: " + T;
+		}
 	/*
 		const QString nfParameter2 = parser.value("Latitude");
 
@@ -134,7 +144,7 @@ int main(int argc, char *argv[])
 		param.U = nfParameter23.toInt();
 		const QString nfParameter24 = parser.value("CropColNo");
 		param.CropColNo = nfParameter24.toInt();*/
-		param.Print();
+//		param.Print();
 		////////////////////////////////////////////////////////
 		param.Latitude = 36.41;
 		param.VPDF = 0.75;
@@ -167,10 +177,13 @@ int main(int argc, char *argv[])
 		param.nD = 90;
 		param.rT = 1;
 		param.ecovar = true;
-		param.print_trace = 0;
-		//param.Print();
+		param.print_trace = T;
 	}
-
-	model = new Model(param);
+	if (param.print_trace > 0) {
+		param.Print();
+	}
+	model = new Model(param, &a);
+    QObject::connect(model, SIGNAL(finished()), &a, SLOT(quit()));
+	QTimer::singleShot(0, model, SLOT(run_h5()));
 	return a.exec();
 }
