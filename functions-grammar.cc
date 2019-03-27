@@ -256,22 +256,6 @@ void Add::coprint() {
 		cout << " (0";
 		cout << ") ";
 	}
-	else if (children[0]) {
-		cout << " (";
-		children[0]->coprint();
-		cout << ") ";
-	}
-	else if (children[1]) {
-		cout << " (";
-		children[1]->coprint();
-		cout << ") ";
-	}
-	else {
-		if (PRINT_TRACE > 1) cerr << "left and right not defined in add" << endl;
-		cout << " (0";
-		cout << ") ";
-	}
-	return this;
 }
 
 Add* Add::prune() {
@@ -341,21 +325,6 @@ void Subtract::coprint() {
 		cout << ") ";
 	} else {
 		if (PRINT_TRACE > 1) cerr << "left and right not defined in subtract"<<endl;
-		cout << " (0";
-		cout << ") ";
-	}
-	else if (children[0]) {
-		cout << " (";
-		children[0]->coprint();
-		cout << ") ";
-	}
-	else if (children[1]) {
-		cout << " (";
-		children[1]->coprint();
-		cout << ") ";
-	}
-	else {
-		if (PRINT_TRACE > 1) cerr << "left and right not defined in subtract" << endl;
 		cout << " (0";
 		cout << ") ";
 	}
@@ -431,27 +400,6 @@ void Multiply::coprint() {
 		cout << " (0";
 		cout << ") ";
 	}
-	else if (children[0]) {
-		cout << " (";
-		children[0]->coprint();
-		cout << ") ";
-	}
-	else if (children[1]) {
-		cout << " (";
-		children[1]->coprint();
-		cout << ") ";
-	}
-	else {
-		if (PRINT_TRACE > 1) cerr << "left and right not defined in multiply" << endl;
-		cout << " (0";
-		cout << ") ";
-	}
-	if (!children[0] && !children[1]){
-//		cout << *this << endl;
-		delete this;
-		return NULL;
-	}
-	return this;
 }
 
 Multiply* Multiply::prune() {
@@ -572,17 +520,6 @@ void Divide::coprint() {
 		cout << " (0";
 		cout << ") ";
 	}
-	else {
-		if (PRINT_TRACE > 1) cerr << "left and right not defined in divide" << endl;
-		cout << " (0";
-		cout << ") ";
-	}
-	if (!children[0] && !children[1]){
-//		cout << *this << endl;
-		delete this;
-		return NULL;
-	}
-	return this;
 }
 
 Divide* Divide::prune() {
@@ -689,23 +626,6 @@ void InputMinusConst::coprint() {
 		cout << " 0 ";
 		cout << ") ";
 	}
-	else if (children[0]) {
-		cout << " (";
-		children[0]->coprint();
-		cout << ") ";
-	}
-	else if (children[1]) {
-		cout << " (";
-		cout << " - ";
-		children[1]->coprint();
-		cout << ") ";
-	}
-	else {
-		if (PRINT_TRACE > 1) cerr << "left and right not defined in InputMinusConst" << endl;
-		cout << " (";
-		cout << " 0 ";
-		cout << ") ";
-	}
 }
 
 InputMinusConst* InputMinusConst::prune() {
@@ -778,27 +698,6 @@ void RecInputMinusConst::coprint() {
 		cout << " (1";
 		cout << ") ";
 	}
-	else if (children[0]) {
-		cout << " (1/(";
-		children[0]->coprint();
-		cout << ")) ";
-	}
-	else if (children[1]) {
-		cout << " (-1/(";
-		children[1]->coprint();
-		cout << ")) ";
-	}
-	else {
-		if (PRINT_TRACE > 1) cerr << "left and right not defined in InputMinusConst" << endl;
-		cout << " (1";
-		cout << ") ";
-	}
-	if (!children[0] && !children[1]){
-//		cout << *this << endl;
-		delete this;
-		return NULL;
-	}
-	return this;
 }
 
 RecInputMinusConst* RecInputMinusConst::prune() {

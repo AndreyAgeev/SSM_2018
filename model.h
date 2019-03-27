@@ -270,7 +270,7 @@ public:
 	//int index_ftp;
 
 
-	explicit Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param), nl(param.nlreg_file_name, {"T", "P", "U", "H", "S"}, 5, 12, 5, 6)
+	explicit Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
 	{
 		run_h5();
 	}

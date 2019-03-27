@@ -205,7 +205,7 @@ public:
 		data_p.vpd_resp = sett.value("vpd_resp ", 1).toDouble();
 		data_p.vpd_cr = sett.value("vpd_cr", 20.0).toDouble();
 		sett.endGroup();*/
-		QSettings sett("C:\project\SSM\SSM_improved\SSM_improved\crops.ini.src", QSettings::IniFormat);
+		QSettings sett("crops.ini.src", QSettings::IniFormat);
 		sett.beginGroup("Jam");
 		data_p.phyl = sett.value("phyl", 46).toDouble();
 		data_p.PLACON = sett.value("PLACON", 1).toDouble();
@@ -346,23 +346,6 @@ public:
 			std::cerr << err.what() << std::endl;
 		}
 		data_a5.response = Data::std2arvec(data_a5.resp, data_a5.nSamples, 0);
-	}
-
-	void write_csv(QString out_file_name, arma::mat &Fpoints, int nFunctions, int nDays)
-	{
-		ofstream out;
-		out.open(out_file_name.toStdString(), ios::app);
-		out << "ID" << "," << "d" << ",";
-		for (size_t n; n < nFunctions; ++n) out << "I" << n << ",";
-		out << "state" << endl;
-		for (size_t nsam = 0; nsam < data_a5.nSamples; ++nsam) {
-			for (size_t nd = 0; nd < nDays; ++nd) {
-				out << nsam << "," << nd << ",";
-				for (size_t n = 0; n < nFunctions; ++n) out << Fpoints(nDays * nsam + nd, n) << ",";
-				out << Fpoints(nDays * nsam + nd, nFunctions) << endl;
-			}
-		}
-		out.close();
 	}
 private:
 	arma::mat std2arvec(std::vector<std::vector<double> > &vec, int n_rows, int offset) {
