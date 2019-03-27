@@ -17,6 +17,7 @@
 #include <nlreg.h>
 using namespace std;
 using namespace HighFive;
+#define SOLTANI_FUNC 0
 class Model : public QObject
 {
 	Q_OBJECT
@@ -258,17 +259,10 @@ public:
 	Parametrs param;
 
 
-	int Pyear;
-	int Pdoy;
-	int Yr;
 	bool write_check = false;
 
 
 	int nsam = 0;
-	//Nlreg nl;
-	//vector<vector<double> > func_temp_photo;
-	//vector<vector<double> > func_genotype;
-	//int index_ftp;
 
 
 	Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
@@ -280,8 +274,8 @@ public:
 		nl = new Nlreg(param.func_file_name, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace);
 		nl->nlreg_build();
 		if (param.print_trace > 0) cout << "end read" << endl;
+	//	run_h5();
 	}
-
 	void SoilWater()
 	{
 		if (iniSW == 0)
@@ -562,24 +556,7 @@ public:
 
 	void FindSowingData(int geo_id, int start_day, int start_year)
 	{
-		/*for (int i = 0; i < data.data_h5.years.size(); i++)
-		{
-			if (data.data_h5.years[i] == Pyear && data.data_h5.doy[i] == Pdoy )//просто добавить локацию, и по локации смотреть ген данные
-			{
-				ROW = i;
-				DOY = data.data_h5.doy[ROW];
-				break;
-			}
-		}*/
-		for (size_t nd = 0; nd < data.data_h5.nWeather; ++nd)
-		{
-			if (geo_id == data.data_h5.geo_id[nd] && data.data_h5.doy[nd] == start_day && data.data_h5.years[nd] == start_year) {
-				ROW = nd;
-				DOY = data.data_h5.doy[ROW];
-				break;
-			}
-		}
-		if (param.FixFind == 2)
+		/*if (param.FixFind == 2)
 		{
 			CumFind = 0.0;
 			for (int row = ROW; row < data.data_h5.years.size(); row++)
@@ -617,21 +594,21 @@ public:
 
 			}
 			Pdoy = data.data_h5.doy[ROW];
-		}
+		}*/
 	}
 	void Weather(void)
 	{
-		ROW += 1;
-	//	index_lai += 1;
+	//	ROW += 1;
 		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2.0;
 	}
 
 	void Phenology(void)
 	{
+		int threshold_index;
 		if (iniPheno == 0)
 		{
 			bdEM = data.data_p.ttSWEM;
-			bdR1 = bdEM + data.data_p.ttEMR1;
+			bdR1 = bdEM + data.data_p.ttEMR1;//Thermal time from sowing to emergence
 			bdR3 = bdR1 + data.data_p.ttR1R3;
 			bdR5 = bdR3 + data.data_p.ttR3R5;
 			bdR7 = bdR5 + data.data_p.ttR5R7;
@@ -644,63 +621,83 @@ public:
 			WSFD = 1.0;
 			iniPheno = 1;
 		}
-		// Thermal time calculation
-		if (TMP <= data.data_p.TBD || TMP >= data.data_p.TCD)
-			tempfun = 0.0;
-		else if (TMP > data.data_p.TBD && TMP < data.data_p.TP1D)
-			tempfun = (TMP - data.data_p.TBD) / (data.data_p.TP1D - data.data_p.TBD);
-		else if (TMP > data.data_p.TP2D && TMP < data.data_p.TCD)
-			tempfun = (data.data_p.TCD - TMP) / (data.data_p.TCD - data.data_p.TP2D);
-		else if (TMP >= data.data_p.TP1D && TMP <= data.data_p.TP2D)
-			tempfun = 1.0;
+		switch (param.threshold)
+		{
+		    case 0:
+			    bdEM = nl->get_cbd();
+			    break;
+		    case 1:
+			    bdR5 = nl->get_cbd();
+			    break;
+		    case 2:
+			    bdR8 = nl->get_cbd();
+			    break;
+		}
+		if (param.function_mode == SOLTANI_FUNC)
+		{
+			// Thermal time calculation
+			if (TMP <= data.data_p.TBD || TMP >= data.data_p.TCD)
+				tempfun = 0.0;
+			else if (TMP > data.data_p.TBD && TMP < data.data_p.TP1D)
+				tempfun = (TMP - data.data_p.TBD) / (data.data_p.TP1D - data.data_p.TBD);
+			else if (TMP > data.data_p.TP2D && TMP < data.data_p.TCD)
+				tempfun = (data.data_p.TCD - TMP) / (data.data_p.TCD - data.data_p.TP2D);
+			else if (TMP >= data.data_p.TP1D && TMP <= data.data_p.TP2D)
+				tempfun = 1.0;
 
-		DTT = (data.data_p.TP1D - data.data_p.TBD) * tempfun;
-		if (CBD > data.data_p.ttWSD)
-			tempfun = tempfun * WSFD;
-		if (CBD > data.data_p.ttWSD)
-			DTT = DTT * WSFD;
+			DTT = (data.data_p.TP1D - data.data_p.TBD) * tempfun;
+			if (CBD > data.data_p.ttWSD)
+				tempfun = tempfun * WSFD;
+			if (CBD > data.data_p.ttWSD)
+				DTT = DTT * WSFD;
 			// Photoperiod function
-		SABH = 6.0;
-		Pi = 3.141592654;
-		RDN = Pi / 180.0;
-		ALPHA = 90.0 + SABH;
-		SMA3 = 0.9856 * DOY - 3.251;
-		LANDA = SMA3 + 1.916 * sin(SMA3 * RDN) + 0.02 * sin(2.0 * SMA3 * RDN) + 282.565;
-		DEC = 0.39779 * sin(LANDA * RDN);
-		DEC = atan(DEC / sqrt(1.0 - (DEC * DEC)));
-		DEC = DEC / RDN;
-		TALSOC = 1.0 / cos(LAI * RDN);
-		CEDSOC = 1.0 / cos(DEC * RDN);
-		SOCRA = (cos(ALPHA * RDN) * TALSOC * CEDSOC) - (tan(LAI * RDN) * tan(DEC * RDN));
-	//	DL = Pi / 2.0 - (atan(SOCRA / (((1.0 - (SOCRA *  SOCRA))) * (1.0 - (SOCRA *  SOCRA)))));
-	//	DL = Pi / 2.0 - (atan(SOCRA / sqrt(1.0 - (SOCRA * SOCRA))));
-	//	DL = DL / RDN;
-	//	pp = 2.0/ 15.0 * DL;
-	//	pp = 2.0 / 15.0 * DL[index_lai];
+			SABH = 6.0;
+			Pi = 3.141592654;
+			RDN = Pi / 180.0;
+			ALPHA = 90.0 + SABH;
+			SMA3 = 0.9856 * DOY - 3.251;
+			LANDA = SMA3 + 1.916 * sin(SMA3 * RDN) + 0.02 * sin(2.0 * SMA3 * RDN) + 282.565;
+			DEC = 0.39779 * sin(LANDA * RDN);
+			DEC = atan(DEC / sqrt(1.0 - (DEC * DEC)));
+			DEC = DEC / RDN;
+			TALSOC = 1.0 / cos(LAI * RDN);
+			CEDSOC = 1.0 / cos(DEC * RDN);
+			SOCRA = (cos(ALPHA * RDN) * TALSOC * CEDSOC) - (tan(LAI * RDN) * tan(DEC * RDN));
+			//	DL = Pi / 2.0 - (atan(SOCRA / (((1.0 - (SOCRA *  SOCRA))) * (1.0 - (SOCRA *  SOCRA)))));
+			//	DL = Pi / 2.0 - (atan(SOCRA / sqrt(1.0 - (SOCRA * SOCRA))));
+			//	DL = DL / RDN;
+			//	pp = 2.0/ 15.0 * DL;
+			pp = 2.0 / 15.0 * data.data_h5.dl[ROW];
 
-		if (data.data_p.ppsen >= 0.0)
-			ppfun = 1.0 - data.data_p.ppsen * (data.data_p.CPP - pp);
-		else if (data.data_p.ppsen < 0.0)
-			ppfun = 1.0 - (-data.data_p.ppsen) * (pp - data.data_p.CPP);
-		if (ppfun > 1.0)
-			ppfun = 1.0;
-		if (ppfun < 0.0)
-			ppfun = 0.0;
+			if (data.data_p.ppsen >= 0.0)
+				ppfun = 1.0 - data.data_p.ppsen * (data.data_p.CPP - pp);
+			else if (data.data_p.ppsen < 0.0)
+				ppfun = 1.0 - (-data.data_p.ppsen) * (pp - data.data_p.CPP);
+			if (ppfun > 1.0)
+				ppfun = 1.0;
+			if (ppfun < 0.0)
+				ppfun = 0.0;
 
-		if (CBD < data.data_p.ttBRP)
-			ppfun = 1.0;
-		if (CBD > data.data_p.ttTRP)
-			ppfun = 1.0;
+			if (CBD < data.data_p.ttBRP)
+				ppfun = 1.0;
+			if (CBD > data.data_p.ttTRP)
+				ppfun = 1.0;
+
+			bd = tempfun * ppfun;
+			CBD = CBD + bd;
+		}
+		else
+		{
+		     vector<double> clim_covar = { data.data_h5.tmax[ROW], data.data_h5.tmin[ROW], data.data_h5.rain[ROW], data.data_h5.dl[ROW], data.data_h5.srad[ROW] };
+	         bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[nsam]);
 
 
+			 CBD += Heaviside(bd) * bd;
+		}
 
-		//DL НЕ НУЖЕН.
-		vector<double> clim_covar = { data.data_h5.tmax[ROW], data.data_h5.tmin[ROW], data.data_h5.rain[ROW], data.data_h5.dl[ROW], data.data_h5.srad[ROW] };
-	    bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[nsam]);
-		CBD = CBD + bd;
 		DAP = DAP + 1.0;
 
-	//	index_ftp += 1;
+
 		if (CBD < bdEM)
 			dtEM = DAP + 1.0;  // 'Saving days to EMR
 		if (CBD < bdR1)
@@ -718,7 +715,15 @@ public:
 		if (CBD > bdR8)
 			MAT = 1;
 	}
-
+	double get_curr_day(void)
+	{
+		if (param.threshold == 0)
+			return dtEM;
+		if (param.threshold == 1)
+			return dtR5;
+		if (param.threshold == 2)
+			return dtR8;
+	}
 	void CropLAIN(void)
 	{
 		if (iniLai == 0)
@@ -1280,20 +1285,17 @@ public:
 		out_s << "CIRGW = " << CIRGW << endl;
 		out_s.close();
 	}
-	void calculation()
+	double Heaviside(double arg) { return (arg > 0) ? 1.0 : 0.0; }
+	void calculation(void)
 	{
-		Pyear = param.FirstYear;
-		Pdoy = param.Pdoy;
-		param.yno = 1;////////////
-
-		double phase_change = 0.6;
+		double phase_change = nl->get_cbd();
 		double training_error = 0;
 		double curr_error = 0;
-		bool mode = true;
-	//	for (int i = 0; i < param.yno; i++)
-	//	{
-			//ManagInputs
-		    //INITIALS
+		int nDays = param.nD;
+		if (param.print_trace > 0) cout << phase_change << endl;
+		for (size_t nsam = 0; nsam < data.data_a5.nSamples; ++nsam)
+		{
+			ROW = -1;
 			MAT = 0;
 			CBD = 0.0;
 			iniPheno = 0;
@@ -1302,130 +1304,74 @@ public:
 			iniDMD = 0;
 			iniSW = 0;
 			iniPNB = 0;
-			//IF(EXTRA_COVAR)
-			for (size_t _nsam = 0; _nsam < data.data_a5.nSamples; ++_nsam)
-			{
-			//	CBD = 0.0;
-				int start_day = data.data_a5.doy[_nsam];
-				int start_year = data.data_a5.years[_nsam];
-				int geo_id = data.data_a5.geo_id[_nsam];
-				double event_day = data.data_a5.response[_nsam];
-				nsam = _nsam;
-				FindSowingData(geo_id, start_day, start_year);
-				if (param.print_trace > 0) cout << ROW << endl;
-				int curr_day = 0;
-				if (mode == true)
-				{
-					for (size_t nd = 0; nd < param.nD; nd++)
-					{
-						if (param.print_trace > 0) cout << nd << endl;
-						if (CBD >= phase_change) {/////////////////////////////не верно скорее всего
-							curr_day = nd;
-							break;
-						}
-						out.open("output.txt", std::ios::app);
-						out << "BEGIN MAT = " << MAT << endl;
-						out.close();
-						out.open("output.txt", std::ios::app);
-						out << "begin  Weather();" << endl;
-						Weather();
-						out.close();
-						out.open("output.txt", std::ios::app);
-						out << "begin  Phenology()" << endl;
-						Phenology();
-						out.close();
-						out.open("output.txt", std::ios::app);
-						out << "begin  CropLAIN()" << endl;
-						CropLAIN();
-						out.close();
-						out.open("output.txt", std::ios::app);
-						out << "begin  DMProduction()" << endl;
-						DMProduction();
-						out.close();
-						out.open("output.txt", std::ios::app);
-						out << "begin  DMDistribution()" << endl;
-						DMDistribution();
-						out.close();
-						out.open("output.txt", std::ios::app);
-						out << "begin  LegumPlant()" << endl;
-						LegumPlant();
-						out.close();
-						out.open("output.txt", std::ios::app);
-						out << "begin SoilWater()" << endl;
-						SoilWater();
-						out.close();
-						out.open("output.txt", std::ios::app);
-						out << "begin  DailyPrintOut()" << endl;
-						out.close();
-						DailyPrintOut();
 
-						out.open("output.txt", std::ios::app);
-						out << "end  WHILE" << endl;
-						out.close();
-
-					}
-					out.open("output.txt", std::ios::app);
-					out.close();
-					SummaryPrintOut();
-					training_error += (curr_day - event_day) * (curr_day - event_day);
-					curr_error += (CBD - phase_change) * (CBD - phase_change);
-				}
-				else
-				{
-					while (MAT != 1)
-					{
-						out.open("output.txt", std::ios::app);
-						out << "begin  Weather();" << endl;
-						Weather();
-						out.close();
-						out.open("output.txt", std::ios::app);
-						out << "begin  Phenology()" << endl;
-						Phenology();
-						out.close();
-						out.open("output.txt", std::ios::app);
-						out << "begin  CropLAIN()" << endl;
-						CropLAIN();
-						out.close();
-						out.open("output.txt", std::ios::app);
-						out << "begin  DMProduction()" << endl;
-						DMProduction();
-						out.close();
-						out.open("output.txt", std::ios::app);
-						out << "begin  DMDistribution()" << endl;
-						DMDistribution();
-						out.close();
-						out.open("output.txt", std::ios::app);
-						out << "begin  LegumPlant()" << endl;
-						LegumPlant();
-						out.close();
-						out.open("output.txt", std::ios::app);
-						out << "begin SoilWater()" << endl;
-						SoilWater();
-						out.close();
-						out.open("output.txt", std::ios::app);
-						out << "begin  DailyPrintOut()" << endl;
-						out.close();
-						DailyPrintOut();
-
-						out.open("output.txt", std::ios::app);
-						out << "end  WHILE" << endl;
-						out.close();
-					}
-					out.open("output.txt", std::ios::app);
-					out.close();
-					SummaryPrintOut();
-					curr_error += (CBD - phase_change) * (CBD - phase_change);
+			int start_day = data.data_a5.doy[nsam];
+			int start_year = data.data_a5.years[nsam];
+			int geo_id = data.data_a5.geo_id[nsam];
+			double event_day = data.data_a5.response[nsam];
+			//	FindSowingData(geo_id, start_day, start_year);
+			bool check = false;
+			size_t j = 0;
+			for (size_t nd = 0; nd < data.data_h5.nWeather; ++nd) {
+				if (geo_id == data.data_h5.geo_id[nd] && data.data_h5.doy[nd] == start_day && data.data_h5.years[nd] == start_year) {
+					j = nd;
+					check = true;
+					break;
 				}
 			}
-	//	}
-		cout << "ERROR = " << training_error << endl;
+			ROW = j;
+			if (check == false)
+			{
+				continue;
+			}
+
+			int curr_day = -nDays;
+			bool check_day = false;
+			if (param.print_trace > 0) cout << "nsam = " << nsam << " BEGIN ROW = " << ROW << endl;
+			for (size_t nd = 0; nd < nDays; nd++)
+			{
+				ROW = j + nd;
+				if (ROW >= data.data_h5.nWeather)
+					break;
+				if (param.print_trace > 0) cout << " nsam = " << nsam << " ROW = " <<  ROW << endl;
+
+				Weather();
+				Phenology();
+				CropLAIN();
+				DMProduction();
+				DMDistribution();
+				LegumPlant();
+				SoilWater();
+				DailyPrintOut();
+				if (MAT == 1)
+				{
+					check_day = true;
+					break;
+				}
+			}
+			if (check_day == true && param.threshold != -1)
+				curr_day = get_curr_day();
+			else
+				curr_day = -nDays;
+
+			SummaryPrintOut();
+			if (param.print_trace > 0)	cout << "curr_day = "<< curr_day << endl;
+			if (param.print_trace > 0)	cout << "event_dat = " << event_day << endl;
+			if (param.print_trace > 0)	cout << "CBD = " << CBD << endl;
+			if (param.print_trace > 0)	cout << "phase_change = " << phase_change << endl;
+			training_error += (curr_day - event_day) * (curr_day - event_day);
+			curr_error += (CBD - phase_change) * (CBD - phase_change);
+		}
+		cout << training_error << endl;
+		cout << curr_error << endl;
 	}
 public slots:
 	void run_h5()
 	{
-		cout << "BEGIN CALC" << endl;
+
+		if (param.print_trace > 0) cout << "BEGIN CALC" << endl;
 		calculation();
-		cout << "END CALC" << endl;
+		if (param.print_trace > 0) cout << "END CALC" << endl;
 		emit finished();
 	}
 signals:
