@@ -20,12 +20,12 @@
 #ifndef _FUNCTIONS_GRAMMAR_H_
 #define _FUNCTIONS_GRAMMAR_H_
 
-// based on github.com:pbharrin/Genetic-Prog.git
+ // based on github.com:pbharrin/Genetic-Prog.git
 
 #include <string>
 #include <vector>
 
-void set_print_trace (int arg);
+void set_print_trace(int arg);
 
 using namespace std;
 
@@ -44,16 +44,16 @@ public:
 	virtual GrammarNode* prune() = 0;
 	virtual GrammarNode* clone() = 0; //make a deep copy of the current tree
 	virtual void setScale(vector<double>& a, vector<double>& b) = 0;
-	virtual string getLabel() {	return label; }
-// Print function. It's virtual, so only one operator << is needed.
-	virtual void printOn (ostream& os) { os << label; }
+	virtual string getLabel() { return label; }
+	// Print function. It's virtual, so only one operator << is needed.
+	virtual void printOn(ostream& os) { os << label; }
 };
 
 // Print operator for all classes that inherit from GrammarNode
 inline ostream& operator << (ostream& os, GrammarNode& gnd)
 {
-  gnd.printOn (os);
-  return os;
+	gnd.printOn(os);
+	return os;
 }
 
 //class for storing constant values
@@ -69,8 +69,8 @@ public:
 	virtual void coprint();
 	virtual ConstNode* prune();
 	virtual void setScale(vector<double>& a, vector<double>& b) { }
-//	virtual string getLabel();
-//	virtual void printOn (ostream& os) { os << "Const" << endl; };
+	//	virtual string getLabel();
+	//	virtual void printOn (ostream& os) { os << "Const" << endl; };
 };
 
 //class for using inputs
@@ -81,7 +81,7 @@ class InputNode : public GrammarNode {
 	double scale;
 	double offset;
 public:
-	InputNode ();
+	InputNode();
 	InputNode(int inputId, string pname);
 	virtual double eval(vector<double>& inVal);
 	InputNode* clone();
@@ -90,13 +90,14 @@ public:
 	virtual void setScale(vector<double>& a, vector<double>& b) {
 		if (inputIndex >= 0) {
 			scale = a[inputIndex]; offset = b[inputIndex]; scalePresent = true;
-		} else if (children[0]) {
+		}
+		else if (children[0]) {
 			children[0]->setScale(a, b);
 		}
 	}
-//	void setValues(int inIndex);
-//	virtual string getLabel();
-//	virtual void printOn (ostream& os) { os << "Input" << endl; };
+	//	void setValues(int inIndex);
+	//	virtual string getLabel();
+	//	virtual void printOn (ostream& os) { os << "Input" << endl; };
 };
 
 //addition
@@ -111,8 +112,8 @@ public:
 		if (children[0]) children[0]->setScale(a, b);
 		if (children[1]) children[1]->setScale(a, b);
 	}
-//	virtual string getLabel();
-//	virtual void printOn (ostream& os) { os << "Add" << endl; };
+	//	virtual string getLabel();
+	//	virtual void printOn (ostream& os) { os << "Add" << endl; };
 };
 
 //subtraction
@@ -127,8 +128,8 @@ public:
 		if (children[0]) children[0]->setScale(a, b);
 		if (children[1]) children[1]->setScale(a, b);
 	}
-//	virtual string getLabel();
-//	virtual void printOn (ostream& os) { os << "Subtract" << endl; };
+	//	virtual string getLabel();
+	//	virtual void printOn (ostream& os) { os << "Subtract" << endl; };
 };
 
 //multiplication
@@ -143,8 +144,8 @@ public:
 		if (children[0]) children[0]->setScale(a, b);
 		if (children[1]) children[1]->setScale(a, b);
 	}
-//	virtual string getLabel();
-//	virtual void printOn (ostream& os) { os << "Multiply" << endl; };
+	//	virtual string getLabel();
+	//	virtual void printOn (ostream& os) { os << "Multiply" << endl; };
 };
 
 //division
@@ -159,8 +160,8 @@ public:
 		if (children[0]) children[0]->setScale(a, b);
 		if (children[1]) children[1]->setScale(a, b);
 	}
-//	virtual string getLabel();
-//	virtual void printOn (ostream& os) { os << "Divide" << endl; };
+	//	virtual string getLabel();
+	//	virtual void printOn (ostream& os) { os << "Divide" << endl; };
 };
 
 //subtraction of const
@@ -175,8 +176,8 @@ public:
 		if (children[0]) children[0]->setScale(a, b);
 		if (children[1]) children[1]->setScale(a, b);
 	}
-//	virtual string getLabel();
-//	virtual void printOn (ostream& os) { os << "InputMinusConst" << endl; };
+	//	virtual string getLabel();
+	//	virtual void printOn (ostream& os) { os << "InputMinusConst" << endl; };
 };
 
 //rec subtraction of const
@@ -191,13 +192,13 @@ public:
 		if (children[0]) children[0]->setScale(a, b);
 		if (children[1]) children[1]->setScale(a, b);
 	}
-//	virtual string getLabel();
-//	virtual void printOn (ostream& os) { os << "RecInputMinusConst" << endl; };
+	//	virtual string getLabel();
+	//	virtual void printOn (ostream& os) { os << "RecInputMinusConst" << endl; };
 };
 
 class GrammarContainer {
 public:
-	GrammarContainer (vector<string>& measurements, int n_t) : predictors(measurements), tree(n_t) {
+	GrammarContainer(vector<string>& measurements, int n_t) : predictors(measurements), tree(n_t) {
 		n_trees = n_t;
 		n_predictors = predictors.size();
 		n_nodes_type_0 = 7;
@@ -221,5 +222,5 @@ private:
 	GrammarNode* find_node_type_1(int gen, double conc, double *phenotype);
 	GrammarNode* find_node_type_2(int gen, double *phenotype);
 };
-
 #endif // _FUNCTIONS_GRAMMAR_H_
+

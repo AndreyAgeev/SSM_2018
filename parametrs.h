@@ -3,36 +3,18 @@
 class Parametrs
 {
 public:
-	struct Nlreg_param
-	{
-		double alpha;
-		double b;
-		double c;
-		double d;
-		double epsilon;
-		bool force;
-		double g;
-		double intersept;
-		double k;
-		int nFunctions;
-		double m;
-		double l;
-		double p;
-		double q;
-		double r;
-		double s;
-		double t;
-		int wordLength;
-		bool scale;
-		int n_cycles;
-		bool positive;
-		bool make_corrections;
-		QString h5_file_name;
-		QString funcs_file_name;////?
-	};
-	Nlreg_param nl_param;
-	QString nlreg_file_name;
-	QString file_name;
+	
+	QString func_file_name;
+	QString h5_file_name;
+	QString h5_table_name;
+	int nF;
+	int wL;
+	int nD;
+	int rT;
+	bool ecovar;
+	int print_trace;
+
+
 	QString sName;//Name of site or scenario. This name will appear in output
 	double Latitude;//Latitude of location. NOTE: south latitude should be NEGETIVE
 	double VPDF;//Vapor pressure deficit factor.
