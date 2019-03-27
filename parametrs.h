@@ -16,6 +16,8 @@ public:
 	bool ecovar;
 	int print_trace;
 
+	int function_mode;// 0 - soltani, 1 - opt
+	int threshold;//0- 1- 2 
 
 	QString sName;//Name of site or scenario. This name will appear in output
 	double Latitude;//Latitude of location. NOTE: south latitude should be NEGETIVE
