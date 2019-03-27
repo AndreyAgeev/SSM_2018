@@ -19,6 +19,12 @@ int main(int argc, char *argv[])
 									{{"y", "yno"},
 										QCoreApplication::translate("main", "Number of years."),
 										QCoreApplication::translate("main", "Y")},
+										{{"R", "R"},
+										QCoreApplication::translate("main", "function mode"),
+										QCoreApplication::translate("main", "R")},
+										{{"P", "P"},
+										QCoreApplication::translate("main", "threshold"),
+										QCoreApplication::translate("main", "P")},
 									{{"f", "FirstYear"},
 										QCoreApplication::translate("main", "FirstYear."),
 										QCoreApplication::translate("main", "F")},
@@ -86,11 +92,23 @@ int main(int argc, char *argv[])
 		param.h5_file_name = args.at(2); // samples
 		param.h5_table_name = args.at(1); // weather
 		param.crops_ini_file = args.at(0); // weather
-		//cout << "name file: " << param.func_file_name.toStdString() << " " << param.h5_file_name.toStdString() << " " << param.h5_table_name.toStdString() << param.crops_ini_file.toStdString() << param.crops_ini_file  << endl;
+		cout << "name file: " << param.func_file_name.toStdString() << " " << param.h5_file_name.toStdString() << " " << param.h5_table_name.toStdString() << param.crops_ini_file.toStdString() << param.crops_ini_file.toStdString()  << endl;
 		const QString TParameter = parser.value("print-trace");
 		const int T = TParameter.toInt();
 		if (T < 0) {
 			std::cout << "Bad p: " + T;
+		}
+
+		const QString RParameter = parser.value("R");
+		const int R = RParameter.toInt();
+		if (R != 0 && R != 1) {
+			std::cout << "Bad p: " + R;
+		}
+
+		const QString PParameter = parser.value("P");
+		const int P = PParameter.toInt();
+		if (P != 0 && P != 1 && P != 2 && P != -1) {
+			std::cout << "Bad p: " + P;
 		}
 		/*
 			const QString nfParameter2 = parser.value("Latitude");
@@ -176,6 +194,8 @@ int main(int argc, char *argv[])
 		param.rT = 1;
 		param.ecovar = true;
 		param.print_trace = T;
+		param.function_mode = R;
+		param.threshold = P;
 	}
 	if (param.print_trace > 0) {
 		param.Print();
