@@ -191,6 +191,23 @@ Add::Add() {
 double Add::eval(vector<double>& inVal) {
 	if (children[0] && children[1]) {
 		return children[0]->eval(inVal) + children[1]->eval(inVal);
+	} else if (children[0]){
+		return children[0]->eval(inVal);
+	} else if (children[1]){
+		return children[1]->eval(inVal);
+	} else {
+		if (PRINT_TRACE > 1) cerr << "left and right not defined in add"<<endl;
+		return 0.0;
+	}
+}
+
+/*
+double Add::eval(vector<double>& inVal, double& dvdt){
+	if (children[0] && children[1]){
+		double dvdt1, dvdt2, ff;
+		ff = children[0]->eval(inVal, dvdt1) + children[1]->eval(inVal, dvdt2);
+		dvdt1 = dvdt1 + dvdt2;
+		return ff;
 	}
 	else if (children[0]) {
 		return children[0]->eval(inVal);
@@ -226,19 +243,16 @@ void Add::coprint() {
 		cout << " + ";
 		children[1]->coprint();
 		cout << ") ";
-	}
-	else if (children[0]) {
+	} else if (children[0]){
 		cout << " (";
 		children[0]->coprint();
 		cout << ") ";
-	}
-	else if (children[1]) {
+	} else if (children[1]){
 		cout << " (";
 		children[1]->coprint();
 		cout << ") ";
-	}
-	else {
-		if (PRINT_TRACE > 1) cerr << "left and right not defined in add" << endl;
+	} else {
+		if (PRINT_TRACE > 1) cerr << "left and right not defined in add"<<endl;
 		cout << " (0";
 		cout << ") ";
 	}
@@ -301,19 +315,16 @@ void Subtract::coprint() {
 		cout << " - ";
 		children[1]->coprint();
 		cout << ") ";
-	}
-	else if (children[0]) {
+	} else if (children[0]){
 		cout << " (";
 		children[0]->coprint();
 		cout << ") ";
-	}
-	else if (children[1]) {
+	} else if (children[1]){
 		cout << " (";
 		children[1]->coprint();
 		cout << ") ";
-	}
-	else {
-		if (PRINT_TRACE > 1) cerr << "left and right not defined in subtract" << endl;
+	} else {
+		if (PRINT_TRACE > 1) cerr << "left and right not defined in subtract"<<endl;
 		cout << " (0";
 		cout << ") ";
 	}
@@ -376,19 +387,16 @@ void Multiply::coprint() {
 		cout << " * ";
 		children[1]->coprint();
 		cout << ") ";
-	}
-	else if (children[0]) {
+	} else if (children[0]){
 		cout << " (";
 		children[0]->coprint();
 		cout << ") ";
-	}
-	else if (children[1]) {
+	} else if (children[1]){
 		cout << " (";
 		children[1]->coprint();
 		cout << ") ";
-	}
-	else {
-		if (PRINT_TRACE > 1) cerr << "left and right not defined in multiply" << endl;
+	} else {
+		if (PRINT_TRACE > 1) cerr << "left and right not defined in multiply"<<endl;
 		cout << " (0";
 		cout << ") ";
 	}
@@ -431,6 +439,25 @@ Divide::Divide() {
 double Divide::eval(vector<double>& inVal) {
 	if (children[0] && children[1]) {
 		return children[0]->eval(inVal) / children[1]->eval(inVal);
+	} else if (children[0]){
+		return children[0]->eval(inVal);
+	} else if (children[1]){
+		return 1/children[1]->eval(inVal);
+	} else {
+		if (PRINT_TRACE > 1) cerr << "left and right not defined in divide"<<endl;
+		return 0.0;
+	}
+}
+
+/*
+double Divide::eval(vector<double>& inVal, double& dvdt){
+	if (children[0] && children[1]){
+		double dvdt1, dvdt2, ff, ff1, ff2;
+		ff1 = children[0]->eval(inVal, dvdt1);
+		ff2 = children[0]->eval(inVal, dvdt2);
+		ff = ff1 / ff2;
+		dvdt = (dvdt1 * ff2 - ff1 * dvdt2) / dvdt2 / dvdt2;
+		return ff;
 	}
 	else if (children[0]) {
 		return children[0]->eval(inVal);
@@ -479,9 +506,17 @@ void Divide::coprint() {
 		cout << " / ";
 		children[1]->coprint();
 		cout << ") ";
-	}
-	else {
-		if (PRINT_TRACE > 1) cerr << "left and right not defined in divide" << endl;
+	} else if (children[0]){
+		cout << " (";
+		children[0]->coprint();
+		cout << ") ";
+	} else if (children[1]){
+		cout << " (1";
+		cout << " / ";
+		children[1]->coprint();
+		cout << ") ";
+	} else {
+		if (PRINT_TRACE > 1) cerr << "left and right not defined in divide"<<endl;
 		cout << " (0";
 		cout << ") ";
 	}
@@ -524,6 +559,23 @@ InputMinusConst::InputMinusConst() {
 double InputMinusConst::eval(vector<double>& inVal) {
 	if (children[0] && children[1]) {
 		return children[0]->eval(inVal) - children[1]->eval(inVal);
+	} else if (children[0]){
+		return children[0]->eval(inVal);
+	} else if (children[1]){
+		return -children[1]->eval(inVal);
+	} else {
+		if (PRINT_TRACE > 1) cerr << "left and right not defined in InputMinusConst" << endl;
+		return 0.0;
+	}
+}
+
+/*
+double InputMinusConst::eval(vector<double>& inVal, double& dvdt){
+	if (children[0] && children[1]){
+		double ff, dvdt1, dvdt2;
+		ff = children[0]->eval(inVal, dvdt1) - children[1]->eval(inVal, dvdt2);
+		dvdt = dvdt1 - dvdt2;
+		return ff;
 	}
 	else if (children[0]) {
 		return children[0]->eval(inVal);
@@ -559,19 +611,16 @@ void InputMinusConst::coprint() {
 		cout << " - ";
 		children[1]->coprint();
 		cout << ") ";
-	}
-	else if (children[0]) {
+	} else if (children[0]){
 		cout << " (";
 		children[0]->coprint();
 		cout << ") ";
-	}
-	else if (children[1]) {
+	} else if (children[1]){
 		cout << " (";
 		cout << " - ";
 		children[1]->coprint();
 		cout << ") ";
-	}
-	else {
+	} else {
 		if (PRINT_TRACE > 1) cerr << "left and right not defined in InputMinusConst" << endl;
 		cout << " (";
 		cout << " 0 ";
@@ -636,18 +685,15 @@ void RecInputMinusConst::coprint() {
 		cout << " - ";
 		children[1]->coprint();
 		cout << ")) ";
-	}
-	else if (children[0]) {
+	} else if (children[0]) {
 		cout << " (1/(";
 		children[0]->coprint();
 		cout << ")) ";
-	}
-	else if (children[1]) {
+	} else if (children[1]) {
 		cout << " (-1/(";
 		children[1]->coprint();
 		cout << ")) ";
-	}
-	else {
+	} else {
 		if (PRINT_TRACE > 1) cerr << "left and right not defined in InputMinusConst" << endl;
 		cout << " (1";
 		cout << ") ";

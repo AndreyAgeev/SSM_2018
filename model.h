@@ -167,7 +167,6 @@ public:
 	double PLA2;
 	double PLA1;
 
-
 	double GLAI;
 
 	double DLAI;
@@ -252,7 +251,7 @@ public:
 	double HI;
 
 
-	
+
 	Nlreg *nl;
 	Data data;
 	Parametrs param;
@@ -318,7 +317,7 @@ public slots:
 			LtDrCntr = 0.0;
 
 			SE2C = 3.5;
-			SE1MX = param.U; 
+			SE1MX = param.U;
 			DSR = 1.0;
 			SSE1 = param.U;
 			SSE = param.U + SE2C;
@@ -369,7 +368,7 @@ public slots:
 		if (EWAT > WSTORG)
 			EWAT = WSTORG;
 
-		
+
 		RUNOF = 0;
 		if (param.water == 2 && data.data_h5.rain[ROW] > 0.01)
 		{
@@ -418,7 +417,7 @@ public slots:
 			SEVP = EOS * (pow((DYSE + 1.0), 0.5 )- pow(DYSE,0.5));
 			DYSE = DYSE + 1.0;
 		}
-		if (semethod == 2) 
+		if (semethod == 2)
 		{
 			if (ATSW1 < 0.0)
 				SEVP = 0.0;
@@ -531,9 +530,9 @@ public slots:
 
 		if (WATRT > (0.95 * WSAT))
 		{
-			WSFN = 0.0; 
+			WSFN = 0.0;
 			WSFG = 0.0;
-			WSFL = 0.0; 
+			WSFL = 0.0;
 			WSFD = 0.0;
 		}
 
@@ -620,7 +619,7 @@ public slots:
 	//	index_lai += 1;
 		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2.0;
 	}
-	
+
 	void Phenology(void)
 	{
 		if (iniPheno == 0)
@@ -688,7 +687,7 @@ public slots:
 			ppfun = 1.0;
 
 
-		
+
 		//DL НЕ НУЖЕН.
 		vector<double> clim_covar = { data.data_h5.tmax[ROW], data.data_h5.tmin[ROW], data.data_h5.rain[ROW], data.data_h5.dl[ROW], data.data_h5.srad[ROW] };
 	    bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[nsam]);
@@ -737,7 +736,7 @@ public slots:
 			LAI = 0.0;
 		if (LAI > MXLAI)
 			MXLAI = LAI;  //'Saving maximum LAI
-		
+
 		// Daily increase and decrease in LAI
 		if (CBD <= bdBLG)
 			GLAI = 0.0;
@@ -760,7 +759,7 @@ public slots:
 		DLAI = XNLF / (data.data_p.SLNG - data.data_p.SLNS);
 	}
 	//dmproduction
-	
+
 	void DMProduction(void)
 	{
 		//'------------------------------- Parameters and Initials
@@ -800,7 +799,7 @@ public slots:
 
 		if (vpdtp == 2 || vpdtp == 3) {
 			//'__________________________ Hourly calcs ___________________________
-			Pi = 3.141592654;   
+			Pi = 3.141592654;
 			RDN = Pi / 180.0;
 			DEC = sin(23.45 * RDN) * cos(2.0 * Pi * (DOY + 10.0) / 365.0);
 			DEC = atan(DEC / sqrt(1.0 - (DEC *  DEC))) * (-1.0);
@@ -897,17 +896,17 @@ public slots:
 				DDMP = 0.0;
 
 	}
-	
+
 	void DMDistribution(void)
 	{
 
 		//	'------------------------------- Parameters and Initials
 		if (iniDMD == 0)
 		{
-			WLF = 0.5;  
-			WST = 0.5; 
+			WLF = 0.5;
+			WST = 0.5;
 			WVEG = WLF + WST;
-			WGRN = 0.0; 
+			WGRN = 0.0;
 			iniDMD = 1;
 		}
 
@@ -1006,16 +1005,16 @@ public slots:
 			INST = 0.0;
 			INGRN = 0.0;
 		}
-		
+
 		else if (CBD > bdEM && CBD < data.data_p.ttBSG)
 		{
 			INGRN = 0.0;
 			NUP = (GST * data.data_p.SNCG) + (GLAI * data.data_p.SLNG); // '+ NSTDF    '<---- -
 			if (CBD < data.data_p.ttBNF && CNUP > param.INSOL)
 				NUP = 0.0;
-			if (NUP > data.data_p.MXNUP) 
+			if (NUP > data.data_p.MXNUP)
 				NUP = data.data_p.MXNUP;
-		
+
 			NFC = NFC * 3.0 / 4.0 + NUP / WVEG * (1.0 / 4.0);//   'from Sinclair et al. 2003
 			NUP = NUP * WSFN;
 			if (NUP < 0.0)
@@ -1030,7 +1029,7 @@ public slots:
 				XNST = 0.0;
 				if (INST >= NUP)
 				{
-					INLF = 0.0;  
+					INLF = 0.0;
 					XNLF = INST - NUP;
 				}
 				else if (INST < NUP)
@@ -1042,7 +1041,7 @@ public slots:
 			}
 			else if (NST > (WST * data.data_p.SNCS))
 			{
-			
+
 			    INLF = GLAI * data.data_p.SLNG;
 				XNLF = 0.0;
 		     }
@@ -1082,7 +1081,7 @@ public slots:
 			if (DDMP == 0.0)
 				DNF = 0.0;
 			NUP = DNF;
-			
+
 			if (NUP > (SGR * data.data_p.GNC))
 			{
 				//   'N is excess of seed needs
@@ -1103,14 +1102,14 @@ public slots:
 						if (INLF > (NUP2 - INST))
 						{
 							INLF = NUP2 - INST;
-							INST = NUP2 - INLF;   
+							INST = NUP2 - INLF;
 							XNLF = 0.0;
 						}
 					}
 				}
 				else if (NST > (WST * data.data_p.SNCS))
 				{
-					INLF = GLAI * data.data_p.SLNG; 
+					INLF = GLAI * data.data_p.SLNG;
 					XNLF = 0.0;
 					if (INLF >= NUP2)
 					{
@@ -1126,7 +1125,7 @@ public slots:
 							INST = NUP2 - INLF;
 							XNST = 0.0;
 					}
-					
+
 				}
 
 				TRLN = LAI * (data.data_p.SLNG - data.data_p.SLNS) + (NST + INST - WST * data.data_p.SNCS);
@@ -1147,7 +1146,7 @@ public slots:
 		   NVEG = NLF + NST;
 		   NGRN = NGRN + INGRN;
 		   CNUP = CNUP + NUP;
-  
+
 		   TRLN = LAI * (data.data_p.SLNG - data.data_p.SLNS) + (NST - WST * data.data_p.SNCS);
 		   FXLF = LAI * (data.data_p.SLNG - data.data_p.SLNS) / (TRLN + 0.000000000001);///////////
 		   if (FXLF > 1.0)
