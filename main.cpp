@@ -69,16 +69,18 @@ int main(int argc, char *argv[])
 				QCoreApplication::translate("main", "CropColNo.")},*/
 
 		});
-	parser.addPositionalArgument("file", "The file to open.");
+	parser.addPositionalArgument("samplesfile", "The file to open.");
+	parser.addPositionalArgument("weatherfile", "The file to open.");
+	parser.addPositionalArgument("funcsfile", "The file to read funcs.");
 	parser.process(a);
 	const QStringList args = parser.positionalArguments();
 	Model * model;
 	Parametrs param;
 	if (args.size())
 	{
-		param.func_file_name = args.at(0);
-	    param.h5_file_name = args.at(args.size() - 1);
-		param.h5_table_name = args.at(args.size() - 2);
+		param.func_file_name = args.at(2); // funcs
+	    param.h5_file_name = args.at(1); // samples
+		param.h5_table_name = args.at(0); // weather
 		cout << "name file: " << param.func_file_name.toStdString() << " " << param.h5_file_name.toStdString() << " " << param.h5_table_name.toStdString() << endl;
 	/*
 		const QString nfParameter2 = parser.value("Latitude");
@@ -166,9 +168,9 @@ int main(int argc, char *argv[])
 		param.rT = 1;
 		param.ecovar = true;
 		param.print_trace = 0;
-	//	param.Print();
+		param.Print();
 	}
-	
+
 	model = new Model(param);
 	return a.exec();
 }
