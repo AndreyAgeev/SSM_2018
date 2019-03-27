@@ -3,11 +3,12 @@
 class Parametrs
 {
 public:
-
+	
 	QString func_file_name;
 	QString h5_file_name;
 	QString h5_table_name;
 	QString crops_ini_file;
+
 	int nF;
 	int wL;
 	int nD;
@@ -24,20 +25,20 @@ public:
 	int FixFind; // 1=fixed sowing date, 2=first possible sowing date based on pre-defined conditions.
 	int Pdoy; // Sowing date as Day of Year if Fix/Find=1 and day of year that model must start searching for sowing date from if Fix/Find=2.
 	double SearchDur; // Specifies the end of sowing window
-	double SowWat; // Amount of water in the soil that makes sowing possible (mm)
+	double SowWat; // Amount of water in the soil that makes sowing possible (mm) 
 	double PDEN; // Plant density (# per m2)
 	int water; //  1= irrigated 2 = rainfed
-	double IRGLVL; // Irrigation level based on FTSW if the farming is irrigated.
+	double IRGLVL; // Irrigation level based on FTSW if the farming is irrigated. 
 	double SOLDEP; // Soil depth (mm)
 	double DEP1; // Depth of top layer (mm)
 	double SALB; // Soil albedo
-	double CN2; // Soil curve number.
+	double CN2; // Soil curve number. 
 	double DRAINF; // Drainage factor
 	double SAT; // Soil saturation limit (m3 m-3 or mm mm-1).
 	double DUL;// Soil drained upper limit (m3 m-3 or mm mm-1).
 	double EXTR; // Soil extractable moisture (m3 m-3 or mm mm-1).
-	int MAI1; // Soil moisture availabilty index for top layer. 1=DUL, 0=LL.
-	int MAI;// Soil moisture availability index (1=DUL, 0=LL).
+	int MAI1; // Soil moisture availabilty index for top layer. 1=DUL, 0=LL. 
+	int MAI;// Soil moisture availability index (1=DUL, 0=LL). 
 	int INSOL; // Initial soil nitrogen that can be uptaken by the crop before BNF is activated (g N m-2)
 	double U;// Cumulative evaporation that stage I terminates and stage II starts. Not used by the model (inactive)
 	int CropColNo; // Column number in "Crops" sheeet that contains cultivar parameters estimates
@@ -46,31 +47,31 @@ public:
 	Parametrs() {}
 	void Print()
 	{
-		std::cout << "Latitude "<< Latitude << std::endl;
-		std::cout << "VPDF "<< VPDF << std::endl;
-		std::cout << "yno "<< yno << std::endl;
-		std::cout << "FirstYear "<< FirstYear << std::endl;
-		std::cout << "FixFind "<< FixFind << std::endl;
-		std::cout << "Pdoy "<< Pdoy << std::endl;
-		std::cout << "SearchDur "<< SearchDur << std::endl;
-		std::cout << "SowWat "<< SowWat << std::endl;
-		std::cout << "PDEN "<< PDEN << std::endl;
-		std::cout << "water "<< water << std::endl;
-		std::cout << "IRGLVL "<< IRGLVL << std::endl;
-		std::cout << "SOLDEP "<< SOLDEP << std::endl;
-		std::cout << "DEP1 "<< DEP1 << std::endl;
-		std::cout << "SALB "<< SALB << std::endl;
-		std::cout << "CN2 "<< CN2 << std::endl;
-		std::cout << "DRAINF "<< DRAINF << std::endl;
-		std::cout << "SAT "<< SAT << std::endl;
-		std::cout << "DUL "<< DUL << std::endl;
-		std::cout << "EXTR "<< EXTR << std::endl;
-		std::cout << "MAI1 "<< MAI1 << std::endl;
-		std::cout << "MAI "<< MAI << std::endl;
-		std::cout << "INSOL "<< INSOL << std::endl;
-		std::cout << "U "<< U << std::endl;
-		std::cout << "CropColNo "<< CropColNo << std::endl;
-		std::cout << "file_mode "<< file_mode << endl;
-		std::cout << "print_trace "<< print_trace << endl;
+		std::cout << "Latitude " << Latitude << std::endl;
+		std::cout << "VPDF " << VPDF << std::endl;
+		std::cout << "yno " << yno << std::endl;
+		std::cout << "FirstYear " << FirstYear << std::endl;
+		std::cout << "FixFind " << FixFind << std::endl;
+		std::cout << "Pdoy " << Pdoy << std::endl;
+		std::cout << "SearchDur " << SearchDur << std::endl;
+		std::cout << "SowWat " << SowWat << std::endl;
+		std::cout << "PDEN " << PDEN << std::endl;
+		std::cout << "water " << water << std::endl;
+		std::cout << "IRGLVL " << IRGLVL << std::endl;
+		std::cout << "SOLDEP " << SOLDEP << std::endl;
+		std::cout << "DEP1 " << DEP1 << std::endl;
+		std::cout << "SALB " << SALB << std::endl;
+		std::cout << "CN2 " << CN2 << std::endl;
+		std::cout << "DRAINF " << DRAINF << std::endl;
+		std::cout << "SAT " << SAT << std::endl;
+		std::cout << "DUL " << DUL << std::endl;
+		std::cout << "EXTR " << EXTR << std::endl;
+		std::cout << "MAI1 " << MAI1 << std::endl;
+		std::cout << "MAI " << MAI << std::endl;
+		std::cout << "INSOL " << INSOL << std::endl;
+		std::cout << "U " << U << std::endl;
+		std::cout << "CropColNo " << CropColNo << std::endl;
+		std::cout << "file_mode " << file_mode << endl;
+		std::cout << "print_trace " << print_trace << endl;
 	}
 };
