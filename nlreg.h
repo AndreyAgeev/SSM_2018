@@ -128,6 +128,7 @@ private:
 	vector<double> climate_var;
 	vector<double> beta;
 	double CBD;
+	double MB;
 	QString funcs_file_name;
 	double *phenotype;
 	int *phenomask;
@@ -168,13 +169,16 @@ private:
 		climate_var = concs;
 		if (read_flag > 0) {
 			in >> CBD;
+			in >> MB;
+			for (size_t i = nFunctions; i < nFunctions + nFunctions * num_of_gt_vars; ++i) {
+				double be = (beta[i] > 0) ? beta[i] : -beta[i];
+				beta[i] = (be < MB) ? 0.0 : beta[i];
+			}
 		}
 		//					for (size_t i = 0; i < nFunctions * wordLength; ++i) { cout << gt[i] << endl; }
 		genotype = gt;
 	};
 };
-
-
 
 
 
