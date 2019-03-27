@@ -17,6 +17,7 @@
 #include <nlreg.h>
 using namespace std;
 using namespace HighFive;
+#define SOLTANI_FUNC 0
 class Model : public QObject
 {
 	Q_OBJECT
@@ -257,7 +258,7 @@ public:
 	Nlreg *nl;
 	Data data;
 	Parametrs param;
-
+	int curr_day;
 
 	bool write_check = false;
 
@@ -603,10 +604,11 @@ public:
 	
 	void Phenology(void)
 	{
+		int threshold_index;
 		if (iniPheno == 0)
 		{
 			bdEM = data.data_p.ttSWEM;
-			bdR1 = bdEM + data.data_p.ttEMR1;
+			bdR1 = bdEM + data.data_p.ttEMR1;//Thermal time from sowing to emergence 
 			bdR3 = bdR1 + data.data_p.ttR1R3;
 			bdR5 = bdR3 + data.data_p.ttR3R5;
 			bdR7 = bdR5 + data.data_p.ttR5R7;
@@ -618,6 +620,18 @@ public:
 			CBD = 0.0;
 			WSFD = 1.0;
 			iniPheno = 1;
+		}
+		switch (param.threshold)
+		{
+		case 0:
+			bdEM = nl->get_cbd();
+			break;
+		case 1:
+			bdR5 = nl->get_cbd();
+			break;
+		case 2:
+			bdR8 = nl->get_cbd();
+			break;
 		}
 		// Thermal time calculation
 		if (TMP <= data.data_p.TBD || TMP >= data.data_p.TCD)
@@ -651,7 +665,7 @@ public:
 	//	DL = Pi / 2.0 - (atan(SOCRA / sqrt(1.0 - (SOCRA * SOCRA))));
 	//	DL = DL / RDN;
 	//	pp = 2.0/ 15.0 * DL;
-	//	pp = 2.0 / 15.0 * DL[index_lai];
+		pp = 2.0 / 15.0 * data.data_h5.dl[ROW];
 
 		if (data.data_p.ppsen >= 0.0)
 			ppfun = 1.0 - data.data_p.ppsen * (data.data_p.CPP - pp);
@@ -666,16 +680,22 @@ public:
 			ppfun = 1.0;
 		if (CBD > data.data_p.ttTRP)
 			ppfun = 1.0;
+		if (param.function_mode == SOLTANI_FUNC)
+		{
+			bd = tempfun * ppfun;
+			CBD = CBD + bd;
+		}
+		else
+		{
+		     vector<double> clim_covar = { data.data_h5.tmax[ROW], data.data_h5.tmin[ROW], data.data_h5.rain[ROW], data.data_h5.dl[ROW], data.data_h5.srad[ROW] };
+	         bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[nsam]);
 
-
+			 CBD += Heaviside(bd) * bd;
+		}
 		
-		/*//DL НЕ НУЖЕН.
-		vector<double> clim_covar = { data.data_h5.tmax[ROW], data.data_h5.tmin[ROW], data.data_h5.rain[ROW], data.data_h5.dl[ROW], data.data_h5.srad[ROW] };
-	    bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[nsam]);
-		CBD = CBD + bd;*/
 		DAP = DAP + 1.0;
 
-	//	index_ftp += 1;
+
 		if (CBD < bdEM)
 			dtEM = DAP + 1.0;  // 'Saving days to EMR
 		if (CBD < bdR1)
@@ -693,7 +713,15 @@ public:
 		if (CBD > bdR8)
 			MAT = 1;
 	}
-
+	double get_curr_day(void)
+	{
+		if (param.threshold == 0)
+			return dtEM;
+		if (param.threshold == 1)
+			return dtR5;
+		if (param.threshold == 2)
+			return dtR8;
+	}
 	void CropLAIN(void)
 	{
 		if (iniLai == 0)
@@ -1295,24 +1323,22 @@ public:
 				continue;
 			}
 	
-			double _CBD = 0;
-			int curr_day = -nDays;
+			int _curr_day = -nDays;
 			if (param.print_trace > 0) cout << "nsam = " << nsam << " BEGIN ROW = " << ROW << endl;
 			for (size_t nd = 0; nd < nDays; nd++)
 			{
-				if (j + nd >= data.data_h5.nWeather)
+				ROW = j + nd;
+				if (ROW >= data.data_h5.nWeather)
 					break;
-				vector<double> clim_covar = { data.data_h5.tmax[j + nd], data.data_h5.tmin[j + nd], data.data_h5.rain[j + nd], data.data_h5.dl[j + nd], data.data_h5.srad[j + nd] };
-				double arg = nl->get_func_value(clim_covar, data.data_a5.gr_covar[nsam]);
-				_CBD += Heaviside(arg) * arg;
-				if (_CBD >= phase_change) {
-					curr_day = nd;
-					break;
-				}
-                ROW = j + nd;
 				if (param.print_trace > 0) cout << " nsam = " << nsam << " ROW = " <<  ROW << endl;
+
 				Weather();
 				Phenology();
+				if (CBD >= phase_change)
+				{
+					_curr_day = nd;
+					break;
+				}
 				CropLAIN();
 				DMProduction();
 				DMDistribution();
@@ -1322,14 +1348,19 @@ public:
 
 
 			}
+
+			if (param.threshold == -1)
+				curr_day = _curr_day;
+			else
+				curr_day = get_curr_day();
+
 			SummaryPrintOut();
 			if (param.print_trace > 0)	cout << "curr_day = "<< curr_day << endl;
 			if (param.print_trace > 0)	cout << "event_dat = " << event_day << endl;
 			if (param.print_trace > 0)	cout << "CBD = " << CBD << endl;
 			if (param.print_trace > 0)	cout << "phase_change = " << phase_change << endl;
 			training_error += (curr_day - event_day) * (curr_day - event_day);
-			curr_error += (_CBD - phase_change) * (_CBD - phase_change);
-			CBD = _CBD;
+			curr_error += (CBD - phase_change) * (CBD - phase_change);
 		}
 		cout << training_error << endl;
 		cout << curr_error << endl;
