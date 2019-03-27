@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 		param.rT = 1;
 		param.ecovar = true;
 		param.print_trace = 0;
-		param.Print();
+		//param.Print();
 	}
 
 	model = new Model(param);

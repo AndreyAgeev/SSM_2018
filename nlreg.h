@@ -61,8 +61,8 @@ public:
 	{
 		GrammarNode *retFtn;
 		grc = new GrammarContainer(measurements, nFunctions);
-		phenotype = new double[nFunctions * (wordLength + 1) + nFunctions * num_of_gt_vars];
-		phenomask = new int[nFunctions * (wordLength + 1) + nFunctions * num_of_gt_vars];
+		phenotype = new double[nFunctions * wordLength];
+		phenomask = new int[nFunctions * wordLength];
 		int first = 0, last = wordLength;
 		for (int i = 0; i < nFunctions; ++i) {
 			std::vector<int> gt = std::vector<int>(genotype.begin() + first, genotype.begin() + last);
@@ -93,16 +93,20 @@ public:
 					}
 					else if (j >= nFunctions) {
 						int jj = j - nFunctions;
-						int ii = jj / nFunctions;
-						int kk = jj % nFunctions;
+						int ii = jj / num_of_gt_vars;
+						int kk = jj % num_of_gt_vars;
 						cout << "*" << gr_names[kk] << "*" << "f[" << ii << "]";
 					}
 					flag = 1;
 				}
 			}
 			cout << endl;
-			for (size_t i = 0; i < nFunctions * (wordLength + 1) + nFunctions * num_of_gt_vars; ++i) { // + nEcovar
+			for (size_t i = 0; i < nFunctions * wordLength; ++i) { // + nEcovar
 				cout << phenotype[i] << " ";
+			}
+			cout << endl;
+			for (size_t i = 0; i < nFunctions * wordLength; ++i) { // + nEcovar
+				cout << phenomask[i] << " ";
 			}
 			cout << endl;
 		}
