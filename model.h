@@ -258,7 +258,7 @@ public:
 	Nlreg *nl;
 	Data data;
 	Parametrs param;
-	int curr_day;
+	
 
 	bool write_check = false;
 
@@ -623,65 +623,66 @@ public:
 		}
 		switch (param.threshold)
 		{
-		case 0:
-			bdEM = nl->get_cbd();
-			break;
-		case 1:
-			bdR5 = nl->get_cbd();
-			break;
-		case 2:
-			bdR8 = nl->get_cbd();
-			break;
+		    case 0:
+			    bdEM = nl->get_cbd();
+			    break;
+		    case 1:
+			    bdR5 = nl->get_cbd();
+			    break;
+		    case 2:
+			    bdR8 = nl->get_cbd();
+			    break;
 		}
-		// Thermal time calculation
-		if (TMP <= data.data_p.TBD || TMP >= data.data_p.TCD)
-			tempfun = 0.0;
-		else if (TMP > data.data_p.TBD && TMP < data.data_p.TP1D)
-			tempfun = (TMP - data.data_p.TBD) / (data.data_p.TP1D - data.data_p.TBD);
-		else if (TMP > data.data_p.TP2D && TMP < data.data_p.TCD)
-			tempfun = (data.data_p.TCD - TMP) / (data.data_p.TCD - data.data_p.TP2D);
-		else if (TMP >= data.data_p.TP1D && TMP <= data.data_p.TP2D)
-			tempfun = 1.0;
-
-		DTT = (data.data_p.TP1D - data.data_p.TBD) * tempfun;
-		if (CBD > data.data_p.ttWSD)
-			tempfun = tempfun * WSFD;
-		if (CBD > data.data_p.ttWSD)
-			DTT = DTT * WSFD;
-			// Photoperiod function
-		SABH = 6.0;
-		Pi = 3.141592654;
-		RDN = Pi / 180.0;
-		ALPHA = 90.0 + SABH;
-		SMA3 = 0.9856 * DOY - 3.251;
-		LANDA = SMA3 + 1.916 * sin(SMA3 * RDN) + 0.02 * sin(2.0 * SMA3 * RDN) + 282.565;
-		DEC = 0.39779 * sin(LANDA * RDN);
-		DEC = atan(DEC / sqrt(1.0 - (DEC * DEC)));
-		DEC = DEC / RDN;
-		TALSOC = 1.0 / cos(LAI * RDN);
-		CEDSOC = 1.0 / cos(DEC * RDN);
-		SOCRA = (cos(ALPHA * RDN) * TALSOC * CEDSOC) - (tan(LAI * RDN) * tan(DEC * RDN));
-	//	DL = Pi / 2.0 - (atan(SOCRA / (((1.0 - (SOCRA *  SOCRA))) * (1.0 - (SOCRA *  SOCRA)))));
-	//	DL = Pi / 2.0 - (atan(SOCRA / sqrt(1.0 - (SOCRA * SOCRA))));
-	//	DL = DL / RDN;
-	//	pp = 2.0/ 15.0 * DL;
-		pp = 2.0 / 15.0 * data.data_h5.dl[ROW];
-
-		if (data.data_p.ppsen >= 0.0)
-			ppfun = 1.0 - data.data_p.ppsen * (data.data_p.CPP - pp);
-		else if (data.data_p.ppsen < 0.0)
-			ppfun = 1.0 - (-data.data_p.ppsen) * (pp - data.data_p.CPP);
-		if (ppfun > 1.0)
-			ppfun = 1.0;
-		if (ppfun < 0.0)
-			ppfun = 0.0;
-
-		if (CBD < data.data_p.ttBRP)
-			ppfun = 1.0;
-		if (CBD > data.data_p.ttTRP)
-			ppfun = 1.0;
 		if (param.function_mode == SOLTANI_FUNC)
 		{
+			// Thermal time calculation
+			if (TMP <= data.data_p.TBD || TMP >= data.data_p.TCD)
+				tempfun = 0.0;
+			else if (TMP > data.data_p.TBD && TMP < data.data_p.TP1D)
+				tempfun = (TMP - data.data_p.TBD) / (data.data_p.TP1D - data.data_p.TBD);
+			else if (TMP > data.data_p.TP2D && TMP < data.data_p.TCD)
+				tempfun = (data.data_p.TCD - TMP) / (data.data_p.TCD - data.data_p.TP2D);
+			else if (TMP >= data.data_p.TP1D && TMP <= data.data_p.TP2D)
+				tempfun = 1.0;
+
+			DTT = (data.data_p.TP1D - data.data_p.TBD) * tempfun;
+			if (CBD > data.data_p.ttWSD)
+				tempfun = tempfun * WSFD;
+			if (CBD > data.data_p.ttWSD)
+				DTT = DTT * WSFD;
+			// Photoperiod function
+			SABH = 6.0;
+			Pi = 3.141592654;
+			RDN = Pi / 180.0;
+			ALPHA = 90.0 + SABH;
+			SMA3 = 0.9856 * DOY - 3.251;
+			LANDA = SMA3 + 1.916 * sin(SMA3 * RDN) + 0.02 * sin(2.0 * SMA3 * RDN) + 282.565;
+			DEC = 0.39779 * sin(LANDA * RDN);
+			DEC = atan(DEC / sqrt(1.0 - (DEC * DEC)));
+			DEC = DEC / RDN;
+			TALSOC = 1.0 / cos(LAI * RDN);
+			CEDSOC = 1.0 / cos(DEC * RDN);
+			SOCRA = (cos(ALPHA * RDN) * TALSOC * CEDSOC) - (tan(LAI * RDN) * tan(DEC * RDN));
+			//	DL = Pi / 2.0 - (atan(SOCRA / (((1.0 - (SOCRA *  SOCRA))) * (1.0 - (SOCRA *  SOCRA)))));
+			//	DL = Pi / 2.0 - (atan(SOCRA / sqrt(1.0 - (SOCRA * SOCRA))));
+			//	DL = DL / RDN;
+			//	pp = 2.0/ 15.0 * DL;
+			pp = 2.0 / 15.0 * data.data_h5.dl[ROW];
+
+			if (data.data_p.ppsen >= 0.0)
+				ppfun = 1.0 - data.data_p.ppsen * (data.data_p.CPP - pp);
+			else if (data.data_p.ppsen < 0.0)
+				ppfun = 1.0 - (-data.data_p.ppsen) * (pp - data.data_p.CPP);
+			if (ppfun > 1.0)
+				ppfun = 1.0;
+			if (ppfun < 0.0)
+				ppfun = 0.0;
+
+			if (CBD < data.data_p.ttBRP)
+				ppfun = 1.0;
+			if (CBD > data.data_p.ttTRP)
+				ppfun = 1.0;
+
 			bd = tempfun * ppfun;
 			CBD = CBD + bd;
 		}
@@ -1323,7 +1324,8 @@ public:
 				continue;
 			}
 	
-			int _curr_day = -nDays;
+			int curr_day = -nDays;
+			bool check_day = false;
 			if (param.print_trace > 0) cout << "nsam = " << nsam << " BEGIN ROW = " << ROW << endl;
 			for (size_t nd = 0; nd < nDays; nd++)
 			{
@@ -1334,25 +1336,22 @@ public:
 
 				Weather();
 				Phenology();
-				if (CBD >= phase_change)
-				{
-					_curr_day = nd;
-					break;
-				}
 				CropLAIN();
 				DMProduction();
 				DMDistribution();
 				LegumPlant();
 				SoilWater();
 				DailyPrintOut();
-
-
+				if (MAT == 1)
+				{
+					check_day = true;
+					break;
+				}
 			}
-
-			if (param.threshold == -1)
-				curr_day = _curr_day;
-			else
+			if (check_day == true && param.threshold != -1)
 				curr_day = get_curr_day();
+			else
+				curr_day = -nDays;
 
 			SummaryPrintOut();
 			if (param.print_trace > 0)	cout << "curr_day = "<< curr_day << endl;
