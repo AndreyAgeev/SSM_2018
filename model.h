@@ -142,6 +142,15 @@ public:
 	double  bdTLM;
 	double bdTLP;
 
+	double cbdEM;
+
+	double cbdR1;
+	double cbdR3;
+
+	double cbdR5;
+	double cbdR7;
+	double cbdR8;
+
 
 	double DAP;
 	double tempfun;
@@ -627,7 +636,7 @@ public:
 			    bdEM = nl->get_cbd();
 			    break;
 		    case 1:
-			    bdR5 = nl->get_cbd();
+			    bdR1 = nl->get_cbd();
 			    break;
 		    case 2:
 			    bdR8 = nl->get_cbd();
@@ -699,17 +708,35 @@ public:
 
 
 		if (CBD < bdEM)
+		{
 			dtEM = DAP + 1.0;  // 'Saving days to EMR
+			cbdEM = CBD;
+		}
 		if (CBD < bdR1)
+		{
 			dtR1 = DAP + 1.0; // 'Saving days to R1
+			cbdR1 = CBD;
+		}
 		if (CBD < bdR3)
+		{
 			dtR3 = DAP + 1.0;  // 'Saving days to R3
+			cbdR3 = CBD;
+		}
 		if (CBD < bdR5)
+		{
 			dtR5 = DAP + 1.0;//  'Saving days to R5
+			cbdR5 = CBD;
+		}
 		if (CBD < bdR7)
+		{
 			dtR7 = DAP + 1.0; //  'Saving days to R7
+			cbdR7 = CBD;
+		}
 		if (CBD < bdR8)
+		{
 			dtR8 = DAP + 1.0; // 'Saving days to R8
+			cbdR8 = CBD;
+		}
 
 		// Maturity ?
 		if (CBD > bdR8)
@@ -720,9 +747,27 @@ public:
 		if (param.threshold == 0)
 			return dtEM;
 		if (param.threshold == 1)
-			return dtR5;
+			return dtR1;
 		if (param.threshold == 2)
 			return dtR8;
+	}
+	double get_phase_change(void)
+	{
+		if (param.threshold == 0)
+			return bdEM;
+		if (param.threshold == 1)
+			return bdR1;
+		if (param.threshold == 2)
+			return bdR8;
+	}
+	double get_cbd(void)
+	{
+		if (param.threshold == 0)
+			return cbdEM;
+		if (param.threshold == 1)
+			return cbdR1;
+		if (param.threshold == 2)
+			return cbdR8;
 	}
 	void CropLAIN(void)
 	{
@@ -1289,6 +1334,7 @@ public:
 	void calculation(void)
 	{
 		double phase_change = nl->get_cbd();
+		double cbd;
 		double training_error = 0;
 		double curr_error = 0;
 		int nDays = param.nD;
@@ -1350,17 +1396,21 @@ public:
 				}
 			}
 			if (check_day == true && param.threshold != -1)
+			{
 				curr_day = get_curr_day();
+				phase_change = get_phase_change();
+				cbd = get_cbd();
+			}
 			else
 				curr_day = -nDays;
 
 			SummaryPrintOut();
 			if (param.print_trace > 0)	cout << "curr_day = "<< curr_day << endl;
 			if (param.print_trace > 0)	cout << "event_dat = " << event_day << endl;
-			if (param.print_trace > 0)	cout << "CBD = " << CBD << endl;
+			if (param.print_trace > 0)	cout << "CBD = " << cbd << endl;
 			if (param.print_trace > 0)	cout << "phase_change = " << phase_change << endl;
 			training_error += (curr_day - event_day) * (curr_day - event_day);
-			curr_error += (CBD - phase_change) * (CBD - phase_change);
+			curr_error += (cbd - phase_change) * (cbd - phase_change);
 		}
 		cout << training_error << endl;
 		cout << curr_error << endl;
