@@ -142,6 +142,15 @@ public:
 	double  bdTLM;
 	double bdTLP;
 
+	double cbdEM;
+
+	double cbdR1;
+	double cbdR3;
+
+	double cbdR5;
+	double cbdR7;
+	double cbdR8;
+
 
 	double DAP;
 	double tempfun;
@@ -168,7 +177,6 @@ public:
 	double MSNN;
 	double PLA2;
 	double PLA1;
-
 
 	double GLAI;
 
@@ -254,16 +262,17 @@ public:
 	double HI;
 
 
-	
+
 	Nlreg *nl;
 	Data data;
 	Parametrs param;
-	
+
 
 	bool write_check = false;
 
 
 	int nsam = 0;
+
 
 	Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
 	{
@@ -317,7 +326,7 @@ public:
 			LtDrCntr = 0.0;
 
 			SE2C = 3.5;
-			SE1MX = param.U; 
+			SE1MX = param.U;
 			DSR = 1.0;
 			SSE1 = param.U;
 			SSE = param.U + SE2C;
@@ -368,7 +377,7 @@ public:
 		if (EWAT > WSTORG)
 			EWAT = WSTORG;
 
-		
+
 		RUNOF = 0;
 		if (param.water == 2 && data.data_h5.rain[ROW] > 0.01)
 		{
@@ -417,7 +426,7 @@ public:
 			SEVP = EOS * (pow((DYSE + 1.0), 0.5 )- pow(DYSE,0.5));
 			DYSE = DYSE + 1.0;
 		}
-		if (semethod == 2) 
+		if (semethod == 2)
 		{
 			if (ATSW1 < 0.0)
 				SEVP = 0.0;
@@ -530,9 +539,9 @@ public:
 
 		if (WATRT > (0.95 * WSAT))
 		{
-			WSFN = 0.0; 
+			WSFN = 0.0;
 			WSFG = 0.0;
-			WSFL = 0.0; 
+			WSFL = 0.0;
 			WSFD = 0.0;
 		}
 
@@ -591,7 +600,6 @@ public:
 				}
 				if (ATSW1 + WSTORG >= param.SowWat || MAT == 1)
 					break;
-
 			}
 			Pdoy = data.data_h5.doy[ROW];
 		}*/
@@ -601,14 +609,14 @@ public:
 	//	ROW += 1;
 		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2.0;
 	}
-	
+
 	void Phenology(void)
 	{
 		int threshold_index;
 		if (iniPheno == 0)
 		{
 			bdEM = data.data_p.ttSWEM;
-			bdR1 = bdEM + data.data_p.ttEMR1;//Thermal time from sowing to emergence 
+			bdR1 = bdEM + data.data_p.ttEMR1;//Thermal time from sowing to emergence
 			bdR3 = bdR1 + data.data_p.ttR1R3;
 			bdR5 = bdR3 + data.data_p.ttR3R5;
 			bdR7 = bdR5 + data.data_p.ttR5R7;
@@ -627,7 +635,7 @@ public:
 			    bdEM = nl->get_cbd();
 			    break;
 		    case 1:
-			    bdR5 = nl->get_cbd();
+			    bdR1 = nl->get_cbd();
 			    break;
 		    case 2:
 			    bdR8 = nl->get_cbd();
@@ -691,24 +699,43 @@ public:
 		     vector<double> clim_covar = { data.data_h5.tmax[ROW], data.data_h5.tmin[ROW], data.data_h5.rain[ROW], data.data_h5.dl[ROW], data.data_h5.srad[ROW] };
 	         bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[nsam]);
 
+
 			 CBD += Heaviside(bd) * bd;
 		}
-		
+
 		DAP = DAP + 1.0;
 
 
 		if (CBD < bdEM)
+		{
 			dtEM = DAP + 1.0;  // 'Saving days to EMR
+			cbdEM = CBD;
+		}
 		if (CBD < bdR1)
+		{
 			dtR1 = DAP + 1.0; // 'Saving days to R1
+			cbdR1 = CBD;
+		}
 		if (CBD < bdR3)
+		{
 			dtR3 = DAP + 1.0;  // 'Saving days to R3
+			cbdR3 = CBD;
+		}
 		if (CBD < bdR5)
+		{
 			dtR5 = DAP + 1.0;//  'Saving days to R5
+			cbdR5 = CBD;
+		}
 		if (CBD < bdR7)
+		{
 			dtR7 = DAP + 1.0; //  'Saving days to R7
+			cbdR7 = CBD;
+		}
 		if (CBD < bdR8)
+		{
 			dtR8 = DAP + 1.0; // 'Saving days to R8
+			cbdR8 = CBD;
+		}
 
 		// Maturity ?
 		if (CBD > bdR8)
@@ -719,9 +746,27 @@ public:
 		if (param.threshold == 0)
 			return dtEM;
 		if (param.threshold == 1)
-			return dtR5;
+			return dtR1;
 		if (param.threshold == 2)
 			return dtR8;
+	}
+	double get_phase_change(void)
+	{
+		if (param.threshold == 0)
+			return bdEM;
+		if (param.threshold == 1)
+			return bdR1;
+		if (param.threshold == 2)
+			return bdR8;
+	}
+	double get_cbd(void)
+	{
+		if (param.threshold == 0)
+			return cbdEM;
+		if (param.threshold == 1)
+			return cbdR1;
+		if (param.threshold == 2)
+			return cbdR8;
 	}
 	void CropLAIN(void)
 	{
@@ -746,7 +791,7 @@ public:
 			LAI = 0.0;
 		if (LAI > MXLAI)
 			MXLAI = LAI;  //'Saving maximum LAI
-		
+
 		// Daily increase and decrease in LAI
 		if (CBD <= bdBLG)
 			GLAI = 0.0;
@@ -769,7 +814,7 @@ public:
 		DLAI = XNLF / (data.data_p.SLNG - data.data_p.SLNS);
 	}
 	//dmproduction
-	
+
 	void DMProduction(void)
 	{
 		//'------------------------------- Parameters and Initials
@@ -809,7 +854,7 @@ public:
 
 		if (vpdtp == 2 || vpdtp == 3) {
 			//'__________________________ Hourly calcs ___________________________
-			Pi = 3.141592654;   
+			Pi = 3.141592654;
 			RDN = Pi / 180.0;
 			DEC = sin(23.45 * RDN) * cos(2.0 * Pi * (DOY + 10.0) / 365.0);
 			DEC = atan(DEC / sqrt(1.0 - (DEC *  DEC))) * (-1.0);
@@ -906,17 +951,17 @@ public:
 				DDMP = 0.0;
 
 	}
-	
+
 	void DMDistribution(void)
 	{
 
 		//	'------------------------------- Parameters and Initials
 		if (iniDMD == 0)
 		{
-			WLF = 0.5;  
-			WST = 0.5; 
+			WLF = 0.5;
+			WST = 0.5;
 			WVEG = WLF + WST;
-			WGRN = 0.0; 
+			WGRN = 0.0;
 			iniDMD = 1;
 		}
 
@@ -1015,16 +1060,16 @@ public:
 			INST = 0.0;
 			INGRN = 0.0;
 		}
-		
+
 		else if (CBD > bdEM && CBD < data.data_p.ttBSG)
 		{
 			INGRN = 0.0;
 			NUP = (GST * data.data_p.SNCG) + (GLAI * data.data_p.SLNG); // '+ NSTDF    '<---- -
 			if (CBD < data.data_p.ttBNF && CNUP > param.INSOL)
 				NUP = 0.0;
-			if (NUP > data.data_p.MXNUP) 
+			if (NUP > data.data_p.MXNUP)
 				NUP = data.data_p.MXNUP;
-		
+
 			NFC = NFC * 3.0 / 4.0 + NUP / WVEG * (1.0 / 4.0);//   'from Sinclair et al. 2003
 			NUP = NUP * WSFN;
 			if (NUP < 0.0)
@@ -1039,7 +1084,7 @@ public:
 				XNST = 0.0;
 				if (INST >= NUP)
 				{
-					INLF = 0.0;  
+					INLF = 0.0;
 					XNLF = INST - NUP;
 				}
 				else if (INST < NUP)
@@ -1051,7 +1096,7 @@ public:
 			}
 			else if (NST > (WST * data.data_p.SNCS))
 			{
-			
+
 			    INLF = GLAI * data.data_p.SLNG;
 				XNLF = 0.0;
 		     }
@@ -1091,7 +1136,7 @@ public:
 			if (DDMP == 0.0)
 				DNF = 0.0;
 			NUP = DNF;
-			
+
 			if (NUP > (SGR * data.data_p.GNC))
 			{
 				//   'N is excess of seed needs
@@ -1112,14 +1157,14 @@ public:
 						if (INLF > (NUP2 - INST))
 						{
 							INLF = NUP2 - INST;
-							INST = NUP2 - INLF;   
+							INST = NUP2 - INLF;
 							XNLF = 0.0;
 						}
 					}
 				}
 				else if (NST > (WST * data.data_p.SNCS))
 				{
-					INLF = GLAI * data.data_p.SLNG; 
+					INLF = GLAI * data.data_p.SLNG;
 					XNLF = 0.0;
 					if (INLF >= NUP2)
 					{
@@ -1135,7 +1180,7 @@ public:
 							INST = NUP2 - INLF;
 							XNST = 0.0;
 					}
-					
+
 				}
 
 				TRLN = LAI * (data.data_p.SLNG - data.data_p.SLNS) + (NST + INST - WST * data.data_p.SNCS);
@@ -1156,7 +1201,7 @@ public:
 		   NVEG = NLF + NST;
 		   NGRN = NGRN + INGRN;
 		   CNUP = CNUP + NUP;
-  
+
 		   TRLN = LAI * (data.data_p.SLNG - data.data_p.SLNS) + (NST - WST * data.data_p.SNCS);
 		   FXLF = LAI * (data.data_p.SLNG - data.data_p.SLNS) / (TRLN + 0.000000000001);///////////
 		   if (FXLF > 1.0)
@@ -1288,11 +1333,12 @@ public:
 	void calculation(void)
 	{
 		double phase_change = nl->get_cbd();
+		double cbd;
 		double training_error = 0;
 		double curr_error = 0;
 		int nDays = param.nD;
 		if (param.print_trace > 0) cout << phase_change << endl;
-		for (size_t nsam = 0; nsam < data.data_a5.nSamples; ++nsam) 
+		for (size_t nsam = 0; nsam < data.data_a5.nSamples; ++nsam)
 		{
 			ROW = -1;
 			MAT = 0;
@@ -1323,7 +1369,7 @@ public:
 			{
 				continue;
 			}
-	
+
 			int curr_day = -nDays;
 			bool check_day = false;
 			if (param.print_trace > 0) cout << "nsam = " << nsam << " BEGIN ROW = " << ROW << endl;
@@ -1349,17 +1395,21 @@ public:
 				}
 			}
 			if (check_day == true && param.threshold != -1)
+			{
 				curr_day = get_curr_day();
+				phase_change = get_phase_change();
+				cbd = get_cbd();
+			}
 			else
 				curr_day = -nDays;
 
 			SummaryPrintOut();
 			if (param.print_trace > 0)	cout << "curr_day = "<< curr_day << endl;
 			if (param.print_trace > 0)	cout << "event_dat = " << event_day << endl;
-			if (param.print_trace > 0)	cout << "CBD = " << CBD << endl;
+			if (param.print_trace > 0)	cout << "CBD = " << cbd << endl;
 			if (param.print_trace > 0)	cout << "phase_change = " << phase_change << endl;
 			training_error += (curr_day - event_day) * (curr_day - event_day);
-			curr_error += (CBD - phase_change) * (CBD - phase_change);
+			curr_error += (cbd - phase_change) * (cbd - phase_change);
 		}
 		cout << training_error << endl;
 		cout << curr_error << endl;
@@ -1376,4 +1426,5 @@ public slots:
 signals:
 	void finished();
 };
+
 #endif // _MODEL_H_
