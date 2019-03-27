@@ -7,6 +7,8 @@ public:
 	QString func_file_name;
 	QString h5_file_name;
 	QString h5_table_name;
+	QString crops_ini_file;
+
 	int nF;
 	int wL;
 	int nD;
@@ -45,30 +47,31 @@ public:
 	Parametrs() {}
 	void Print()
 	{
-		std::cout << Latitude << std::endl;
-		std::cout << VPDF << std::endl;
-		std::cout << yno << std::endl;
-		std::cout << FirstYear << std::endl;
-		std::cout << FixFind << std::endl;
-		std::cout << Pdoy << std::endl;
-		std::cout << SearchDur << std::endl;
-		std::cout << SowWat << std::endl;
-		std::cout << PDEN << std::endl;
-		std::cout << water << std::endl;
-		std::cout << IRGLVL << std::endl;
-		std::cout << SOLDEP << std::endl;
-		std::cout << DEP1 << std::endl;
-		std::cout << SALB << std::endl;
-		std::cout << CN2 << std::endl;
-		std::cout << DRAINF << std::endl;
-		std::cout << SAT << std::endl;
-		std::cout << DUL << std::endl;
-		std::cout << EXTR << std::endl;
-		std::cout << MAI1 << std::endl;
-		std::cout << MAI << std::endl;
-		std::cout << INSOL << std::endl;
-		std::cout << U << std::endl;
-		std::cout << CropColNo << std::endl;
-		std::cout << file_mode << endl;
+		std::cout << "Latitude " << Latitude << std::endl;
+		std::cout << "VPDF " << VPDF << std::endl;
+		std::cout << "yno " << yno << std::endl;
+		std::cout << "FirstYear " << FirstYear << std::endl;
+		std::cout << "FixFind " << FixFind << std::endl;
+		std::cout << "Pdoy " << Pdoy << std::endl;
+		std::cout << "SearchDur " << SearchDur << std::endl;
+		std::cout << "SowWat " << SowWat << std::endl;
+		std::cout << "PDEN " << PDEN << std::endl;
+		std::cout << "water " << water << std::endl;
+		std::cout << "IRGLVL " << IRGLVL << std::endl;
+		std::cout << "SOLDEP " << SOLDEP << std::endl;
+		std::cout << "DEP1 " << DEP1 << std::endl;
+		std::cout << "SALB " << SALB << std::endl;
+		std::cout << "CN2 " << CN2 << std::endl;
+		std::cout << "DRAINF " << DRAINF << std::endl;
+		std::cout << "SAT " << SAT << std::endl;
+		std::cout << "DUL " << DUL << std::endl;
+		std::cout << "EXTR " << EXTR << std::endl;
+		std::cout << "MAI1 " << MAI1 << std::endl;
+		std::cout << "MAI " << MAI << std::endl;
+		std::cout << "INSOL " << INSOL << std::endl;
+		std::cout << "U " << U << std::endl;
+		std::cout << "CropColNo " << CropColNo << std::endl;
+		std::cout << "file_mode " << file_mode << endl;
+		std::cout << "print_trace " << print_trace << endl;
 	}
 };
