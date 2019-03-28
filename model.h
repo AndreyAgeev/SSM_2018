@@ -600,7 +600,6 @@ public:
 				}
 				if (ATSW1 + WSTORG >= param.SowWat || MAT == 1)
 					break;
-
 			}
 			Pdoy = data.data_h5.doy[ROW];
 		}*/
