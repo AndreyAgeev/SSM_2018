@@ -271,18 +271,18 @@ public:
 	bool write_check = false;
 
 
-	int nsam = 0;
+	int NSAM = 0;
 
 
 	Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
 	{
-		if (param.print_trace > 0) cout << "begin read" << endl;
+		if (param.print_trace > 1) cout << "begin read" << endl;
 		data.read_h5(param.h5_file_name);
 		data.read_spieces(param.h5_table_name, param.ecovar);
 		data.read_ini(param.crops_ini_file);
 		nl = new Nlreg(param.func_file_name, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace);
 		nl->nlreg_build();
-		if (param.print_trace > 0) cout << "end read" << endl;
+		if (param.print_trace > 1) cout << "end read" << endl;
 	//	run_h5();
 	}
 	void SoilWater()
@@ -696,8 +696,11 @@ public:
 		}
 		else
 		{
-		     vector<double> clim_covar = { data.data_h5.tmax[ROW], data.data_h5.tmin[ROW], data.data_h5.rain[ROW], data.data_h5.dl[ROW], data.data_h5.srad[ROW] };
-	         bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[nsam]);
+		    vector<double> clim_covar = { data.data_h5.tmax[ROW], data.data_h5.tmin[ROW], data.data_h5.rain[ROW], data.data_h5.dl[ROW], data.data_h5.srad[ROW] };
+		    if (param.ecovar)
+				bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[NSAM]);
+			else
+				bd = nl->get_func_value(clim_covar);
 
 
 			 CBD += Heaviside(bd) * bd;
@@ -1223,7 +1226,7 @@ public:
 
 		out.open("output.txt", std::ios::app);
 		if (write_check == false) {
-			out << " YEARS= " << " DOY= " << "DAP= " << " TMP= " << " DTT= " << "CBD= " << "MSNN= " << "GLAI= " << " DLAI=" << "LAI = " << "TCFRUE = " << "FINT= " << " DDMP= " << "GLF= " <<	"GST= " << " SGR= " << " WLF= " << "WST= " << "WVEG=  " << " WGRN= " << "WTOP= " << "DEPORT= " << "RAIN= " << "IRGW= " << "RUNOF= " << "PET= " << "SEVP= " << "TR= " << "ATSW= " << " FTSW=  " <<" CRAIN= " << " CIRGW= " << "IRGNO= " << " CRUNOF= " << "CE= " << " CTR= " << "WSTORG= " << "NUP= " << " NLF= " << "NST= " << "NVEG= " << " NGRN= " << "CNUP= " << endl;
+			out << "NSAM= " << "ROW= "<< " YEARS= " << " DOY= " << "DAP= " << " TMP= " << " DTT= " << "CBD= " << "MSNN= " << "GLAI= " << " DLAI=" << "LAI = " << "TCFRUE = " << "FINT= " << " DDMP= " << "GLF= " <<	"GST= " << " SGR= " << " WLF= " << "WST= " << "WVEG=  " << " WGRN= " << "WTOP= " << "DEPORT= " << "RAIN= " << "IRGW= " << "RUNOF= " << "PET= " << "SEVP= " << "TR= " << "ATSW= " << " FTSW=  " <<" CRAIN= " << " CIRGW= " << "IRGNO= " << " CRUNOF= " << "CE= " << " CTR= " << "WSTORG= " << "NUP= " << " NLF= " << "NST= " << "NVEG= " << " NGRN= " << "CNUP= "<< "MAT= " << endl;
 			write_check = true;
 		}
 		out_LAI << LAI << endl;
@@ -1236,9 +1239,10 @@ public:
 		out_NVEG << NVEG << endl;
 		out_NGRN << NGRN << endl;
 
-		out << "ROW = " <<  ROW << endl;
-		out << data.data_h5.years[ROW] << endl;
-		out << data.data_h5.doy[ROW] << endl;
+		out << NSAM << "  ";
+		out <<  ROW << "  ";
+		out << data.data_h5.years[ROW] << "  ";
+		out << data.data_h5.doy[ROW] << "  ";
 		out << DAP << "  ";
 		out  << TMP << "  ";
 		out  << DTT << "  ";
@@ -1279,8 +1283,8 @@ public:
 		out << NST << "  ";
 		out  << NVEG << "  ";
 		out  << NGRN << "  ";
-		out  << CNUP << "  " << endl;
-		out << "MAT =" << MAT << endl;
+		out  << CNUP << "  ";
+		out << MAT << endl;
 		out.close();
 		out_LAI.close();
 		out_DAP.close();
@@ -1295,6 +1299,7 @@ public:
 	void SummaryPrintOut()
 	{
 		out_s.open("output_summary.txt", std::ios::app);
+		out_s << "[" << NSAM << "]" << endl;
 		out_s << "year = " << data.data_h5.years[ROW] << endl;
 		out_s << "dtEM = "  << dtEM << endl;
 		out_s << "dtR1 = " << dtR1 << endl;
@@ -1332,14 +1337,15 @@ public:
 	double Heaviside(double arg) { return (arg > 0) ? 1.0 : 0.0; }
 	void calculation(void)
 	{
-		double phase_change = nl->get_cbd();
+		double phase_change;
 		double cbd;
 		double training_error = 0;
 		double curr_error = 0;
 		int nDays = param.nD;
-		if (param.print_trace > 0) cout << phase_change << endl;
+
 		for (size_t nsam = 0; nsam < data.data_a5.nSamples; ++nsam)
 		{
+			NSAM = nsam;
 			ROW = -1;
 			MAT = 0;
 			CBD = 0.0;
@@ -1365,20 +1371,20 @@ public:
 				}
 			}
 			ROW = j;
+
 			if (check == false)
 			{
 				continue;
 			}
 
+			if (param.print_trace > 0) cout << "nsam = " << nsam << " geo id = " << geo_id << " BEGIN ROW = " << ROW;
 			int curr_day = -nDays;
 			bool check_day = false;
-			if (param.print_trace > 0) cout << "nsam = " << nsam << " BEGIN ROW = " << ROW << endl;
 			for (size_t nd = 0; nd < nDays; nd++)
 			{
 				ROW = j + nd;
 				if (ROW >= data.data_h5.nWeather)
 					break;
-				if (param.print_trace > 0) cout << " nsam = " << nsam << " ROW = " <<  ROW << endl;
 
 				Weather();
 				Phenology();
@@ -1387,32 +1393,41 @@ public:
 				DMDistribution();
 				LegumPlant();
 				SoilWater();
-				DailyPrintOut();
+				if (param.print_trace > 0)
+				{
+					DailyPrintOut();
+				}
 				if (MAT == 1)
 				{
-					check_day = true;
 					break;
 				}
 			}
-			if (check_day == true && param.threshold != -1)
-			{
+			phase_change = get_phase_change();
+			cbd = get_cbd();
+			if (param.threshold != -1)
 				curr_day = get_curr_day();
-				phase_change = get_phase_change();
-				cbd = get_cbd();
-			}
 			else
 				curr_day = -nDays;
 
-			SummaryPrintOut();
-			if (param.print_trace > 0)	cout << "curr_day = "<< curr_day << endl;
-			if (param.print_trace > 0)	cout << "event_dat = " << event_day << endl;
-			if (param.print_trace > 0)	cout << "CBD = " << cbd << endl;
-			if (param.print_trace > 0)	cout << "phase_change = " << phase_change << endl;
+			if (param.print_trace > 0)
+			{
+				SummaryPrintOut();
+				cout << " END ROW = " <<  ROW;
+				cout << " MAT = " <<  MAT;
+				cout << " curr_day = " << curr_day;
+				cout << " event_dat = " << event_day;
+				cout << " CBD = " << cbd;
+				cout << " phase_change = " << phase_change << endl;
+			}
 			training_error += (curr_day - event_day) * (curr_day - event_day);
 			curr_error += (cbd - phase_change) * (cbd - phase_change);
 		}
 		cout << training_error << endl;
 		cout << curr_error << endl;
+		if (param.print_trace > 0 && param.function_mode != SOLTANI_FUNC)
+		{
+			nl->print_trace(0);
+		}
 	}
 public slots:
 	void run_h5()

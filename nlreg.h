@@ -31,6 +31,17 @@ public:
 		}
 		return val;
 	}
+	double get_func_value(vector<double> clim_arg)
+	{
+		double val = 0;
+		GrammarNode *retFtn;
+		for (size_t i = 0; i < nFunctions; ++i) {
+			retFtn = grc->get_nth_tree(i);
+			double fval = retFtn->eval(clim_arg);
+			val += beta[i] * fval;
+		}
+		return val;
+	}
 	double get_cbd()
 	{
 		return CBD;
