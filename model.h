@@ -271,19 +271,19 @@ public:
 	bool write_check = false;
 
 
-	int nsam = 0;
+	int NSAM = 0;
 
 
 	Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
 	{
-		if (param.print_trace > 0) cout << "begin read" << endl;
+		if (param.print_trace > 1) cout << "begin read" << endl;
 		data.read_h5(param.h5_file_name);
 		data.read_spieces(param.h5_table_name, param.ecovar);
 		data.read_ini(param.crops_ini_file);
 		nl = new Nlreg(param.func_file_name, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace);
 		nl->nlreg_build();
-		if (param.print_trace > 0) cout << "end read" << endl;
-	//	run_h5();
+		if (param.print_trace > 1) cout << "end read" << endl;
+		//	run_h5();
 	}
 	void SoilWater()
 	{
@@ -404,7 +404,7 @@ public:
 			ETLAI = BSGLAI;
 
 		// Potential ET
-		TD = 0.6 * data.data_h5.tmax[ROW]+ 0.4 * data.data_h5.tmin[ROW];
+		TD = 0.6 * data.data_h5.tmax[ROW] + 0.4 * data.data_h5.tmin[ROW];
 		ALBEDO = CALB * (1.0 - exp(-KET * ETLAI)) + param.SALB * exp((-KET) * ETLAI);
 		EEQ = data.data_h5.srad[ROW] * (0.004876 - 0.004374 * ALBEDO) * (TD + 29.0);
 		PET = EEQ * 1.1;
@@ -413,7 +413,7 @@ public:
 		if (data.data_h5.tmax[ROW] < 5.0)
 			PET = EEQ * 0.01 * exp(0.18 * (data.data_h5.tmax[ROW] + 20.0));
 
-	   // Soil evaporation
+		// Soil evaporation
 		EOS = PET * exp(((-KET) * ETLAI));
 		if (PET > EOSMIN && EOS < EOSMIN)
 			EOS = EOSMIN;
@@ -423,7 +423,7 @@ public:
 			DYSE = 1.0;
 		if (DYSE > 1.0 || FTSW < 0.5 || ATSW1 <= 2.0)
 		{
-			SEVP = EOS * (pow((DYSE + 1.0), 0.5 )- pow(DYSE,0.5));
+			SEVP = EOS * (pow((DYSE + 1.0), 0.5) - pow(DYSE, 0.5));
 			DYSE = DYSE + 1.0;
 		}
 		if (semethod == 2)
@@ -443,15 +443,15 @@ public:
 					SSE = SSE + SEVP;
 					if (SSE1 >= SE1MX)
 					{
-							//Transition from Stage I to Stage II
-						SEVP = SEVP + SE2C * (pow(DSR, 0.5) - pow((DSR - 1.0) , 0.5)) * (1.0 - (SEVP / EOS));
+						//Transition from Stage I to Stage II
+						SEVP = SEVP + SE2C * (pow(DSR, 0.5) - pow((DSR - 1.0), 0.5)) * (1.0 - (SEVP / EOS));
 						DSR = DSR + 1.0 - SEVP / EOS;
 					}
 				}
 				else
 				{
 					//Stage II evaporation
-					SEVP = SE2C * (pow(DSR, 0.5) - pow((DSR - 1.0),0.5));
+					SEVP = SE2C * (pow(DSR, 0.5) - pow((DSR - 1.0), 0.5));
 					if (SEVP > EOS)
 						SEVP = EOS;
 					DSR = DSR + 1.0;
@@ -483,13 +483,14 @@ public:
 		//Plant transpiration
 		if (vpdtp == 1 || vpdtp == 3)
 		{
-			VPTMIN = 0.6108 * exp(17.27 * data.data_h5.tmin[ROW]/ (data.data_h5.tmin[ROW] + 237.3));
+			VPTMIN = 0.6108 * exp(17.27 * data.data_h5.tmin[ROW] / (data.data_h5.tmin[ROW] + 237.3));
 			VPTMAX = 0.6108 * exp(17.27 * data.data_h5.tmax[ROW] / (data.data_h5.tmax[ROW] + 237.3));
 			VPD = param.VPDF * (VPTMAX - VPTMIN);
 			TR = DDMP * VPD / data.data_p.TEC;    //    'VPD in kPa, TEC in Pa
 		}
-		else if (vpdtp == 2 )
-		{}
+		else if (vpdtp == 2)
+		{
+		}
 
 		if (TR < 0.0)
 			TR = 0.0;
@@ -505,7 +506,7 @@ public:
 				RT1 = FTSW1 / data.data_p.WSSG;
 			TR1 = TR * RT1;
 		}
-       //  Updating
+		//  Updating
 		ATSW1 = ATSW1 + data.data_h5.rain[ROW] + IRGW - DRAIN1 - RUNOF - TR1 - SEVP;
 		if (ATSW1 < 0.0)
 			ATSW1 = 0.0;
@@ -548,9 +549,9 @@ public:
 		// Crop termination by water stress
 		if (CBD > data.data_p.ttDKill/*bdDKill*/ && (CBD < data.data_p.ttTSG/*bdTSG*/))
 		{
-				//If LAI < 0.05 Then CBD = bdTSG
-				//If FTSW < 0.02 And VPD > 2.2 Then CBD = bdTSG
-				//If FTSW <= 0 And VPD > 1.8 Then CBD = bdTSG
+			//If LAI < 0.05 Then CBD = bdTSG
+			//If FTSW < 0.02 And VPD > 2.2 Then CBD = bdTSG
+			//If FTSW <= 0 And VPD > 1.8 Then CBD = bdTSG
 			if (FTSW <= data.data_p.LtFtsw)
 			{
 				LtDrCntr = LtDrCntr + 1.0;
@@ -579,14 +580,14 @@ public:
 					MAT = 1;
 				if (MAT == 1)
 				{
-				    DOY = -1;
+					DOY = -1;
 					dtEM = 0.0;
 					dtR1 = 0.0;
 					dtR3 = 0.0;
 					dtR5 = 0.0;
 					dtR7 = 0.0;
 					dtR8 = 0.0;
-				    MXLAI = 0.0;
+					MXLAI = 0.0;
 					BSGLAI = 0.0;
 					BSGDM = 0.0;
 					WTOP = 0.0;
@@ -606,7 +607,7 @@ public:
 	}
 	void Weather(void)
 	{
-	//	ROW += 1;
+		//	ROW += 1;
 		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2.0;
 	}
 
@@ -631,15 +632,24 @@ public:
 		}
 		switch (param.threshold)
 		{
-		    case 0:
-			    bdEM = nl->get_cbd();
-			    break;
-		    case 1:
-			    bdR1 = nl->get_cbd();
-			    break;
-		    case 2:
-			    bdR8 = nl->get_cbd();
-			    break;
+		case 0:
+			bdEM = nl->get_cbd();
+			break;
+		case 1:
+			bdR1 = nl->get_cbd();
+			break;
+		case 3:
+			bdR3 = nl->get_cbd();
+			break;
+		case 5:
+			bdR5 = nl->get_cbd();
+			break;
+		case 7:
+			bdR7 = nl->get_cbd();
+			break;
+		case 8:
+			bdR8 = nl->get_cbd();
+			break;
 		}
 		if (param.function_mode == SOLTANI_FUNC)
 		{
@@ -696,11 +706,14 @@ public:
 		}
 		else
 		{
-		     vector<double> clim_covar = { data.data_h5.tmax[ROW], data.data_h5.tmin[ROW], data.data_h5.rain[ROW], data.data_h5.dl[ROW], data.data_h5.srad[ROW] };
-	         bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[nsam]);
+			vector<double> clim_covar = { data.data_h5.tmax[ROW], data.data_h5.tmin[ROW], data.data_h5.rain[ROW], data.data_h5.dl[ROW], data.data_h5.srad[ROW] };
+			if (param.ecovar)
+				bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[NSAM]);
+			else
+				bd = nl->get_func_value(clim_covar);
 
 
-			 CBD += Heaviside(bd) * bd;
+			CBD += Heaviside(bd) * bd;
 		}
 
 		DAP = DAP + 1.0;
@@ -747,26 +760,46 @@ public:
 			return dtEM;
 		if (param.threshold == 1)
 			return dtR1;
-		if (param.threshold == 2)
+		if (param.threshold == 3)
+			return dtR3;
+		if (param.threshold == 5)
+			return dtR5;
+		if (param.threshold == 7)
+			return dtR7;
+		if (param.threshold == 8)
 			return dtR8;
+		return (double)(-param.nD);
 	}
-	double get_phase_change(void)
+/*	double get_phase_change(void)
 	{
 		if (param.threshold == 0)
 			return bdEM;
 		if (param.threshold == 1)
 			return bdR1;
-		if (param.threshold == 2)
+		if (param.threshold == 3)
+			return bdR3;
+		if (param.threshold == 5)
+			return bdR5;
+		if (param.threshold == 7)
+			return bdR7;
+		if (param.threshold == 8)
 			return bdR8;
-	}
+	}*/
 	double get_cbd(void)
 	{
 		if (param.threshold == 0)
 			return cbdEM;
 		if (param.threshold == 1)
 			return cbdR1;
-		if (param.threshold == 2)
+		if (param.threshold == 3)
+			return cbdR3;
+		if (param.threshold == 5)
+			return cbdR5;
+		if (param.threshold == 7)
+			return cbdR7;
+		if (param.threshold == 8)
 			return cbdR8;
+		return CBD;
 	}
 	void CropLAIN(void)
 	{
@@ -799,8 +832,8 @@ public:
 		{
 			INODE = DTT / data.data_p.phyl;
 			MSNN = MSNN + INODE * WSFL;
-			PLA2 = data.data_p.PLACON * pow(MSNN,PLAPOW);
-			GLAI = (((PLA2 - PLA1) * (double)param.PDEN )/ 10000.0);
+			PLA2 = data.data_p.PLACON * pow(MSNN, PLAPOW);
+			GLAI = (((PLA2 - PLA1) * (double)param.PDEN) / 10000.0);
 			PLA1 = PLA2;
 		}
 		else if (CBD > bdTLM && CBD <= bdTLP)
@@ -848,7 +881,7 @@ public:
 			RUE = data.data_p.IRUE2 * TCFRUE * WSFG;
 
 
-			//'------------------------------ CODES FOR RESPONSE TO VPD
+		//'------------------------------ CODES FOR RESPONSE TO VPD
 		vpdtp = data.data_p.vpd_resp;
 		VPDcr = data.data_p.vpd_cr;
 
@@ -941,14 +974,14 @@ public:
 			}
 		}
 		else if (vpdtp == 1)
-			{
+		{
 
-				FINT = 1.0 - exp(-data.data_p.KPAR * LAI);
-				DDMP = data.data_h5.srad[ROW] * 0.48 * FINT * RUE;
-			}
+			FINT = 1.0 - exp(-data.data_p.KPAR * LAI);
+			DDMP = data.data_h5.srad[ROW] * 0.48 * FINT * RUE;
+		}
 
-			if (CBD < bdEM || CBD > data.data_p.ttTSG)
-				DDMP = 0.0;
+		if (CBD < bdEM || CBD > data.data_p.ttTSG)
+			DDMP = 0.0;
 
 	}
 
@@ -1008,7 +1041,7 @@ public:
 			TRANSL = 0.0;
 			SGR = 0.0;
 		}
-			//'------------------------------- DM avail. for Leaf & stem
+		//'------------------------------- DM avail. for Leaf & stem
 		DDMP2 = DDMP - SGR * data.data_p.GCF;
 		if (DDMP2 < 0.0)
 			DDMP2 = 0.0;
@@ -1030,7 +1063,7 @@ public:
 		//	'------------------------------- Stem dry matter growth
 		GST = DDMP2 - GLF;
 
-			//'------------------------------- Organs accumulated mass
+		//'------------------------------- Organs accumulated mass
 		WLF = WLF + GLF;
 		WST = WST + GST;
 		WGRN = WGRN + SGR;
@@ -1097,9 +1130,9 @@ public:
 			else if (NST > (WST * data.data_p.SNCS))
 			{
 
-			    INLF = GLAI * data.data_p.SLNG;
+				INLF = GLAI * data.data_p.SLNG;
 				XNLF = 0.0;
-		     }
+			}
 			if (INLF >= NUP)
 			{
 				INST = 0.0;
@@ -1115,8 +1148,8 @@ public:
 			}
 
 		}
-		   //'       TRLN = LAI * (SLNG - SLNS) + (NST + INST - WST * SNCS)
-		   //'       FXLF = LAI * (SLNG - SLNS) / TRLN
+		//'       TRLN = LAI * (SLNG - SLNS) + (NST + INST - WST * SNCS)
+		//'       FXLF = LAI * (SLNG - SLNS) / TRLN
 
 		else if (CBD >= data.data_p.ttBSG && CBD <= data.data_p.ttTSG)
 		{
@@ -1177,8 +1210,8 @@ public:
 					}
 					else if (INLF < NUP2)
 					{
-							INST = NUP2 - INLF;
-							XNST = 0.0;
+						INST = NUP2 - INLF;
+						XNST = 0.0;
 					}
 
 				}
@@ -1192,22 +1225,22 @@ public:
 				INLF = 0.0;
 				INST = 0.0;
 				XNLF = (SGR * data.data_p.GNC - NUP) * FXLF;
-				XNST = (SGR * data.data_p.GNC - NUP) * (1.0- FXLF);
+				XNST = (SGR * data.data_p.GNC - NUP) * (1.0 - FXLF);
 			}
 
 		}
-		   NST = NST + INST - XNST;
-		   NLF = NLF + INLF - XNLF;
-		   NVEG = NLF + NST;
-		   NGRN = NGRN + INGRN;
-		   CNUP = CNUP + NUP;
+		NST = NST + INST - XNST;
+		NLF = NLF + INLF - XNLF;
+		NVEG = NLF + NST;
+		NGRN = NGRN + INGRN;
+		CNUP = CNUP + NUP;
 
-		   TRLN = LAI * (data.data_p.SLNG - data.data_p.SLNS) + (NST - WST * data.data_p.SNCS);
-		   FXLF = LAI * (data.data_p.SLNG - data.data_p.SLNS) / (TRLN + 0.000000000001);///////////
-		   if (FXLF > 1.0)
-			   FXLF = 1.0;
-		   if (FXLF < 0.0 )
-			   FXLF = 0.0;
+		TRLN = LAI * (data.data_p.SLNG - data.data_p.SLNS) + (NST - WST * data.data_p.SNCS);
+		FXLF = LAI * (data.data_p.SLNG - data.data_p.SLNS) / (TRLN + 0.000000000001);///////////
+		if (FXLF > 1.0)
+			FXLF = 1.0;
+		if (FXLF < 0.0)
+			FXLF = 0.0;
 	}
 	void DailyPrintOut(void)
 	{
@@ -1223,7 +1256,7 @@ public:
 
 		out.open("output.txt", std::ios::app);
 		if (write_check == false) {
-			out << " YEARS= " << " DOY= " << "DAP= " << " TMP= " << " DTT= " << "CBD= " << "MSNN= " << "GLAI= " << " DLAI=" << "LAI = " << "TCFRUE = " << "FINT= " << " DDMP= " << "GLF= " <<	"GST= " << " SGR= " << " WLF= " << "WST= " << "WVEG=  " << " WGRN= " << "WTOP= " << "DEPORT= " << "RAIN= " << "IRGW= " << "RUNOF= " << "PET= " << "SEVP= " << "TR= " << "ATSW= " << " FTSW=  " <<" CRAIN= " << " CIRGW= " << "IRGNO= " << " CRUNOF= " << "CE= " << " CTR= " << "WSTORG= " << "NUP= " << " NLF= " << "NST= " << "NVEG= " << " NGRN= " << "CNUP= " << endl;
+			out << "NSAM= " << "ROW= " << " YEARS= " << " DOY= " << "DAP= " << " TMP= " << " DTT= " << "CBD= " << "MSNN= " << "GLAI= " << " DLAI=" << "LAI = " << "TCFRUE = " << "FINT= " << " DDMP= " << "GLF= " << "GST= " << " SGR= " << " WLF= " << "WST= " << "WVEG=  " << " WGRN= " << "WTOP= " << "DEPORT= " << "RAIN= " << "IRGW= " << "RUNOF= " << "PET= " << "SEVP= " << "TR= " << "ATSW= " << " FTSW=  " << " CRAIN= " << " CIRGW= " << "IRGNO= " << " CRUNOF= " << "CE= " << " CTR= " << "WSTORG= " << "NUP= " << " NLF= " << "NST= " << "NVEG= " << " NGRN= " << "CNUP= " << "MAT= " << endl;
 			write_check = true;
 		}
 		out_LAI << LAI << endl;
@@ -1236,51 +1269,52 @@ public:
 		out_NVEG << NVEG << endl;
 		out_NGRN << NGRN << endl;
 
-		out << "ROW = " <<  ROW << endl;
-		out << data.data_h5.years[ROW] << endl;
-		out << data.data_h5.doy[ROW] << endl;
+		out << NSAM << "  ";
+		out << ROW << "  ";
+		out << data.data_h5.years[ROW] << "  ";
+		out << data.data_h5.doy[ROW] << "  ";
 		out << DAP << "  ";
-		out  << TMP << "  ";
-		out  << DTT << "  ";
-		out  << CBD << "  ";
-		out  << MSNN << "  ";
+		out << TMP << "  ";
+		out << DTT << "  ";
+		out << CBD << "  ";
+		out << MSNN << "  ";
 		out << GLAI << "  ";
-		out  << DLAI << "  ";
-		out  << LAI << "  ";
-		out  << TCFRUE << "  ";
+		out << DLAI << "  ";
+		out << LAI << "  ";
+		out << TCFRUE << "  ";
 		out << FINT << "  ";
-		out  << DDMP << "  ";
-		out  << GLF << "  ";
+		out << DDMP << "  ";
+		out << GLF << "  ";
 		out << GST << "  ";
-		out<< SGR << "  ";
+		out << SGR << "  ";
 		out << WLF << "  ";
-		out  << WST << "  ";
+		out << WST << "  ";
 		out << WVEG << "  ";
 		out << WGRN << "  ";
 		out << WTOP << "  ";
-		out  << data.data_p.DEPORT << "  ";
+		out << data.data_p.DEPORT << "  ";
 		out << data.data_h5.rain[ROW] << "  ";
-		out  << IRGW << "  ";
-		out  << RUNOF << "  ";
-		out  << PET << "  ";
+		out << IRGW << "  ";
+		out << RUNOF << "  ";
+		out << PET << "  ";
 		out << SEVP << "  ";
-		out  << TR << "  ";
-		out  << ATSW << "  ";
+		out << TR << "  ";
+		out << ATSW << "  ";
 		out << FTSW << "  ";
-		out  << CRAIN << "  ";
+		out << CRAIN << "  ";
 		out << CIRGW << "  ";
 		out << IRGNO << "  ";
-		out  << CRUNOF << "  ";
+		out << CRUNOF << "  ";
 		out << CE << "  ";
 		out << CTR << "  ";
 		out << WSTORG << "  ";
-		out  << NUP << "  ";
-		out  << NLF << "  ";
+		out << NUP << "  ";
+		out << NLF << "  ";
 		out << NST << "  ";
-		out  << NVEG << "  ";
-		out  << NGRN << "  ";
-		out  << CNUP << "  " << endl;
-		out << "MAT =" << MAT << endl;
+		out << NVEG << "  ";
+		out << NGRN << "  ";
+		out << CNUP << "  ";
+		out << MAT << endl;
 		out.close();
 		out_LAI.close();
 		out_DAP.close();
@@ -1295,8 +1329,9 @@ public:
 	void SummaryPrintOut()
 	{
 		out_s.open("output_summary.txt", std::ios::app);
+		out_s << "[" << NSAM << "]" << endl;
 		out_s << "year = " << data.data_h5.years[ROW] << endl;
-		out_s << "dtEM = "  << dtEM << endl;
+		out_s << "dtEM = " << dtEM << endl;
 		out_s << "dtR1 = " << dtR1 << endl;
 		out_s << "dtR3 = " << dtR3 << endl;
 		out_s << "dtR5 = " << dtR5 << endl;
@@ -1332,14 +1367,15 @@ public:
 	double Heaviside(double arg) { return (arg > 0) ? 1.0 : 0.0; }
 	void calculation(void)
 	{
-		double phase_change = nl->get_cbd();
+		double phase_change;
 		double cbd;
 		double training_error = 0;
 		double curr_error = 0;
 		int nDays = param.nD;
-		if (param.print_trace > 0) cout << phase_change << endl;
+
 		for (size_t nsam = 0; nsam < data.data_a5.nSamples; ++nsam)
 		{
+			NSAM = nsam;
 			ROW = -1;
 			MAT = 0;
 			CBD = 0.0;
@@ -1365,20 +1401,19 @@ public:
 				}
 			}
 			ROW = j;
+
 			if (check == false)
 			{
 				continue;
 			}
 
+			if (param.print_trace > 0) cout << "nsam = " << nsam << " geo id = " << geo_id << " BEGIN ROW = " << ROW;
 			int curr_day = -nDays;
-			bool check_day = false;
-			if (param.print_trace > 0) cout << "nsam = " << nsam << " BEGIN ROW = " << ROW << endl;
 			for (size_t nd = 0; nd < nDays; nd++)
 			{
 				ROW = j + nd;
 				if (ROW >= data.data_h5.nWeather)
 					break;
-				if (param.print_trace > 0) cout << " nsam = " << nsam << " ROW = " <<  ROW << endl;
 
 				Weather();
 				Phenology();
@@ -1387,32 +1422,41 @@ public:
 				DMDistribution();
 				LegumPlant();
 				SoilWater();
-				DailyPrintOut();
+				if (param.print_trace > 0)
+				{
+					DailyPrintOut();
+				}
 				if (MAT == 1)
 				{
-					check_day = true;
 					break;
 				}
 			}
-			if (check_day == true && param.threshold != -1)
-			{
-				curr_day = get_curr_day();
-				phase_change = get_phase_change();
-				cbd = get_cbd();
-			}
-			else
-				curr_day = -nDays;
+			phase_change = nl->get_cbd();//get_phase_change();
+			cbd = get_cbd();
+		//	if (param.threshold != -1)
+			curr_day = get_curr_day();
+		//	else
+		//		curr_day = -nDays;
 
-			SummaryPrintOut();
-			if (param.print_trace > 0)	cout << "curr_day = "<< curr_day << endl;
-			if (param.print_trace > 0)	cout << "event_dat = " << event_day << endl;
-			if (param.print_trace > 0)	cout << "CBD = " << cbd << endl;
-			if (param.print_trace > 0)	cout << "phase_change = " << phase_change << endl;
+			if (param.print_trace > 0)
+			{
+				SummaryPrintOut();
+				cout << " END ROW = " << ROW;
+				cout << " MAT = " << MAT;
+				cout << " curr_day = " << curr_day;
+				cout << " event_dat = " << event_day;
+				cout << " CBD = " << cbd;
+				cout << " phase_change = " << phase_change << endl;
+			}
 			training_error += (curr_day - event_day) * (curr_day - event_day);
 			curr_error += (cbd - phase_change) * (cbd - phase_change);
 		}
 		cout << training_error << endl;
 		cout << curr_error << endl;
+		if (param.print_trace > 0 && param.function_mode != SOLTANI_FUNC)
+		{
+			nl->print_trace(0);
+		}
 	}
 public slots:
 	void run_h5()
