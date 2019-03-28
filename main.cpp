@@ -36,12 +36,23 @@ int main(int argc, char *argv[])
 									{{"T", "print-trace"},
 										QCoreApplication::translate("main", "Print trace."),
 										QCoreApplication::translate("main", "T")},
+	{{"D", "num-days"},
+		QCoreApplication::translate("main", "Number of days."),
+		QCoreApplication::translate("main", "D")},
+	{{"N", "number-of-funcs"},
+		QCoreApplication::translate("main", "Number of functions."),
+		QCoreApplication::translate("main", "N")},
+	{{"L", "length-of-word"},
+		QCoreApplication::translate("main", "Length of a word to represent one function."),
+		QCoreApplication::translate("main", "L")},
+	{{"Q", "extra_covar"},
+		QCoreApplication::translate("main", "Read binary covariates.")},
 									{{"d", "SearchDur"},
 														QCoreApplication::translate("main", "SearchDur.")},
 									{{"w", "SowWat"},
 														QCoreApplication::translate("main", "SowWat."),
 														QCoreApplication::translate("main", "M")},
-								    {{"n", "PDEN"},////////////////////////////
+									{{"n", "PDEN"},////////////////////////////
 														QCoreApplication::translate("main", "Number of functions."),
 														QCoreApplication::translate("main", "N")},
 													{{"m", "water"},
@@ -76,7 +87,6 @@ int main(int argc, char *argv[])
 														QCoreApplication::translate("main", "U.")},
 													{{"2", "CropColNo"},
 														QCoreApplication::translate("main", "CropColNo.")},
-
 		});
 	parser.addPositionalArgument("cropsoinifile", "The file to open.");
 	parser.addPositionalArgument("samplesfile", "The file to open.");
@@ -92,7 +102,7 @@ int main(int argc, char *argv[])
 		param.h5_file_name = args.at(2); // samples
 		param.h5_table_name = args.at(1); // weather
 		param.crops_ini_file = args.at(0); // weather
-		cout << "name file: " << param.func_file_name.toStdString() << " " << param.h5_file_name.toStdString() << " " << param.h5_table_name.toStdString() << param.crops_ini_file.toStdString() << param.crops_ini_file.toStdString()  << endl;
+		cout << "name file: " << param.func_file_name.toStdString() << " " << param.h5_file_name.toStdString() << " " << param.h5_table_name.toStdString() << param.crops_ini_file.toStdString() << param.crops_ini_file.toStdString() << endl;
 		const QString TParameter = parser.value("print-trace");
 		const int T = TParameter.toInt();
 		if (T < 0) {
@@ -107,9 +117,26 @@ int main(int argc, char *argv[])
 
 		const QString PParameter = parser.value("P");
 		const int P = PParameter.toInt();
-		if (P != 0 && P != 1 && P != 2 && P != -1) {
+		if (P != 0 && P != 1 && P != 3 && P != 5 && P != 7 && P != 8 && P != -1) {
 			std::cout << "Bad p: " + P;
 		}
+
+		const QString NParameter = parser.value("number-of-funcs");
+		const int N = NParameter.toInt();
+		if (N < 0) {
+			std::cout << "Bad nf: " + N;
+		}
+		const QString LParameter = parser.value("length-of-word");
+		const int L = LParameter.toInt();
+		if (L < 0) {
+			std::cout << "Bad wl: " + L;
+		}
+		const QString DParameter = parser.value("num-days");
+		const int D = DParameter.toInt();
+		if (D <= 0) {
+			std::cout << "Bad nd: " + D;
+		}
+
 		/*
 			const QString nfParameter2 = parser.value("Latitude");
 			param.Latitude = nfParameter2.toDouble();
@@ -188,11 +215,11 @@ int main(int argc, char *argv[])
 		param.CropColNo = 3;
 		param.ROW = 7;
 		param.file_mode = false;
-		param.nF = 5;
-		param.wL = 12;
-		param.nD = 90;
+		param.nF = N;
+		param.wL = L;
+		param.nD = D;
 		param.rT = 1;
-		param.ecovar = true;
+		param.ecovar = parser.isSet("extra_covar");
 		param.print_trace = T;
 		param.function_mode = R;
 		param.threshold = P;
