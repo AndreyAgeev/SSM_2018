@@ -1453,6 +1453,8 @@ public:
 		}
 		cout << training_error << endl;
 		cout << curr_error << endl;
+		cout << nl->get_l1_pen() << endl;
+		cout << nl->get_l2_pen() << endl;
 		if (param.print_trace > 0 && param.function_mode != SOLTANI_FUNC)
 		{
 			nl->print_trace(0);
