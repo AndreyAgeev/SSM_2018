@@ -10,8 +10,8 @@ int main(int argc, char *argv[])
 	parser.addVersionOption();
 	parser.addOptions({
 					{{"l", "Latitude"},
-					QCoreApplication::translate("main", "Latitude.")},
-					                {{"3", "VPDF"},
+					QCoreApplication::translate("main", "Latitude")},
+					                {{"s", "VPDF"},///3
 										QCoreApplication::translate("main", "VPDF.")},
 										{{"R", "R"},
 										QCoreApplication::translate("main", "function mode"),
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 														QCoreApplication::translate("main", "SAT.")},
 													{{"k", "DUL"},
 														QCoreApplication::translate("main", "DUL.")},
-													{{"4", "EXTR"},
+													{{"E", "EXTR"},////4
 														QCoreApplication::translate("main", "EXTR.")},
 													{{"j", "MAI1"},
 														QCoreApplication::translate("main", "MAI1.")},
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 														QCoreApplication::translate("main", "MAI.")},
 													{{"o", "INSOL"},
 														QCoreApplication::translate("main", "INSOL.")},
-													{{"1", "U"},
+													{{"U", "U"},////1
 														QCoreApplication::translate("main", "U.")},
 		});
 	parser.addPositionalArgument("cropsoinifile", "The file to open.");
@@ -124,12 +124,12 @@ int main(int argc, char *argv[])
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/*	const QString LatParameter = parser.value("Latitude");
+			const QString LatParameter = parser.value("Latitude");
 			const double Lat = LatParameter.toDouble();
 			param.Latitude = Lat;
 		
 			const QString VPDFParameter = parser.value("VPDF");
-			const int VPDF = VPDFParameter.toDouble();	
+			const double VPDF = VPDFParameter.toDouble();	
 			param.VPDF = VPDF;
 
 		const QString FixFindParameter = parser.value("FixFind");
@@ -137,9 +137,7 @@ int main(int argc, char *argv[])
 		param.FixFind = FixFind;
 
 
-		const QString PdoyParameter = parser.value("Pdoy");
-		const int Pdoy = PdoyParameter.toInt();
-		param.Pdoy = Pdoy;
+		
 
 		const QString SearchDurParameter = parser.value("SearchDur");
 		const double SearchDur = SearchDurParameter.toDouble();
@@ -216,10 +214,10 @@ int main(int argc, char *argv[])
 				const double U = UParameter.toDouble();
 				param.U = U;
 
-				*/
+				
 						
 				//////////////////////////////////////////////////////////////////
-		param.Latitude = 36.41;
+	/*	param.Latitude = 36.41;
 		param.VPDF = 0.75;
 		param.FixFind = 1;
 		param.SearchDur = 60;
@@ -239,7 +237,7 @@ int main(int argc, char *argv[])
 		param.MAI = 1;
 		param.INSOL = 3;
 		param.U = 6;
-		param.ROW = 7;
+		param.ROW = 7;*/
 
 
 		param.file_mode = false;
@@ -251,6 +249,7 @@ int main(int argc, char *argv[])
 		param.print_trace = T;
 		param.function_mode = R;
 		param.threshold = P;
+		param.Print();
 	}
 	if (param.print_trace > 0) {
 		param.Print();
