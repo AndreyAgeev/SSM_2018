@@ -280,7 +280,11 @@ public:
 		data.read_h5(param.h5_file_name);
 		data.read_spieces(param.h5_table_name, param.ecovar);
 		data.read_ini(param.crops_ini_file);
-		nl = new Nlreg(param.func_file_name, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace);
+		nl = new Nlreg(data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace);
+		nl->set_genotype(data.data_b.x);
+		nl->set_beta(data.data_b.beta);
+		nl->set_beta_limit(data.data_b.betaLimit);
+		nl->set_climate_vars(data.data_b.concs);
 		nl->nlreg_build();
 		if (param.print_trace > 1) cout << "end read" << endl;
 		//	run_h5();
@@ -630,7 +634,7 @@ public:
 			WSFD = 1.0;
 			iniPheno = 1;
 		}
-		switch (param.threshold)
+/*		switch (param.threshold)
 		{
 		case 0:
 			bdEM = nl->get_cbd();
@@ -650,7 +654,7 @@ public:
 		case 8:
 			bdR8 = nl->get_cbd();
 			break;
-		}
+		}*/
 		if (param.function_mode == SOLTANI_FUNC)
 		{
 			// Thermal time calculation
@@ -1431,8 +1435,8 @@ public:
 					break;
 				}
 			}
-			phase_change = nl->get_cbd();//get_phase_change();
-			cbd = get_cbd();
+			phase_change = bdR1;//nl->get_cbd();//get_phase_change();
+			cbd = cbdR1;// get_cbd();
 		//	if (param.threshold != -1)
 			curr_day = get_curr_day();
 		//	else
@@ -1443,9 +1447,19 @@ public:
 				SummaryPrintOut();
 				cout << " END ROW = " << ROW;
 				cout << " MAT = " << MAT;
-				cout << " curr_day = " << curr_day;
+				cout << " dtEM = "<< dtEM;
+				cout << " dtR1 = "<< dtR1;
+				cout << " dtR3 = "<< dtR3;
+				cout << " dtR5 = "<< dtR5;
+				cout << " dtR7 = "<< dtR7;
+				cout << " dtR8 = "<< dtR8;
 				cout << " event_dat = " << event_day;
-				cout << " CBD = " << cbd;
+				cout << " CBDEM = " << cbdEM;
+				cout << " CBDR1 = " << cbdR1;
+				cout << " CBDR3 = " << cbdR3;
+				cout << " CBDR5 = " << cbdR5;
+				cout << " CBDR7 = " << cbdR7;
+				cout << " CBDR8 = " << cbdR8;
 				cout << " phase_change = " << phase_change << endl;
 			}
 			training_error += (curr_day - event_day) * (curr_day - event_day);

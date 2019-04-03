@@ -6,7 +6,7 @@ using namespace HighFive;
 class Nlreg
 {
 public:
-	Nlreg(QString func_file_name, std::vector<std::string> meas, std::vector<std::string> grn, int nF, int wl, int rF, int print_trace = 0) : funcs_file_name(func_file_name), measurements(meas), gr_names(grn) {
+	Nlreg(std::vector<std::string> meas, std::vector<std::string> grn, int nF, int wl, int rF, int print_trace = 0) : measurements(meas), gr_names(grn) {
 		/*		std::cout << "Got " << h5_file_name.toStdString() << " file" << std::endl;
 				std::cout << "Got " << funcs_file_name.toStdString() << " funcs" << std::endl;*/
 		nFunctions = nF;
@@ -15,7 +15,7 @@ public:
 		num_of_gt_vars = gr_names.size();
 		PRINT_TRACE = print_trace;
 		read_flag = rF;
-		read_genotype();
+//		read_genotype();
 	}
 	double get_func_value(vector<double> clim_arg, vector<double> gt_vars)
 	{
@@ -129,6 +129,26 @@ public:
 				cout << endl;
 			}
 		}
+	}
+	void set_genotype(vector<int>& gt)
+	{
+		genotype = gt;
+	}
+	void set_beta(vector<double>& be)
+	{
+		beta = be;
+	}
+	void set_beta_limit(double& arg)
+	{
+		MB = arg;
+		for (size_t i = nFunctions; i < nFunctions + nFunctions * num_of_gt_vars; ++i) {
+			double be = (beta[i] > 0) ? beta[i] : -beta[i];
+			beta[i] = (be < MB) ? 0.0 : beta[i];
+		}
+	}
+	void set_climate_vars(vector<double>& concs)
+	{
+		climate_var = concs;
 	}
 private:
 	int num_of_climate_vars; // Number of columns in the weather table == number of consts to read after func's and betas

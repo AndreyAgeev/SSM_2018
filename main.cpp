@@ -9,33 +9,32 @@ int main(int argc, char *argv[])
 	parser.addHelpOption();
 	parser.addVersionOption();
 	parser.addOptions({
-					{{"l", "Latitude"},
-					QCoreApplication::translate("main", "Latitude.")},
-					{{"s", "sName"},
-				QCoreApplication::translate("main", "sName."),
-				QCoreApplication::translate("main", "S")},
-									{{"3", "VPDF"},
-										QCoreApplication::translate("main", "VPDF.")},
-									{{"y", "yno"},
-										QCoreApplication::translate("main", "Number of years."),
-										QCoreApplication::translate("main", "Y")},
-										{{"R", "R"},
-										QCoreApplication::translate("main", "function mode"),
-										QCoreApplication::translate("main", "R")},
-										{{"P", "P"},
-										QCoreApplication::translate("main", "threshold"),
-										QCoreApplication::translate("main", "P")},
-									{{"f", "FirstYear"},
-										QCoreApplication::translate("main", "FirstYear."),
-										QCoreApplication::translate("main", "F")},
-									{{"i", "FixFind"},
-										QCoreApplication::translate("main", "FixFind")},
-									{{"p", "Pdoy"},
-										QCoreApplication::translate("main", "Pdoy."),
-										QCoreApplication::translate("main", "P")},
-									{{"T", "print-trace"},
-										QCoreApplication::translate("main", "Print trace."),
-										QCoreApplication::translate("main", "T")},
+	{{"l", "Latitude"},
+		QCoreApplication::translate("main", "Latitude."),
+		QCoreApplication::translate("main", "l")},
+	{{"s", "VPDF"},
+		QCoreApplication::translate("main", "VPDF."),
+		QCoreApplication::translate("main", "s")},
+	{{"y", "yno"},
+		QCoreApplication::translate("main", "Number of years."),
+		QCoreApplication::translate("main", "Y")},
+	{{"R", "R"},
+		QCoreApplication::translate("main", "function mode"),
+		QCoreApplication::translate("main", "R")},
+	{{"P", "P"},
+		QCoreApplication::translate("main", "threshold"),
+		QCoreApplication::translate("main", "P")},
+	{{"f", "FirstYear"},
+		QCoreApplication::translate("main", "FirstYear."),
+		QCoreApplication::translate("main", "F")},
+	{{"i", "FixFind"},
+		QCoreApplication::translate("main", "FixFind")},
+	{{"p", "Pdoy"},
+		QCoreApplication::translate("main", "Pdoy."),
+		QCoreApplication::translate("main", "P")},
+	{{"T", "print-trace"},
+		QCoreApplication::translate("main", "Print trace."),
+		QCoreApplication::translate("main", "T")},
 	{{"D", "num-days"},
 		QCoreApplication::translate("main", "Number of days."),
 		QCoreApplication::translate("main", "D")},
@@ -47,62 +46,62 @@ int main(int argc, char *argv[])
 		QCoreApplication::translate("main", "L")},
 	{{"Q", "extra_covar"},
 		QCoreApplication::translate("main", "Read binary covariates.")},
-									{{"d", "SearchDur"},
-														QCoreApplication::translate("main", "SearchDur.")},
-									{{"w", "SowWat"},
-														QCoreApplication::translate("main", "SowWat."),
-														QCoreApplication::translate("main", "M")},
-									{{"n", "PDEN"},////////////////////////////
-														QCoreApplication::translate("main", "Number of functions."),
-														QCoreApplication::translate("main", "N")},
-													{{"m", "water"},
-														QCoreApplication::translate("main", "Make corrections.")},
-													{{"r", "IRGLVL"},
-														QCoreApplication::translate("main", "IRGLVL."),
-														QCoreApplication::translate("main", "L")},
-													{{"t", "SOLDEP"},
-														QCoreApplication::translate("main", "SOLDEP."),
-														QCoreApplication::translate("main", "P")},
-													{{"q", "DEP1"},
-														QCoreApplication::translate("main", "DEP1")},
-													{{"z", "SALB"},
-														QCoreApplication::translate("main", "SALB.")},
-													{{"x", "CN2"},
-														QCoreApplication::translate("main", "CN2.")},
-													{{"c", "DRAINF"},
-														QCoreApplication::translate("main", "DRAINF.")},
-													{{"b", "SAT"},
-														QCoreApplication::translate("main", "SAT.")},
-													{{"k", "DUL"},
-														QCoreApplication::translate("main", "DUL.")},
-													{{"4", "EXTR"},
-														QCoreApplication::translate("main", "EXTR.")},
-													{{"j", "MAI1"},
-														QCoreApplication::translate("main", "MAI1.")},
-													{{"a", "MAI"},
-														QCoreApplication::translate("main", "MAI.")},
-													{{"o", "INSOL"},
-														QCoreApplication::translate("main", "INSOL.")},
-													{{"1", "U"},
-														QCoreApplication::translate("main", "U.")},
-													{{"2", "CropColNo"},
-														QCoreApplication::translate("main", "CropColNo.")},
-		});
-	parser.addPositionalArgument("cropsoinifile", "The file to open.");
+	{{"d", "SearchDur"},
+		QCoreApplication::translate("main", "SearchDur.")},
+	{{"w", "SowWat"},
+		QCoreApplication::translate("main", "SowWat."),
+		QCoreApplication::translate("main", "M")},
+	{{"n", "PDEN"},////////////////////////////
+		QCoreApplication::translate("main", "Number of functions."),
+		QCoreApplication::translate("main", "N")},
+	{{"m", "water"},
+		QCoreApplication::translate("main", "Make corrections.")},
+	{{"r", "IRGLVL"},
+		QCoreApplication::translate("main", "IRGLVL."),
+		QCoreApplication::translate("main", "L")},
+	{{"t", "SOLDEP"},
+		QCoreApplication::translate("main", "SOLDEP."),
+		QCoreApplication::translate("main", "P")},
+	{{"q", "DEP1"},
+		QCoreApplication::translate("main", "DEP1")},
+	{{"z", "SALB"},
+		QCoreApplication::translate("main", "SALB.")},
+	{{"x", "CN2"},
+		QCoreApplication::translate("main", "CN2.")},
+	{{"c", "DRAINF"},
+		QCoreApplication::translate("main", "DRAINF.")},
+	{{"b", "SAT"},
+		QCoreApplication::translate("main", "SAT.")},
+	{{"k", "DUL"},
+		QCoreApplication::translate("main", "DUL.")},
+	{{"E", "EXTR"},
+		QCoreApplication::translate("main", "EXTR.")},
+	{{"j", "MAI1"},
+		QCoreApplication::translate("main", "MAI1.")},
+	{{"a", "MAI"},
+		QCoreApplication::translate("main", "MAI.")},
+	{{"o", "INSOL"},
+		QCoreApplication::translate("main", "INSOL.")},
+	{{"U", "U"},
+		QCoreApplication::translate("main", "U.")},
+	});
+//	parser.addPositionalArgument("cropsoinifile", "The file to open.");
 	parser.addPositionalArgument("samplesfile", "The file to open.");
 	parser.addPositionalArgument("weatherfile", "The file to open.");
-	parser.addPositionalArgument("funcsfile", "The file to read funcs.");
+//	parser.addPositionalArgument("funcsfile", "The file to read funcs.");
+	parser.addPositionalArgument("cropsoinifile", "The file to open.");
 	parser.process(a);
 	const QStringList args = parser.positionalArguments();
 	Model * model;
 	Parametrs param;
 	if (args.size())
 	{
-		param.func_file_name = args.at(3); // funcs
-		param.h5_file_name = args.at(2); // samples
-		param.h5_table_name = args.at(1); // weather
-		param.crops_ini_file = args.at(0); // weather
-		cout << "name file: " << param.func_file_name.toStdString() << " " << param.h5_file_name.toStdString() << " " << param.h5_table_name.toStdString() << param.crops_ini_file.toStdString() << param.crops_ini_file.toStdString() << endl;
+//		param.func_file_name = args.at(3); // funcs
+		param.crops_ini_file = args.at(2); // crops
+		param.h5_file_name = args.at(1); // samples
+		param.h5_table_name = args.at(0); // weather
+//		param.crops_ini_file = args.at(0); // crops
+//		cout << "name file: " << " " << param.h5_file_name.toStdString() << " " << param.h5_table_name.toStdString() << " " << param.crops_ini_file.toStdString() << endl;
 		const QString TParameter = parser.value("print-trace");
 		const int T = TParameter.toInt();
 		if (T < 0) {
@@ -136,12 +135,10 @@ int main(int argc, char *argv[])
 		if (D <= 0) {
 			std::cout << "Bad nd: " + D;
 		}
-		/*
-			const QString nfParameter2 = parser.value("Latitude");
-			param.Latitude = nfParameter2.toDouble();
-	/*		const QString nfParameter3 = parser.value("VPDF");
-			const int inf = nfParameter3.toDouble();
-			param.VPDF = inf;*/
+		const QString nfParameter2 = parser.value("Latitude");
+		param.Latitude = nfParameter2.toDouble();
+		const QString nfParameter3 = parser.value("VPDF");
+		param.VPDF = nfParameter3.toDouble();
 		const QString nfParameter4 = parser.value("yno");
 		param.yno = nfParameter4.toDouble();
 		const QString nfParameter5 = parser.value("FirstYear");
@@ -188,8 +185,8 @@ int main(int argc, char *argv[])
 				param.CropColNo = nfParameter24.toInt();*/
 				//		param.Print();
 						////////////////////////////////////////////////////////
-		param.Latitude = 36.41;
-		param.VPDF = 0.75;
+//		param.Latitude = 36.41;
+//		param.VPDF = 0.75;
 		param.yno = 10;
 		param.FirstYear = 2014;
 		param.FixFind = 1;
@@ -211,7 +208,6 @@ int main(int argc, char *argv[])
 		param.MAI = 1;
 		param.INSOL = 3;
 		param.U = 6;
-		param.CropColNo = 3;
 		param.ROW = 7;
 		param.file_mode = false;
 		param.nF = N;

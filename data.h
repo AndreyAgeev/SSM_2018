@@ -121,7 +121,14 @@ public:
 		int nSamples;
 		int nGrCovar;
 	};
-
+	struct Data_b
+	{
+		vector<int> x;
+		vector<double> beta;
+		vector<double> concs;
+		double betaLimit;
+	};
+	Data_b data_b;
 
 	Data_a data_a5;
 
@@ -206,7 +213,32 @@ public:
 
 		//QSettings sett("C:\project\SSM\SSM_improved\SSM_improved\crops.ini.src", QSettings::IniFormat);
 		QSettings sett(file_name, QSettings::IniFormat);
-		sett.beginGroup("Jam");
+		sett.beginGroup("DEEP");
+		int size = sett.beginReadArray("x");
+		for (int i = 0; i < size; ++i) {
+		    sett.setArrayIndex(i);
+		    int arg;
+		    arg = sett.value("value").toInt();
+		    data_b.x.push_back(arg);
+		}
+		sett.endArray();
+		size = sett.beginReadArray("beta");
+		for (int i = 0; i < size; ++i) {
+		    sett.setArrayIndex(i);
+		    double arg;
+		    arg = sett.value("value").toDouble();
+		    data_b.beta.push_back(arg);
+		}
+		sett.endArray();
+		size = sett.beginReadArray("concs");
+		for (int i = 0; i < size; ++i) {
+		    sett.setArrayIndex(i);
+		    double arg;
+		    arg = sett.value("value").toDouble();
+		    data_b.concs.push_back(arg);
+		}
+		sett.endArray();
+		data_b.betaLimit = sett.value("betaLimit", 100).toDouble();
 		data_p.phyl = sett.value("phyl", 46).toDouble();
 		data_p.PLACON = sett.value("PLACON", 1).toDouble();
 		data_p.PLAPOW30 = sett.value("PLAPOW30", 2.158).toDouble();
