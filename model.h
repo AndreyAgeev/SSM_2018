@@ -274,16 +274,18 @@ public:
 	int NSAM = 0;
 
 
-	Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
+        Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
 	{
 		if (param.print_trace > 1) cout << "begin read" << endl;
 		data.read_h5(param.h5_file_name);
 		data.read_spieces(param.h5_table_name, param.ecovar);
-		data.read_ini(param.crops_ini_file);
-		nl = new Nlreg(param.func_file_name, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace);
+		if(param.crops == 0)
+		     data.read_ini(param.crops_ini_file);
+		nl = new Nlreg(param.func_file_name, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace, param.crops);
+		if (param.crops == 1)
+			data.data_p = nl->data_p;
 		nl->nlreg_build();
 		if (param.print_trace > 1) cout << "end read" << endl;
-		//	run_h5();
 	}
 	void SoilWater()
 	{
