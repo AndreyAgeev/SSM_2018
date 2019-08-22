@@ -3,6 +3,7 @@
 class Parametrs
 {
 public:
+	int crops;
 
 	QString func_file_name;
 	QString h5_file_name;
