@@ -1,5 +1,9 @@
 #include <QtCore/QCoreApplication>
 #include "model.h"
+#include <WinSDKVer.h>
+#define _WIN32_WINNT 0x0601
+#include <SDKDDKVer.h>
+
 #define add(name) param.## name
 int main(int argc, char *argv[])
 {
@@ -86,6 +90,9 @@ int main(int argc, char *argv[])
 	{{"o", "INSOL"},
 		QCoreApplication::translate("main", "INSOL."),
 		QCoreApplication::translate("main", "o")},
+	{{"y", "CROPS"},//////////////////////////////////////////////////////////////////////new
+		QCoreApplication::translate("main", "CROPS."),
+		QCoreApplication::translate("main", "y")},
 	{{"U", "U"},
 		QCoreApplication::translate("main", "U."),
 		QCoreApplication::translate("main", "U")},
@@ -100,10 +107,27 @@ int main(int argc, char *argv[])
 	Parametrs param;
 	if (args.size())
 	{
-		param.func_file_name = args.at(3); // funcs
-		param.h5_file_name = args.at(2); // samples
-		param.h5_table_name = args.at(1); // weather
-		param.crops_ini_file = args.at(0); // weather
+		const QString CROPSParameter = parser.value("CROPS");///////////////////////////////////////////////////new
+		const int CROPS = CROPSParameter.toInt();
+		if (CROPS != 0 && CROPS != 1) {////0 - outside file, 1 - inside
+			std::cout << "Bad p: " + CROPS;
+		}
+		if (CROPS == 0)
+		{
+			param.func_file_name = args.at(3); // funcs
+			param.h5_file_name = args.at(2); // weather
+			param.h5_table_name = args.at(1); // samples
+			param.crops_ini_file = args.at(0);
+		}
+		else
+		{
+			param.func_file_name = args.at(2); // funcs
+			param.h5_file_name = args.at(1); // weather
+			param.h5_table_name = args.at(0); // samples
+		}
+		param.crops = CROPS;
+
+
 		const QString TParameter = parser.value("print-trace");
 		const int T = TParameter.toInt();
 		if (T < 0) {
@@ -118,10 +142,10 @@ int main(int argc, char *argv[])
 
 		const QString PParameter = parser.value("P");
 		const int P = PParameter.toInt();
-		if (P != 0 && P != 1 && P != 3 && P != 5 && P != 7 && P != 8 && P != -1) {
-			std::cout << "Bad p: " + P;
-		}
-
+		//if (P != 0 && P != 1 && P != 3 && P != 5 && P != 7 && P != 8 && P != 2) {
+		//	std::cout << "Bad p: " + P;
+	//	}
+		
 		const QString NParameter = parser.value("number-of-funcs");
 		const int N = NParameter.toInt();
 		if (N < 0) {
@@ -235,9 +259,9 @@ int main(int argc, char *argv[])
 		param.function_mode = R;
  	    param.threshold = P;
 	}
-	if (param.print_trace > 0) {
-		param.Print();
-	}
+	//if (param.print_trace > 0) {
+	//	param.Print();
+	//}
 	model = new Model(param, &a);
 	QObject::connect(model, SIGNAL(finished()), &a, SLOT(quit()));
 	QTimer::singleShot(0, model, SLOT(run_h5()));
