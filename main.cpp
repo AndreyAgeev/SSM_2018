@@ -117,13 +117,16 @@ int main(int argc, char *argv[])
 			param.func_file_name = args.at(3); // funcs
 			param.h5_file_name = args.at(2); // weather
 			param.h5_table_name = args.at(1); // samples
-			param.crops_ini_file = args.at(0);
+			param.crops_ini_file = args.at(0);//crops
 		}
 		else
 		{
-			param.func_file_name = args.at(2); // funcs
+
+		//	param.func_file_name = args.at(2); // funcs
+			param.crops_ini_file = args.at(2);//crops + func
 			param.h5_file_name = args.at(1); // weather
 			param.h5_table_name = args.at(0); // samples
+			
 		}
 		param.crops = CROPS;
 
