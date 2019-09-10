@@ -1369,14 +1369,19 @@ public:
 	double Heaviside(double arg) { return (arg > 0) ? 1.0 : 0.0; }
 	void calculation(void)
 	{
+		arma::mat Fpoints;
 		double phase_change;
 		double cbd;
 		double training_error = 0;
 		double curr_error = 0;
 		int nDays = param.nD;
-
-		for (size_t nsam = 0; nsam < data.data_a5.nSamples; ++nsam)
-		{
+		double * interpol_error = new double[data.data_a5.nSamples];
+	//	if (param.print_trace > 0 && param.function_mode != SOLTANI_FUNC)
+	//	{
+	//		nl->print_trace(param.func_file_name.toStdString(), 0);
+	//	}
+		 for (size_t nsam = 0; nsam < data.data_a5.nSamples; ++nsam)
+		 {
 			NSAM = nsam;
 			ROW = -1;
 			MAT = 0;
@@ -1403,13 +1408,12 @@ public:
 				}
 			}
 			ROW = j;
-
+			
 			if (check == false)
 			{
 				continue;
 			}
-
-			if (param.print_trace > 0) cout << "nsam = " << nsam << " geo id = " << geo_id << " BEGIN ROW = " << ROW;
+ 		//	if (param.print_trace > 0) cout << "nsam = " << nsam << " geo id = " << geo_id << " BEGIN ROW = " << ROW;
 			int curr_day = -nDays;
 			for (size_t nd = 0; nd < nDays; nd++)
 			{
@@ -1432,35 +1436,47 @@ public:
 				{
 					break;
 				}
+				double rhs = 0.1 * ((double)nd + 6.0 - event_day);
+				cout << "CBD = " << CBD << endl;
+				rhs = (rhs > 0.9) ? 0.9 : rhs;
+				rhs = (rhs < 0.1) ? 0.1 : rhs;
+				cout << "RHS = " << rhs << endl;
+				interpol_error[nsam] += (CBD - rhs) * (CBD - rhs);
 			}
 			phase_change = nl->get_cbd();//get_phase_change();
 			cbd = get_cbd();
-		//	if (param.threshold != -1)
 			curr_day = get_curr_day();
-		//	else
-		//		curr_day = -nDays;
+
 
 			if (param.print_trace > 0)
 			{
 				SummaryPrintOut();
-				cout << " END ROW = " << ROW;
-				cout << " MAT = " << MAT;
-				cout << " curr_day = " << curr_day;
-				cout << " event_dat = " << event_day;
-				cout << " CBD = " << cbd;
-				cout << " phase_change = " << phase_change << endl;
+			//	cout << " END ROW = " << ROW;
+			//	cout << " MAT = " << MAT;
+			//	cout << " curr_day = " << curr_day;
+			//	cout << " event_dat = " << event_day;
+			//	cout << " CBD = " << cbd;
+			//	cout << " phase_change = " << phase_change << endl;
 			}
 			training_error += (curr_day - event_day) * (curr_day - event_day);
 			curr_error += (cbd - phase_change) * (cbd - phase_change);
 		}
-		cout << training_error << endl;
+		out_error.open(param.h5_table_name.toStdString() + "_" + "out_error.txt", std::ios::app);
+		out_error << training_error << endl;
+		out_error << curr_error << endl;
+		out_error << nl->get_l1_pen() << endl;
+		out_error << nl->get_l2_pen() << endl;
+		out_error.close();
+		cout << training_error << endl;////////////////////////////////////////////////
 		cout << curr_error << endl;
-		cout << nl->get_l1_pen() << endl;
-		cout << nl->get_l2_pen() << endl;
+		cout << nl->get_l1_pen() << endl;//////////////////////
+		cout << nl->get_l2_pen() << endl;/////////////////////////////////////
+
 		if (param.print_trace > 0 && param.function_mode != SOLTANI_FUNC)
 		{
-			nl->print_trace(0);
+			nl->print_trace(param.func_file_name.toStdString(), 0);
 		}
+		delete [] interpol_error;
 	}
 public slots:
 	void run_h5()
