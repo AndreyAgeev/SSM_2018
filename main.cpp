@@ -7,7 +7,6 @@
 #define add(name) param.## name
 int main(int argc, char *argv[])
 {
-
 	QCoreApplication a(argc, argv);
 	QCommandLineParser parser;
 	parser.addHelpOption();
@@ -93,11 +92,14 @@ int main(int argc, char *argv[])
 	{{"y", "CROPS"},//////////////////////////////////////////////////////////////////////new
 		QCoreApplication::translate("main", "CROPS."),
 		QCoreApplication::translate("main", "y")},
+//	{{"v", "INTERPOL"},//////////////////////////////////////////////////////////////////////new
+//		QCoreApplication::translate("main", "INTERPOL."),
+//		QCoreApplication::translate("main", "v")},
 	{{"U", "U"},
 		QCoreApplication::translate("main", "U."),
 		QCoreApplication::translate("main", "U")},
 	});
-	parser.addPositionalArgument("cropsoinifile", "The file to open.");
+	parser.addPositionalArgument("cropsinifile", "The file to open.");
 	parser.addPositionalArgument("samplesfile", "The file to open.");
 	parser.addPositionalArgument("weatherfile", "The file to open.");
 	parser.addPositionalArgument("funcsfile", "The file to read funcs.");
@@ -105,32 +107,51 @@ int main(int argc, char *argv[])
 	const QStringList args = parser.positionalArguments();
 	Model * model;
 	Parametrs param;
+	std::ofstream check;
+	check.open("C:/project/ABCDE_CHECK.txt", std::ios::app);
+	check << args.size() << endl;
 	if (args.size())
 	{
 		const QString CROPSParameter = parser.value("CROPS");///////////////////////////////////////////////////new
-		const int CROPS = CROPSParameter.toInt();
+		const int CROPS = 0;// CROPSParameter.toInt();
 		if (CROPS != 0 && CROPS != 1) {////0 - outside file, 1 - inside
-			std::cout << "Bad p: " + CROPS;
+			std::cout << "Bad y: " + CROPS;
 		}
-		if (CROPS == 0)
-		{
+		//CROPS = 0;
+	//	const QString Interpolarameter = parser.value("INTERPOL");///////////////////////////////////////////////////new
+	//	const int INTERPOL = Interpolarameter.toInt();
+	//	if (INTERPOL != 0 && INTERPOL != 1) {////0 - not interpol, 1 - interpol
+	//		std::cout << "Bad v: " + CROPS;
+	//	}
+		
+
+	//	if (CROPS == 0)
+	//	{
 			param.func_file_name = args.at(3); // funcs
 			param.h5_file_name = args.at(2); // weather
 			param.h5_table_name = args.at(1); // samples
 			param.crops_ini_file = args.at(0);//crops
-		}
-		else
+			check << param.func_file_name.toStdString() << endl;
+
+			check << param.h5_file_name.toStdString() << endl;
+
+			check << param.h5_table_name.toStdString() << endl;
+
+			check << param.crops_ini_file.toStdString() << endl;
+
+	//	}
+	/*	else
 		{
 
-		//	param.func_file_name = args.at(2); // funcs
+			param.func_file_name = args.at(2); // funcs
 			param.crops_ini_file = args.at(2);//crops + func
 			param.h5_file_name = args.at(1); // weather
 			param.h5_table_name = args.at(0); // samples
+			param.func_file_name = param.crops_ini_file;
 			
-		}
+		}*/
 		param.crops = CROPS;
-
-
+		check.close();
 		const QString TParameter = parser.value("print-trace");
 		const int T = TParameter.toInt();
 		if (T < 0) {
@@ -258,13 +279,17 @@ int main(int argc, char *argv[])
 		param.nD = D;
 		param.rT = 1;
 		param.ecovar = parser.isSet("extra_covar");
+		param.ecovar = 1;
 		param.print_trace = T;
 		param.function_mode = R;
- 	    param.threshold = P;
+ 	    param.threshold = P; 
+		param.threshold = 1;
 	}
 	//if (param.print_trace > 0) {
 	//	param.Print();
 	//}
+	//check.close();
+
 	model = new Model(param, &a);
 	QObject::connect(model, SIGNAL(finished()), &a, SLOT(quit()));
 	QTimer::singleShot(0, model, SLOT(run_h5()));
