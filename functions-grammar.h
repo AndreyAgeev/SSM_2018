@@ -37,10 +37,10 @@ public:
 	int numChildren;
 	GrammarNode* children[2];
 	int child_type[2];
-	GrammarNode() { } // to be used later
+	GrammarNode() { children[0] = NULL; children[1] = NULL; } // to be used later
 	virtual ~GrammarNode() { } // to be used later
 	virtual double eval(vector<double>& inVal) = 0;  //setting the 0 makes it a PURE
-	virtual void coprint() = 0;
+	virtual void coprint(std::ostream &out) = 0;
 	virtual GrammarNode* prune() = 0;
 	virtual GrammarNode* clone() = 0; //make a deep copy of the current tree
 	virtual void setScale(vector<double>& a, vector<double>& b) = 0;
@@ -66,7 +66,7 @@ public:
 	ConstNode(int ind, double *preSetVal);
 	virtual double eval(vector<double>& inVal);
 	ConstNode* clone();
-	virtual void coprint();
+	virtual void coprint(std::ostream &out);
 	virtual ConstNode* prune();
 	virtual void setScale(vector<double>& a, vector<double>& b) { }
 	//	virtual string getLabel();
@@ -85,7 +85,7 @@ public:
 	InputNode(int inputId, string pname);
 	virtual double eval(vector<double>& inVal);
 	InputNode* clone();
-	virtual void coprint();
+	virtual void coprint(std::ostream &out);
 	virtual InputNode* prune();
 	virtual void setScale(vector<double>& a, vector<double>& b) {
 		if (inputIndex >= 0) {
@@ -106,7 +106,7 @@ public:
 	Add();
 	virtual double eval(vector<double>& inVal);
 	Add* clone();
-	virtual void coprint();
+	virtual void coprint(std::ostream &out);
 	virtual Add* prune();
 	virtual void setScale(vector<double>& a, vector<double>& b) {
 		if (children[0]) children[0]->setScale(a, b);
@@ -122,7 +122,7 @@ public:
 	Subtract();
 	virtual double eval(vector<double>& inVal);
 	Subtract* clone();
-	virtual void coprint();
+	virtual void coprint(std::ostream &out);
 	virtual Subtract* prune();
 	virtual void setScale(vector<double>& a, vector<double>& b) {
 		if (children[0]) children[0]->setScale(a, b);
@@ -138,7 +138,7 @@ public:
 	Multiply();
 	virtual double eval(vector<double>& inVal);
 	Multiply* clone();
-	virtual void coprint();
+	virtual void coprint(std::ostream &out);
 	virtual Multiply* prune();
 	virtual void setScale(vector<double>& a, vector<double>& b) {
 		if (children[0]) children[0]->setScale(a, b);
@@ -154,7 +154,7 @@ public:
 	Divide();
 	virtual double eval(vector<double>& inVal);
 	Divide* clone();
-	virtual void coprint();
+	virtual void coprint(std:: ostream &out);
 	virtual Divide* prune();
 	virtual void setScale(vector<double>& a, vector<double>& b) {
 		if (children[0]) children[0]->setScale(a, b);
@@ -170,7 +170,7 @@ public:
 	InputMinusConst();
 	virtual double eval(vector<double>& inVal);
 	InputMinusConst* clone();
-	virtual void coprint();
+	virtual void coprint(std::ostream &out);
 	virtual InputMinusConst* prune();
 	virtual void setScale(vector<double>& a, vector<double>& b) {
 		if (children[0]) children[0]->setScale(a, b);
@@ -186,7 +186,7 @@ public:
 	RecInputMinusConst();
 	virtual double eval(vector<double>& inVal);
 	RecInputMinusConst* clone();
-	virtual void coprint();
+	virtual void coprint(std::ostream &out);
 	virtual RecInputMinusConst* prune();
 	virtual void setScale(vector<double>& a, vector<double>& b) {
 		if (children[0]) children[0]->setScale(a, b);
@@ -223,4 +223,3 @@ private:
 	GrammarNode* find_node_type_2(int gen, double *phenotype);
 };
 #endif // _FUNCTIONS_GRAMMAR_H_
-
