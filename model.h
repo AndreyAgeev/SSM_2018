@@ -4,6 +4,8 @@
 #include <iostream>
 #include <QtCore>
 #include <QDebug>
+#include <armadillo>
+
 
 #include <highfive/H5Attribute.hpp>
 #include <highfive/H5File.hpp>
@@ -25,13 +27,13 @@ public:
 	int ROW = 0;
 	int MAT;
 	int index_lai = -1;
-	double iniPheno;
-	double iniLai;
-	double iniDMP;
-	double iniDMD;
-	double iniSW;
-	double iniPNB;
-	double CumFind;
+	int iniPheno;//INT
+	int iniLai;
+	int iniDMP;
+	int iniDMD;
+	int iniSW;
+	int iniPNB;
+	int CumFind;
 
 	//SoilWater
 	double CLL;
@@ -74,6 +76,7 @@ public:
 	double DRAIN1;
 	double DRAIN;
 	double GRTD;
+
 	double CBD;
 
 	double EWAT;
@@ -112,12 +115,12 @@ public:
 	double TMP;
 
 	double DOY;
-	double dtEM;
-	double dtR1;
-	double dtR3;
-	double dtR5;
-	double dtR7;
-	double  dtR8;
+	int dtEM;
+	int dtR1;
+	int dtR3;
+	int dtR5;
+	int dtR7;
+	int  dtR8;
 	double  MXLAI;
 	double BSGDM;
 	double  WTOP;
@@ -152,7 +155,7 @@ public:
 	double cbdR8;
 
 
-	double DAP;
+	int DAP;
 	double tempfun;
 	double DTT;
 
@@ -216,6 +219,7 @@ public:
 	std::ofstream out_CNUP;
 	std::ofstream out_NVEG;
 	std::ofstream out_NGRN;
+	std::ofstream out_error;
 	double TSUNST;
 	double NIGHTL;
 	double TEMP1;
@@ -274,16 +278,16 @@ public:
 	int NSAM = 0;
 
 
-        Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
+	Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
 	{
 		if (param.print_trace > 1) cout << "begin read" << endl;
 		data.read_h5(param.h5_file_name);
 		data.read_spieces(param.h5_table_name, param.ecovar);
 		data.read_ini(param.crops_ini_file);
-		if (param.crops == 0)
-			nl = new Nlreg(param.func_file_name, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace, param.crops);
-		else
-			nl = new Nlreg(param.crops_ini_file, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace, param.crops);
+	//	if (param.crops == 0)
+		nl = new Nlreg(param.func_file_name, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace, param.crops);
+//		else
+	//		nl = new Nlreg(param.crops_ini_file, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace, param.crops);
 		nl->nlreg_build();
 		if (param.print_trace > 1) cout << "end read" << endl;
 	}
@@ -563,7 +567,10 @@ public:
 
 		}
 		if (LtDrCntr >= data.data_p.LtWdDur && CBD < data.data_p.ttTSG)
+		{
+			cout << "change cbd not opt" << endl;
 			CBD = data.data_p.ttTSG;
+		}
 	}
 
 	void FindSowingData(int geo_id, int start_day, int start_year)
@@ -613,7 +620,7 @@ public:
 		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2.0;
 	}
 
-	void Phenology(void)
+	void Phenology()
 	{
 		int threshold_index;
 		if (iniPheno == 0)
@@ -627,7 +634,7 @@ public:
 			bdBLG = bdEM;
 			bdTLM = bdR1 + data.data_p.ttR1TLM;
 			bdTLP = bdR1 + data.data_p.ttR1TLP;
-			DAP = 0.0;
+			DAP = 0;
 			CBD = 0.0;
 			WSFD = 1.0;
 			iniPheno = 1;
@@ -708,19 +715,22 @@ public:
 		}
 		else
 		{
+
 			vector<double> clim_covar = { data.data_h5.tmax[ROW], data.data_h5.tmin[ROW], data.data_h5.rain[ROW], data.data_h5.dl[ROW], data.data_h5.srad[ROW] };
-			if (param.ecovar)
-				bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[NSAM]);
-			else
-				bd = nl->get_func_value(clim_covar);
-
-
+	//		if (param.ecovar == 1)// 0 - без снипов, 1 со снипами
+		//	cout << "gr_covar[nsam]= " << data.data_a5.gr_covar[NSAM].size() << endl;
+			bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[NSAM]);
+		//	cout << "THIS bd = " << bd;
+	//		else
+	//		{
+	//			bd = nl->get_func_value(clim_covar);
+	//		}
 			CBD += Heaviside(bd) * bd;
+		//	cout << " THIS CBD = " << CBD;
 		}
 
-		DAP = DAP + 1.0;
-
-
+		DAP = DAP + 1;
+	//	cout << "THIS DAP = " << DAP << endl;
 		if (CBD < bdEM)
 		{
 			dtEM = DAP + 1.0;  // 'Saving days to EMR
@@ -728,27 +738,30 @@ public:
 		}
 		if (CBD < bdR1)
 		{
-			dtR1 = DAP + 1.0; // 'Saving days to R1
+		//	cout << "THIS bdR1 = " << bdR1 << endl;
+
+			dtR1 = DAP + 1; // 'Saving days to R1
 			cbdR1 = CBD;
+		//	cout << "THIS cbdR1 = " << cbdR1 << endl;
 		}
 		if (CBD < bdR3)
 		{
-			dtR3 = DAP + 1.0;  // 'Saving days to R3
+			dtR3 = DAP + 1;  // 'Saving days to R3
 			cbdR3 = CBD;
 		}
 		if (CBD < bdR5)
 		{
-			dtR5 = DAP + 1.0;//  'Saving days to R5
+			dtR5 = DAP + 1;//  'Saving days to R5
 			cbdR5 = CBD;
 		}
 		if (CBD < bdR7)
 		{
-			dtR7 = DAP + 1.0; //  'Saving days to R7
+			dtR7 = DAP + 1; //  'Saving days to R7
 			cbdR7 = CBD;
 		}
 		if (CBD < bdR8)
 		{
-			dtR8 = DAP + 1.0; // 'Saving days to R8
+			dtR8 = DAP + 1; // 'Saving days to R8
 			cbdR8 = CBD;
 		}
 
@@ -756,7 +769,7 @@ public:
 		if (CBD > bdR8)
 			MAT = 1;
 	}
-	double get_curr_day(void)
+	int get_curr_day(void)
 	{
 		if (param.threshold == 0)
 			return dtEM;
@@ -801,7 +814,7 @@ public:
 			return cbdR7;
 		if (param.threshold == 8)
 			return cbdR8;
-		return CBD;
+	return CBD; 
 	}
 	void CropLAIN(void)
 	{
@@ -1246,19 +1259,21 @@ public:
 	}
 	void DailyPrintOut(void)
 	{
-		out_LAI.open("output_LAI.txt", std::ios::app);
-		out_DAP.open("DAP.txt", std::ios::app);
-		out_FTSW.open("output_ftsw.txt", std::ios::app);
-		out_CE.open("output_CE.txt", std::ios::app);
-		out_CTR.open("output_CTR.txt", std::ios::app);
-		out_MSNN.open("output_MSNN.txt", std::ios::app);
-		out_CNUP.open("output_CNUP.txt", std::ios::app);
-		out_NVEG.open("output_NVEG.txt", std::ios::app);
-		out_NGRN.open("output_NGRN.txt", std::ios::app);
+		
+		//out_LAI.open(param.func_file_name.toStdString() + "_" + "output_LAI" + param.h5_file_name.toStdString() + ".txt", std::ios::app);
+		out_LAI.open(param.h5_table_name.toStdString() + "_" + "output_LAI.txt", std::ios::app);
+		out_DAP.open(param.h5_table_name.toStdString() + "_" + "DAP.txt" , std::ios::app);
+		out_FTSW.open(param.h5_table_name.toStdString() + "_" + "output_ftsw.txt" , std::ios::app);
+		out_CE.open(param.h5_table_name.toStdString() + "_" + "output_CE.txt", std::ios::app);
+		out_CTR.open(param.h5_table_name.toStdString() + "_" + "output_CTR.txt", std::ios::app);
+		out_MSNN.open(param.h5_table_name.toStdString() + "_" + "output_MSNN.txt", std::ios::app);
+		out_CNUP.open(param.h5_table_name.toStdString() + "_" + "output_CNUP.txt", std::ios::app);
+		out_NVEG.open(param.h5_table_name.toStdString() + "_" + "output_NVEG.txt", std::ios::app);
+		out_NGRN.open(param.h5_table_name.toStdString() + "_" + "output_NGRN.txt", std::ios::app);
 
-		out.open("output.txt", std::ios::app);
+		out.open(param.h5_table_name.toStdString() + "_" + "output.txt", std::ios::app);
 		if (write_check == false) {
-			out << "NSAM= " << "ROW= " << " YEARS= " << " DOY= " << "DAP= " << " TMP= " << " DTT= " << "CBD= " << "MSNN= " << "GLAI= " << " DLAI=" << "LAI = " << "TCFRUE = " << "FINT= " << " DDMP= " << "GLF= " << "GST= " << " SGR= " << " WLF= " << "WST= " << "WVEG=  " << " WGRN= " << "WTOP= " << "DEPORT= " << "RAIN= " << "IRGW= " << "RUNOF= " << "PET= " << "SEVP= " << "TR= " << "ATSW= " << " FTSW=  " << " CRAIN= " << " CIRGW= " << "IRGNO= " << " CRUNOF= " << "CE= " << " CTR= " << "WSTORG= " << "NUP= " << " NLF= " << "NST= " << "NVEG= " << " NGRN= " << "CNUP= " << "MAT= " << endl;
+			out <<"GEO_ID" <<"NSAM= " << "ROW= " << " YEARS= " << " DOY= " << "DAP= " << " TMP= " << " DTT= " << "CBD= " << "MSNN= " << "GLAI= " << " DLAI=" << "LAI = " << "TCFRUE = " << "FINT= " << " DDMP= " << "GLF= " << "GST= " << " SGR= " << " WLF= " << "WST= " << "WVEG=  " << " WGRN= " << "WTOP= " << "DEPORT= " << "RAIN= " << "IRGW= " << "RUNOF= " << "PET= " << "SEVP= " << "TR= " << "ATSW= " << " FTSW=  " << " CRAIN= " << " CIRGW= " << "IRGNO= " << " CRUNOF= " << "CE= " << " CTR= " << "WSTORG= " << "NUP= " << " NLF= " << "NST= " << "NVEG= " << " NGRN= " << "CNUP= " << "MAT= " << endl;
 			write_check = true;
 		}
 		out_LAI << LAI << endl;
@@ -1271,6 +1286,7 @@ public:
 		out_NVEG << NVEG << endl;
 		out_NGRN << NGRN << endl;
 
+		out << data.data_a5.geo_id[NSAM] << " ";
 		out << NSAM << "  ";
 		out << ROW << "  ";
 		out << data.data_h5.years[ROW] << "  ";
@@ -1330,8 +1346,11 @@ public:
 	}
 	void SummaryPrintOut()
 	{
-		out_s.open("output_summary.txt", std::ios::app);
+		out_s.open(param.func_file_name.toStdString() + "_" + "output_summary.txt", std::ios::app);
+		//out_s.open(param.func_file_name.toStdString() + "_" + "output_summary.txt", std::ios::app);
 		out_s << "[" << NSAM << "]" << endl;
+		out_s <<"geo_id = " << data.data_a5.geo_id[NSAM] << endl;
+		out_s << "CBD = " << CBD << endl;
 		out_s << "year = " << data.data_h5.years[ROW] << endl;
 		out_s << "dtEM = " << dtEM << endl;
 		out_s << "dtR1 = " << dtR1 << endl;
@@ -1339,6 +1358,7 @@ public:
 		out_s << "dtR5 = " << dtR5 << endl;
 		out_s << "dtR7 = " << dtR7 << endl;
 		out_s << "dtR8 = " << dtR8 << endl;
+		out_s << "cbdR1 = " << cbdR1 << endl;
 		out_s << "MSNN = " << MSNN << endl;
 		out_s << "MXLAI = " << MXLAI << endl;
 		out_s << "BSGLAI = " << BSGLAI << endl;
@@ -1366,20 +1386,25 @@ public:
 		out_s << "CIRGW = " << CIRGW << endl;
 		out_s.close();
 	}
-	double Heaviside(double arg) { return (arg > 0) ? 1.0 : 0.0; }
+	double Heaviside(double arg) { return (arg > 0.0) ? 1.0 : 0.0; }
 	void calculation(void)
 	{
-		arma::mat Fpoints;
+	//	arma::mat Fpoints;
 		double phase_change;
 		double cbd;
 		double training_error = 0;
 		double curr_error = 0;
 		int nDays = param.nD;
-		double * interpol_error = new double[data.data_a5.nSamples];
+	//	cout << nDays << endl;
+	//	nl->print_trace(param.func_file_name.toStdString(), 0);
+	//	double * interpol_error = new double[data.data_a5.nSamples];
 	//	if (param.print_trace > 0 && param.function_mode != SOLTANI_FUNC)
 	//	{
 	//		nl->print_trace(param.func_file_name.toStdString(), 0);
-	//	}
+	//	}			
+	//	cout << data.data_a5.nSamples << endl;
+	//	cout << data.data_a5.nSamples << endl;
+
 		 for (size_t nsam = 0; nsam < data.data_a5.nSamples; ++nsam)
 		 {
 			NSAM = nsam;
@@ -1392,6 +1417,7 @@ public:
 			iniDMD = 0;
 			iniSW = 0;
 			iniPNB = 0;
+			//DAP = 0.0;
 
 			int start_day = data.data_a5.doy[nsam];
 			int start_year = data.data_a5.years[nsam];
@@ -1400,6 +1426,7 @@ public:
 			//	FindSowingData(geo_id, start_day, start_year);
 			bool check = false;
 			size_t j = 0;
+			
 			for (size_t nd = 0; nd < data.data_h5.nWeather; ++nd) {
 				if (geo_id == data.data_h5.geo_id[nd] && data.data_h5.doy[nd] == start_day && data.data_h5.years[nd] == start_year) {
 					j = nd;
@@ -1408,7 +1435,7 @@ public:
 				}
 			}
 			ROW = j;
-			
+			//cout << ROW << endl;
 			if (check == false)
 			{
 				continue;
@@ -1436,55 +1463,63 @@ public:
 				{
 					break;
 				}
-				double rhs = 0.1 * ((double)nd + 6.0 - event_day);
-				cout << "CBD = " << CBD << endl;
-				rhs = (rhs > 0.9) ? 0.9 : rhs;
-				rhs = (rhs < 0.1) ? 0.1 : rhs;
-				cout << "RHS = " << rhs << endl;
-				interpol_error[nsam] += (CBD - rhs) * (CBD - rhs);
+		//		double rhs = 0.1 * ((double)nd + 6.0 - event_day);
+			//	cout << "CBD = " << CBD << endl;
+		//		rhs = (rhs > 0.9) ? 0.9 : rhs;
+		//		rhs = (rhs < 0.1) ? 0.1 : rhs;
+		//		cout << "RHS = " << rhs << endl;
+		//		interpol_error[nsam] += (CBD - rhs) * (CBD - rhs);
 			}
 			phase_change = nl->get_cbd();//get_phase_change();
 			cbd = get_cbd();
 			curr_day = get_curr_day();
 
+		//	SummaryPrintOut();
 
-			if (param.print_trace > 0)
-			{
-				SummaryPrintOut();
+		//	if (param.print_trace > 0)
+		//	{
+			//	SummaryPrintOut();
 			//	cout << " END ROW = " << ROW;
 			//	cout << " MAT = " << MAT;
 			//	cout << " curr_day = " << curr_day;
 			//	cout << " event_dat = " << event_day;
 			//	cout << " CBD = " << cbd;
 			//	cout << " phase_change = " << phase_change << endl;
-			}
+		//	}
+		//	cout << "answer:" << endl;
+		//	cout << curr_day << endl;
+		//	cout << event_day << endl;
+
 			training_error += (curr_day - event_day) * (curr_day - event_day);
 			curr_error += (cbd - phase_change) * (cbd - phase_change);
 		}
-		out_error.open(param.h5_table_name.toStdString() + "_" + "out_error.txt", std::ios::app);
-		out_error << training_error << endl;
-		out_error << curr_error << endl;
-		out_error << nl->get_l1_pen() << endl;
-		out_error << nl->get_l2_pen() << endl;
-		out_error.close();
+	//	cout << endl << "final print:" << endl;
+	//	out_error.open(param.func_file_name.toStdString() + "_" + "ERROR.txt", std::ios::app);
+	//	out_error << training_error << endl;
+		//out_error << curr_error << endl;
+	//	out_error << nl->get_l1_pen() << endl;
+	//	out_error << nl->get_l2_pen() << endl;
+	//	out_error.close();
 		cout << training_error << endl;////////////////////////////////////////////////
 		cout << curr_error << endl;
 		cout << nl->get_l1_pen() << endl;//////////////////////
 		cout << nl->get_l2_pen() << endl;/////////////////////////////////////
-
-		if (param.print_trace > 0 && param.function_mode != SOLTANI_FUNC)
-		{
-			nl->print_trace(param.func_file_name.toStdString(), 0);
-		}
-		delete [] interpol_error;
+		nl->print_trace(param.func_file_name.toStdString(), 0);
+	//	if (param.print_trace > 0 && param.function_mode != SOLTANI_FUNC)
+	//	{
+	//		nl->print_trace(param.func_file_name.toStdString(), 0);
+	//	}
+	//	delete [] interpol_error;
+	//	delete nl;
+		nl->delete_all();
 	}
 public slots:
 	void run_h5()
 	{
 
-		if (param.print_trace > 0) cout << "BEGIN CALC" << endl;
+		//if (param.print_trace > 0) cout << "BEGIN CALC" << endl;//////////////////////////////
 		calculation();
-		if (param.print_trace > 0) cout << "END CALC" << endl;
+		//if (param.print_trace > 0) cout << "END CALC" << endl;///////////////////////////////
 		emit finished();
 	}
 signals:
