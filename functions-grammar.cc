@@ -55,7 +55,7 @@ ConstNode::ConstNode() {
 	numChildren = 0;
 	constVal = new double(rand() / (double)RAND_MAX);
 	char str[20] = "";
-	sprintf(str, "Const: %f", constVal);
+	//sprintf(str, "Const: %f", constVal);/////////////////////
 	label = str;
 	precendence = -1;
 }
@@ -90,8 +90,8 @@ double ConstNode::eval(vector<double>& inVal, double& dvdt) {
 }
 * */
 
-void ConstNode::coprint() {
-	cout << "(" << (*constVal) << ")";
+void ConstNode::coprint(std::ostream& out) {
+	out << "(" << (*constVal) << ")";
 }
 
 ConstNode* ConstNode::prune() {
@@ -139,17 +139,17 @@ double InputNode::eval(vector<double>& inVal) {
 	}
 }
 
-void InputNode::coprint() {
+void InputNode::coprint(std::ostream &out) {
 	if (inputIndex >= 0) {
 		if (scalePresent) {
-			cout << "((" << inpname << "-" << offset << ")/" << scale << ")";
+			out << "((" << inpname << "-" << offset << ")/" << scale << ")";
 		}
 		else {
-			cout << inpname;
+			out << inpname;
 		}
 	}
 	else if (children[0]) {
-		children[0]->coprint();
+		children[0]->coprint(out);
 	}
 	else {
 		if (PRINT_TRACE > 1) cerr << "not defined in input coprint" << endl;
@@ -164,7 +164,7 @@ void InputNode::coprint() {
 //}
 
 InputNode* InputNode::prune() {
-	if (inputIndex <= 0 && !children[0]) {
+	if (inputIndex < 0 && !children[0]) {
 		//		cout << *this << endl;
 		delete this;
 		return NULL;
@@ -219,28 +219,28 @@ double Add::eval(vector<double>& inVal, double& dvdt){
 }
 */
 
-void Add::coprint() {
+void Add::coprint(std::ostream &out) {
 	if (children[0] && children[1]) {
-		cout << " (";
-		children[0]->coprint();
-		cout << " + ";
-		children[1]->coprint();
-		cout << ") ";
+		out << " (";
+		children[0]->coprint(out);
+		out << " + ";
+		children[1]->coprint(out);
+		out << ") ";
 	}
 	else if (children[0]) {
-		cout << " (";
-		children[0]->coprint();
-		cout << ") ";
+		out << " (";
+		children[0]->coprint(out);
+		out << ") ";
 	}
 	else if (children[1]) {
-		cout << " (";
-		children[1]->coprint();
-		cout << ") ";
+		out << " (";
+		children[1]->coprint(out);
+		out << ") ";
 	}
 	else {
 		if (PRINT_TRACE > 1) cerr << "left and right not defined in add" << endl;
-		cout << " (0";
-		cout << ") ";
+		out << " (0";
+		out << ") ";
 	}
 }
 
@@ -294,28 +294,28 @@ double Subtract::eval(vector<double>& inVal) {
 	}
 }
 
-void Subtract::coprint() {
+void Subtract::coprint(std::ostream &out) {
 	if (children[0] && children[1]) {
-		cout << " (";
-		children[0]->coprint();
-		cout << " - ";
-		children[1]->coprint();
-		cout << ") ";
+		out << " (";
+		children[0]->coprint(out);
+		out << " - ";
+		children[1]->coprint(out);
+		out << ") ";
 	}
 	else if (children[0]) {
-		cout << " (";
-		children[0]->coprint();
-		cout << ") ";
+		out << " (";
+		children[0]->coprint(out);
+		out << ") ";
 	}
 	else if (children[1]) {
-		cout << " (";
-		children[1]->coprint();
-		cout << ") ";
+		out << " (";
+		children[1]->coprint(out);
+		out << ") ";
 	}
 	else {
 		if (PRINT_TRACE > 1) cerr << "left and right not defined in subtract" << endl;
-		cout << " (0";
-		cout << ") ";
+		out << " (0";
+		out << ") ";
 	}
 }
 
@@ -369,28 +369,28 @@ double Multiply::eval(vector<double>& inVal) {
 	}
 }
 
-void Multiply::coprint() {
+void Multiply::coprint(std::ostream &out) {
 	if (children[0] && children[1]) {
-		cout << " (";
-		children[0]->coprint();
-		cout << " * ";
-		children[1]->coprint();
-		cout << ") ";
+		out << " (";
+		children[0]->coprint(out);
+		out << " * ";
+		children[1]->coprint(out);
+		out << ") ";
 	}
 	else if (children[0]) {
-		cout << " (";
-		children[0]->coprint();
-		cout << ") ";
+		out << " (";
+		children[0]->coprint(out);
+		out << ") ";
 	}
 	else if (children[1]) {
-		cout << " (";
-		children[1]->coprint();
-		cout << ") ";
+		out << " (";
+		children[1]->coprint(out);
+		out << ") ";
 	}
 	else {
 		if (PRINT_TRACE > 1) cerr << "left and right not defined in multiply" << endl;
-		cout << " (0";
-		cout << ") ";
+		out << " (0";
+		out << ") ";
 	}
 }
 
@@ -461,29 +461,29 @@ double Divide::eval(vector<double>& inVal, double& dvdt){
 }
 */
 
-void Divide::coprint() {
+void Divide::coprint(std::ostream &out) {
 	if (children[0] && children[1]) {
-		cout << " (";
-		children[0]->coprint();
-		cout << " / ";
-		children[1]->coprint();
-		cout << ") ";
+		out << " (";
+		children[0]->coprint(out);
+		out << " / ";
+		children[1]->coprint(out);
+		out << ") ";
 	}
 	else if (children[0]) {
-		cout << " (";
-		children[0]->coprint();
-		cout << ") ";
+		out << " (";
+		children[0]->coprint(out);
+		out << ") ";
 	}
 	else if (children[1]) {
-		cout << " (1";
-		cout << " / ";
-		children[1]->coprint();
-		cout << ") ";
+		out << " (1";
+		out << " / ";
+		children[1]->coprint(out);
+		out << ") ";
 	}
 	else {
 		if (PRINT_TRACE > 1) cerr << "left and right not defined in divide" << endl;
-		cout << " (0";
-		cout << ") ";
+		out << " (0";
+		out << ") ";
 	}
 }
 
@@ -552,30 +552,30 @@ double InputMinusConst::eval(vector<double>& inVal, double& dvdt){
 }
 */
 
-void InputMinusConst::coprint() {
+void InputMinusConst::coprint(std::ostream &out) {
 	if (children[0] && children[1]) {
-		cout << " (";
-		children[0]->coprint();
-		cout << " - ";
-		children[1]->coprint();
-		cout << ") ";
+		out << " (";
+		children[0]->coprint(out);
+		out << " - ";
+		children[1]->coprint(out);
+		out << ") ";
 	}
 	else if (children[0]) {
-		cout << " (";
-		children[0]->coprint();
-		cout << ") ";
+		out << " (";
+		children[0]->coprint(out);
+		out << ") ";
 	}
 	else if (children[1]) {
-		cout << " (";
-		cout << " - ";
-		children[1]->coprint();
-		cout << ") ";
+		out << " (";
+		out << " - ";
+		children[1]->coprint(out);
+		out << ") ";
 	}
 	else {
 		if (PRINT_TRACE > 1) cerr << "left and right not defined in InputMinusConst" << endl;
-		cout << " (";
-		cout << " 0 ";
-		cout << ") ";
+		out << " (";
+		out << " 0 ";
+		out << ") ";
 	}
 }
 
@@ -629,28 +629,28 @@ double RecInputMinusConst::eval(vector<double>& inVal) {
 	}
 }
 
-void RecInputMinusConst::coprint() {
+void RecInputMinusConst::coprint(std::ostream &out) {
 	if (children[0] && children[1]) {
-		cout << " (1/(";
-		children[0]->coprint();
-		cout << " - ";
-		children[1]->coprint();
-		cout << ")) ";
+		out << " (1/(";
+		children[0]->coprint(out);
+		out << " - ";
+		children[1]->coprint(out);
+		out << ")) ";
 	}
 	else if (children[0]) {
-		cout << " (1/(";
-		children[0]->coprint();
-		cout << ")) ";
+		out << " (1/(";
+		children[0]->coprint(out);
+		out << ")) ";
 	}
 	else if (children[1]) {
-		cout << " (-1/(";
-		children[1]->coprint();
-		cout << ")) ";
+		out << " (-1/(";
+		children[1]->coprint(out);
+		out << ")) ";
 	}
 	else {
 		if (PRINT_TRACE > 1) cerr << "left and right not defined in InputMinusConst" << endl;
-		cout << " (1";
-		cout << ") ";
+		out << " (1";
+		out << ") ";
 	}
 }
 
@@ -695,6 +695,7 @@ GrammarNode* GrammarContainer::find_node_type_0(int gen, double *phenotype)
 {
 	GrammarNode*n;
 	int ge = gen % n_nodes_type_0;
+	//cout << " ge= " << ge << " ";
 	switch (ge) {
 	case 0:
 		n = new Add();
@@ -720,7 +721,8 @@ GrammarNode* GrammarContainer::find_node_type_0(int gen, double *phenotype)
 	default:
 		cout << "Error find node type 0" << gen << endl;
 	}
-	(*phenotype) = (double)ge;
+	//cout << " ge= " << (long double)ge << " ";
+	(*phenotype) = (long double)ge;
 	return n;
 }
 
@@ -728,6 +730,7 @@ GrammarNode* GrammarContainer::find_node_type_1(int gen, double conc, double *ph
 {
 	GrammarNode*n;
 	(*phenotype) = conc;
+	//cout << " conc " << conc << " ";
 	n = new ConstNode(gen, phenotype);
 	return n;
 }
@@ -738,7 +741,8 @@ GrammarNode* GrammarContainer::find_node_type_2(int gen, double *phenotype)
 	int ge = gen % n_predictors;
 	this->last_predictor = ge;
 	n = new InputNode(ge, predictors[ge]);
-	(*phenotype) = (double)ge;
+	//cout << " ge= " << (long double)ge << " ";
+	(*phenotype) = (long double)ge;
 	return n;
 }
 
@@ -792,7 +796,8 @@ GrammarNode* GrammarContainer::build_tree(vector<int>& genotype, vector<double>&
 
 	root_expr = find_node(curr_type, genotype[i], conc[this->last_predictor], &phenotype[i], phenomask[i]);
 	i++;
-	//	cout << "g " << genotype[i - 1] << ' ' << i - 1 << ' ' << *root_expr << endl;
+	//cout << "g " << genotype[i - 1] << ' ' << i - 1 << ' ' << *root_expr << endl;
+	//cout << "p " << phenotype[i - 1] << ' ' << i - 1 << ' ' << *root_expr << endl;
 
 	if (root_expr->numChildren == 2) {
 		stack.push(new StackNode(root_expr, 1, root_expr->child_type[1]));
@@ -806,7 +811,9 @@ GrammarNode* GrammarContainer::build_tree(vector<int>& genotype, vector<double>&
 		curr_type = curr->child_type;
 		child = find_node(curr_type, genotype[i], conc[this->last_predictor], &phenotype[i], phenomask[i]);
 		i++;
-		//		cout << "g " << genotype[i - 1] << ' ' << i - 1 << ' ' << *child << endl;
+	//	cout << "BEFORE" << endl;
+	//	cout << "g " << genotype[i - 1] << ' ' << i - 1 << ' ' << *child << endl;
+	//	cout << "p " << phenotype[i - 1] << ' ' << i - 1 << ' ' << *child << endl;
 		curr->kernel->children[curr->side] = child;
 		if (child->numChildren == 2) {
 			stack.push(new StackNode(child, 1, child->child_type[1]));
@@ -814,19 +821,27 @@ GrammarNode* GrammarContainer::build_tree(vector<int>& genotype, vector<double>&
 		if (child->numChildren > 0) {
 			stack.push(new StackNode(child, 0, child->child_type[0]));
 		}
+	//	cout << "AFTER" << endl;
+
+	///	cout << "g " << genotype[i - 1] << ' ' << i - 1 << ' ' << *child << endl;
+	//	cout << "p " << phenotype[i - 1] << ' ' << i - 1 << ' ' << *child << endl;
+
 	}
 
 	while (!stack.isEmpty()) {
 		curr = stack.pop();
 		curr->kernel->children[curr->side] = NULL;
+		//delete curr;	
 	}
 
 	root_expr = root_expr->prune();
 	if (!root_expr) root_expr = new ConstNode(-1, new double(0.0));
+	
 	return root_expr;
 }
 
-void GrammarContainer::build_nth_tree(vector<int>& genotype, vector<double>& conc, int n, double *phenotype, int *phenomask)
+void GrammarContainer::build_nth_tree(vector<int>& genotype, vector<double>& conc, int n,  double *phenotype, int *phenomask)
 {
 	tree[n] = build_tree(genotype, conc, phenotype, phenomask);
+	//tree.insert(tree.begin() + n, build_tree(genotype, conc, phenotype, phenomask));
 }
