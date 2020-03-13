@@ -107,9 +107,9 @@ int main(int argc, char *argv[])
 	const QStringList args = parser.positionalArguments();
 	Model * model;
 	Parametrs param;
-	std::ofstream check;
-	check.open("C:/project/ABCDE_CHECK.txt", std::ios::app);
-	check << args.size() << endl;
+	//std::ofstream check;
+//	check.open("C:/project/ABCDE_CHECK.txt", std::ios::app);
+//	check << args.size() << endl;
 	if (args.size())
 	{
 		const QString CROPSParameter = parser.value("CROPS");///////////////////////////////////////////////////new
@@ -131,13 +131,13 @@ int main(int argc, char *argv[])
 			param.h5_file_name = args.at(2); // weather
 			param.h5_table_name = args.at(1); // samples
 			param.crops_ini_file = args.at(0);//crops
-			check << param.func_file_name.toStdString() << endl;
+		//	check << param.func_file_name.toStdString() << endl;
 
-			check << param.h5_file_name.toStdString() << endl;
+		//	check << param.h5_file_name.toStdString() << endl;
 
-			check << param.h5_table_name.toStdString() << endl;
+	//		check << param.h5_table_name.toStdString() << endl;
 
-			check << param.crops_ini_file.toStdString() << endl;
+//check << param.crops_ini_file.toStdString() << endl;
 
 	//	}
 	/*	else
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 			
 		}*/
 		param.crops = CROPS;
-		check.close();
+	//	check.close();
 		const QString TParameter = parser.value("print-trace");
 		const int T = TParameter.toInt();
 		if (T < 0) {
