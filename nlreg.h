@@ -22,14 +22,28 @@ public:
 	{
 		double val = 0;
 		GrammarNode *retFtn;
+	//	std::ofstream out;
+	//	out.open("output_res.txt", std::ios::app);
 		for (size_t i = 0; i < nFunctions; ++i) {
 			retFtn = grc->get_nth_tree(i);
 			double fval = retFtn->eval(clim_arg);
+	//		out <<"fval = " <<  fval << endl;
+	//		out << "beta["<< i <<"] = " << beta[i] << endl;
+
 			val += beta[i] * fval;
-			for (size_t j = 0; j < num_of_gt_vars; ++j) {
-				val += beta[j + nFunctions] * gt_vars[j] * fval;
+	//		out << "val = " << val << endl;
+	//		out << num_of_gt_vars << endl;
+	//		out << "inside:" << endl;
+			for (size_t j = 0; j <  num_of_gt_vars; ++j) {
+	//			out << "beta[" << j <<"+" << nFunctions <<"]=" << beta[j + nFunctions] << endl;
+	//			out << gt_vars[j] << endl;
+	//			out << fval << endl;
+				val += beta[i*num_of_gt_vars + j + nFunctions] * gt_vars[j] * fval;
 			}
+	//		out << "val = " << val << endl;
+
 		}
+	//	out.close();
 		return val;
 	}
 	void delete_all()
@@ -37,7 +51,7 @@ public:
 		delete[] phenotype;
 		delete[] phenomask;
 	}
-/*	double get_func_value(vector<double> clim_arg)
+	double get_func_value(vector<double> clim_arg)
 	{
 		double val = 0;
 		GrammarNode *retFtn;
@@ -47,7 +61,7 @@ public:
 			val += beta[i] * fval;
 		}
 		return val;
-	}*/
+	}
 	double get_cbd()
 	{
 		return nlCBD;
@@ -58,7 +72,7 @@ public:
 		for (size_t i = 0; i < nFunctions; ++i) {
 			val += (beta[i] > 0) ? beta[i] : -beta[i];
 			for (size_t j = 0; j < num_of_gt_vars; ++j) {
-				val += (beta[j + nFunctions] > 0) ? beta[j + nFunctions] : -beta[j + nFunctions];
+				val += (beta[i*num_of_gt_vars + j + nFunctions] > 0) ? beta[i*num_of_gt_vars + j + nFunctions] : -beta[i*num_of_gt_vars + j + nFunctions];
 			}
 		}
 		return val;
@@ -69,7 +83,7 @@ public:
 		for (size_t i = 0; i < nFunctions; ++i) {
 			val += beta[i] * beta[i];
 			for (size_t j = 0; j < num_of_gt_vars; ++j) {
-				val += beta[j + nFunctions] * beta[j + nFunctions];
+				val += beta[i*num_of_gt_vars + j + nFunctions] * beta[i*num_of_gt_vars + j + nFunctions];
 			}
 		}
 		return val;
@@ -207,10 +221,11 @@ private:
 					double arg2;
 					in >> arg2;
 					be.push_back(arg2);
-		//							cout << be[i] << endl;
+		//			cout << be[i] << endl;
 				}
 				beta = be;
 			}
+		//	cout << "end be" << endl;
 			vector<double> concs;
 		//	cout << "num_of_climate_vars " << num_of_climate_vars << endl;
 
@@ -224,11 +239,27 @@ private:
 			if (read_flag > 0) {
 				in >> nlCBD;
 				in >> MB;
+			//	cout << MB << endl;
 				for (size_t i = nFunctions; i < nFunctions + nFunctions * num_of_gt_vars; ++i) {
+			//		cout << "index = " << i << endl;
+			//		cout << "before = " << beta[i] << endl;
 					double be = (beta[i] > 0.0) ? beta[i] : -beta[i];
+			//		cout << "after  = " << be << endl;
+
 					beta[i] = (be < MB) ? 0.0 : beta[i];
+	
+			//		cout << "finaly  = " << beta[i] << endl;
+
+			//		cout << beta[i] << endl;
 				}
 			}
+		//	std::ofstream out;
+
+		//	out.open("output_beta.txt", std::ios::app);
+
+		//	for (size_t i = 0; i < nFunctions * num_of_gt_vars; ++i)
+		//		out << beta[i] << endl;
+		//	out.close();
 		//	for (size_t i = 0; i < nFunctions * wordLength; ++i) { cout << gt[i] << " "; }
 			genotype = gt;
 			file.close();
