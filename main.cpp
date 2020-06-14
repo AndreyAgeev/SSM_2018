@@ -15,6 +15,12 @@ int main(int argc, char *argv[])
 	{{"l", "Latitude"},
 	    QCoreApplication::translate("main", "Latitude"),
 	    QCoreApplication::translate("main", "l") },
+	{{"A", "With snp - 1, without snp - 0"},
+		QCoreApplication::translate("main", "SNP OR NO"),
+		QCoreApplication::translate("main", "A") },
+	{{"C", "Crops file mode"},
+		QCoreApplication::translate("main", "Crops file mode"),
+		QCoreApplication::translate("main", "C") },
 	{{"s", "VPDF"},
 		QCoreApplication::translate("main", "VPDF."),
 		QCoreApplication::translate("main", "s") },
@@ -112,10 +118,10 @@ int main(int argc, char *argv[])
 //	check << args.size() << endl;
 	if (args.size())
 	{
-		const QString CROPSParameter = parser.value("CROPS");///////////////////////////////////////////////////new
-		const int CROPS = 0;// CROPSParameter.toInt();
-		if (CROPS != 0 && CROPS != 1) {////0 - outside file, 1 - inside
-			std::cout << "Bad y: " + CROPS;
+		const QString CROPSParameter = parser.value("C");///////////////////////////////////////////////////new
+		const int crops = CROPSParameter.toInt();
+		if (crops != 0 && crops != 1) {////0 - outside file, 1 - inside
+			std::cout << "Bad y: " + crops;
 		}
 		//CROPS = 0;
 	//	const QString Interpolarameter = parser.value("INTERPOL");///////////////////////////////////////////////////new
@@ -150,8 +156,14 @@ int main(int argc, char *argv[])
 			param.func_file_name = param.crops_ini_file;
 			
 		}*/
-		param.crops = CROPS;
+		const QString snpParameter = parser.value("A");///////////////////////////////////////////////////new
+		const int snp_or_no = snpParameter.toInt();// CROPSParameter.toInt();
+		if (snp_or_no != 0 && snp_or_no != 1) {////0 - outside file, 1 - inside
+			std::cout << "Bad snp: " + snp_or_no;
+		}
+		param.snp_mode = snp_or_no;
 	//	check.close();
+		param.crops = crops;
 		const QString TParameter = parser.value("print-trace");
 		const int T = TParameter.toInt();
 		if (T < 0) {
@@ -277,13 +289,13 @@ int main(int argc, char *argv[])
 		param.nF = N;
 		param.wL = L;
 		param.nD = D;
-		param.rT = 1;
-		param.ecovar = parser.isSet("extra_covar");
+		param.rT = 1;//read_flag = 1
+	//	param.ecovar = parser.isSet("extra_covar");
 		param.ecovar = 1;
 		param.print_trace = T;
 		param.function_mode = R;
  	    param.threshold = P; 
-		param.threshold = 1;
+		//param.threshold = 1;
 	}
 	//if (param.print_trace > 0) {
 	//	param.Print();
