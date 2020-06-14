@@ -3,8 +3,8 @@
 class Parametrs
 {
 public:
+	int snp_mode;
 	int crops;
-
 	QString func_file_name;
 	QString h5_file_name;
 	QString h5_table_name;
@@ -77,5 +77,15 @@ public:
 		std::cout << "file_mode " << file_mode << endl;
 		std::cout << "print_trace " << print_trace << endl;
 		std::cout << "threshold " << threshold << endl;
+		std::cout << "nF " << nF << endl;
+		std::cout << "nD " << nD << endl;
+		std::cout << "wL " << wL << endl;
+		std::cout << "rT " << rT << endl;
+		std::cout << "function_mode " << function_mode << endl;
+
+		std::cout << "func_file_name " << func_file_name.toStdString() << endl;
+		std::cout << "h5_file_name " << h5_file_name.toStdString() << endl;
+		std::cout << "h5_table_name " << h5_table_name.toStdString() << endl;
+		std::cout << "crops_ini_file " << crops_ini_file.toStdString() << endl;
 	}
 };
