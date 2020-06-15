@@ -8,8 +8,6 @@ class Nlreg
 {
 public:
 	Nlreg(QString func_file_name, std::vector<std::string> meas, std::vector<std::string> grn, int nF, int wl, int rF, int print_trace = 0, int crops = 0) : funcs_file_name(func_file_name), measurements(meas), gr_names(grn) {
-		/*		std::cout << "Got " << h5_file_name.toStdString() << " file" << std::endl;
-				std::cout << "Got " << funcs_file_name.toStdString() << " funcs" << std::endl;*/
 		nFunctions = nF;
 		wordLength = wl;
 		num_of_climate_vars = measurements.size();
@@ -22,28 +20,15 @@ public:
 	{
 		double val = 0;
 		GrammarNode *retFtn;
-	//	std::ofstream out;
-	//	out.open("output_res.txt", std::ios::app);
 		for (size_t i = 0; i < nFunctions; ++i) {
 			retFtn = grc->get_nth_tree(i);
 			double fval = retFtn->eval(clim_arg);
-	//		out <<"fval = " <<  fval << endl;
-	//		out << "beta["<< i <<"] = " << beta[i] << endl;
-
 			val += beta[i] * fval;
-	//		out << "val = " << val << endl;
-	//		out << num_of_gt_vars << endl;
-	//		out << "inside:" << endl;
+	
 			for (size_t j = 0; j <  num_of_gt_vars; ++j) {
-	//			out << "beta[" << j <<"+" << nFunctions <<"]=" << beta[j + nFunctions] << endl;
-	//			out << gt_vars[j] << endl;
-	//			out << fval << endl;
 				val += beta[i*num_of_gt_vars + j + nFunctions] * gt_vars[j] * fval;
 			}
-	//		out << "val = " << val << endl;
-
 		}
-	//	out.close();
 		return val;
 	}
 	void delete_all()
@@ -91,33 +76,16 @@ public:
 	void nlreg_build()
 	{
 		GrammarNode *retFtn;
-	//	cout << "measurements "  << measurements.size()  << "nFunction " << nFunctions << "wordLength " << wordLength  <<  "climate_var " << climate_var.size() << endl;
 		grc = new GrammarContainer(measurements, nFunctions);
 		phenotype = new double[nFunctions * wordLength];
 		phenomask = new int[nFunctions * wordLength];
-	/*	for (int i = 0; i < nFunctions * wordLength; i++)
-		{
-			phenotype[i] = 0.0;
-			phenomask[i] = 0;
-		}*/
 		int first = 0, last = wordLength;
 		for (int i = 0; i < nFunctions; ++i) {
 			std::vector<int> gt = std::vector<int>(genotype.begin() + first, genotype.begin() + last);
 			first += wordLength;
 			last += wordLength;
-		//	cout << "first " << first << " last " << last << endl;
-		//	cout << "first " << first << " last " << last << endl;
 			grc->build_nth_tree(gt, climate_var, i, &phenotype[i * wordLength], &phenomask[i * wordLength]);
-		//	cout << " phenotype["<<i << " * wordLength] = " << phenotype[i * wordLength] << " phenomask[" << i << " * wordLength] " << phenomask[i * wordLength] << endl;
 		}
-	/*	cout << " BEFORE" << endl;
-
-		for (size_t i = 0; i < 5 * 11; ++i) { // + nEcovar
-			cout << " phenotype[" << i << " ] = " << phenotype[i] << endl;
-		}
-		for (size_t i = 0; i < 5 * 11; ++i) { // + nEcovar
-			cout << " phenomask[" << i << " ] " << phenomask[i] << endl;
-		}*/
 	}
 	void print_trace(std::string func_name, int arg) {
 		std::ofstream out_func;
@@ -153,12 +121,10 @@ public:
 			out_func << endl; 
 			for (size_t i = 0; i < nFunctions * wordLength; ++i) { // + nEcovar
 				out_func << phenotype[i] << " ";
-		//		cout << " phenotype[" << i << " ] = " << phenotype[i] << endl;
 			}
 			out_func << endl;
 			for (size_t i = 0; i < nFunctions * wordLength; ++i) { // + nEcovar
 				out_func << phenomask[i] << " ";
-		//		cout << " phenomask[" << i << " ] " << phenomask[i] << endl;
 			}
 			out_func << endl;
 		}
@@ -192,8 +158,8 @@ private:
     int *phenomask;
 	vector<int> genotype;
 	void read_genotype(const int crops) {
-	//	if (crops == 0)
-	//	{
+		if (crops == 0)
+		{
 			QFile file(funcs_file_name);
 			vector<int> gt;
 			if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -203,17 +169,10 @@ private:
 			QTextStream in(&file);
 			QString nnm;
 			in >> nnm;
-	//		cout << "NEED =  " << nFunctions * wordLength + nFunctions + nFunctions * num_of_gt_vars + num_of_climate_vars + 2 << endl;
-	//		cout << "ge  " << nFunctions * wordLength << endl;
-	//		cout << "n+nf*num_of_gt  " << nFunctions  << endl;
-	//		cout << "nf*num_of_gt  " << num_of_gt_vars << endl;
-
-			
 			for (size_t i = 0; i < nFunctions * wordLength; ++i) {
 				int arg1;
 				in >> arg1;
 				gt.push_back(arg1);
-			//									cout << gt[i] << endl;
 			}
 			if (read_flag > -1) {
 				vector<double> be;
@@ -221,102 +180,58 @@ private:
 					double arg2;
 					in >> arg2;
 					be.push_back(arg2);
-		//			cout << be[i] << endl;
 				}
 				beta = be;
 			}
-		//	cout << "end be" << endl;
 			vector<double> concs;
-		//	cout << "num_of_climate_vars " << num_of_climate_vars << endl;
 
 			for (size_t i = 0; i < num_of_climate_vars; ++i) {
 				double arg3;
 				in >> arg3;
-					//cout << arg << endl;
 				concs.push_back(arg3);
 			}
 			climate_var = concs;
 			if (read_flag > 0) {
 				in >> nlCBD;
 				in >> MB;
-			//	cout << MB << endl;
 				for (size_t i = nFunctions; i < nFunctions + nFunctions * num_of_gt_vars; ++i) {
-			//		cout << "index = " << i << endl;
-			//		cout << "before = " << beta[i] << endl;
 					double be = (beta[i] > 0.0) ? beta[i] : -beta[i];
-			//		cout << "after  = " << be << endl;
-
 					beta[i] = (be < MB) ? 0.0 : beta[i];
-	
-			//		cout << "finaly  = " << beta[i] << endl;
-
-			//		cout << beta[i] << endl;
 				}
 			}
-		//	std::ofstream out;
-
-		//	out.open("output_beta.txt", std::ios::app);
-
-		//	for (size_t i = 0; i < nFunctions * num_of_gt_vars; ++i)
-		//		out << beta[i] << endl;
-		//	out.close();
-		//	for (size_t i = 0; i < nFunctions * wordLength; ++i) { cout << gt[i] << " "; }
 			genotype = gt;
 			file.close();
-
-	//	}
-		/*else
+		}
+		else
 		{
-			vector<int> gt;
 			QSettings sett(funcs_file_name, QSettings::IniFormat);
-			sett.beginGroup("Funcs");
-			for (size_t i = 0; i < nFunctions * wordLength; ++i) {
+			sett.beginGroup("DEEP");
+			int size = sett.beginReadArray("x");
+			for (int i = 0; i < size; ++i) {
+				sett.setArrayIndex(i);
 				int arg;
-				string codon = "codon";
-				string str = std::to_string(i);
-				string value = codon + str;
-				QString val = QString::fromUtf8(value.c_str());
-				arg = sett.value(val, 1).toInt();
-				gt.push_back(arg);
+				arg = sett.value("value").toInt();
+				genotype.push_back(arg);
 			}
-			if (read_flag > -1) {
-				vector<double> be;
-				for (size_t i = 0; i < nFunctions + nFunctions * num_of_gt_vars; ++i) {
-					int arg;
-					string codon = "beta";
-					string str = std::to_string(i);
-					string value = codon + str;
-					QString val = QString::fromUtf8(value.c_str());
-					arg = sett.value(val, 46).toDouble();
-					be.push_back(arg);
-					//					cout << be[i] << endl;
-				}
-				beta = be;
+			sett.endArray();
+			size = sett.beginReadArray("beta");
+			for (int i = 0; i < size; ++i) {
+				sett.setArrayIndex(i);
+				double arg;
+				arg = sett.value("value").toDouble();
+				beta.push_back(arg);
 			}
-			vector<double> concs;
-			for (size_t i = 0; i < num_of_climate_vars; ++i) {
-				int arg;
-				string codon = "climate_vars";
-				string str = std::to_string(i);
-				string value = codon + str;
-				QString val = QString::fromUtf8(value.c_str());
-				arg = sett.value(val, 46).toDouble();
-				//		cout << arg << endl;
-				concs.push_back(arg);
+			sett.endArray();
+			size = sett.beginReadArray("concs");
+			for (int i = 0; i < size; ++i) {
+				sett.setArrayIndex(i);
+				double arg;
+				arg = sett.value("value").toDouble();
+				climate_var.push_back(arg);
 			}
-			climate_var = concs;
-			if (read_flag > 0) {
-				CBD = sett.value("CBD", 46).toDouble();
-				MB = sett.value("MB", 46).toDouble();
-				for (size_t i = nFunctions; i < nFunctions + nFunctions * num_of_gt_vars; ++i) {
-					double be = (beta[i] > 0) ? beta[i] : -beta[i];
-					beta[i] = (be < MB) ? 0.0 : beta[i];
-				}
-			}
-			//					for (size_t i = 0; i < nFunctions * wordLength; ++i) { cout << gt[i] << endl; }
-			genotype = gt;
-			sett.endGroup();
-		}*/
-
+			sett.endArray();
+			MB = sett.value("betaLimit", 100).toDouble();
+			nlCBD = sett.value("CBD", 1).toDouble();
+		}
 	}
 };
