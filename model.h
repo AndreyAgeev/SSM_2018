@@ -289,10 +289,7 @@ public:
 		data.read_h5(param.h5_file_name);
 		data.read_spieces(param.h5_table_name, param.ecovar);
 		data.read_ini(param.crops_ini_file);
-	//	if (param.crops == 0)
 		nl = new Nlreg(param.func_file_name, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace, param.crops);
-//		else
-	//		nl = new Nlreg(param.crops_ini_file, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace, param.crops);
 		nl->nlreg_build();
 		if (param.print_trace > 1) cout << "end read" << endl;
 	}
@@ -578,50 +575,8 @@ public:
 		}
 	}
 
-	void FindSowingData(int geo_id, int start_day, int start_year)
-	{
-		/*if (param.FixFind == 2)
-		{
-			CumFind = 0.0;
-			for (int row = ROW; row < data.data_h5.years.size(); row++)
-			{
-				ROW = row;
-				DOY = data.data_h5.doy[ROW];;
-				CBD = 0.0;
-				SoilWater();
-				CumFind = CumFind + 1;
-				if (CumFind > param.SearchDur)
-					MAT = 1;
-				if (MAT == 1)
-				{
-					DOY = -1;
-					dtEM = 0.0;
-					dtR1 = 0.0;
-					dtR3 = 0.0;
-					dtR5 = 0.0;
-					dtR7 = 0.0;
-					dtR8 = 0.0;
-					MXLAI = 0.0;
-					BSGLAI = 0.0;
-					BSGDM = 0.0;
-					WTOP = 0.0;
-					WGRN = 0.0;
-					NLF = 0.0;
-					NST = 0.0;
-					NVEG = 0.0;
-					NGRN = 0.0;
-					CNUP = 0.0;
-					param.INSOL = 0.0;
-				}
-				if (ATSW1 + WSTORG >= param.SowWat || MAT == 1)
-					break;
-			}
-			Pdoy = data.data_h5.doy[ROW];
-		}*/
-	}
 	void Weather(void)
 	{
-		//	ROW += 1;
 		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2.0;
 	}
 
@@ -720,39 +675,15 @@ public:
 		}
 		else
 		{
-
 			vector<double> clim_covar = { data.data_h5.tmax[ROW], data.data_h5.tmin[ROW], data.data_h5.rain[ROW], data.data_h5.dl[ROW], data.data_h5.srad[ROW] };
-			//		if (param.ecovar == 1)// 0 - без снипов, 1 со снипами
-				//	cout << "gr_covar[nsam]= " << data.data_a5.gr_covar[NSAM].size() << endl;
-	//		cout << "    TEMP DATA: " << endl;		
-	//		cout << "_________________________ " << endl;
-	//		cout << "TMAX  TMIN  RAIN  DL  SRAD " << endl;
-
-	//		cout << data.data_h5.tmax[ROW] << " " << data.data_h5.tmin[ROW] << " " <<  data.data_h5.rain[ROW] << " " <<  data.data_h5.dl[ROW] << " " <<  data.data_h5.srad[ROW] << endl;
-
-	//		cout << "_________________________ " << endl;
-		//	   bd = nl->get_func_value(clim_covar);
-		if(param.snp_mode == 1)
-	       bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[NSAM]);
-		else
-			bd = nl->get_func_value(clim_covar);
-		//	out_bd.open(param.h5_table_name.toStdString() + "_" + "bd.txt", std::ios::app);
-		//	out_bd << "bd = " << bd << endl;
-	//		cout << "THIS bd = " << bd;
-		//		else
-		//		{
-		//			
-		//		}
+		    if(param.snp_mode == 1)
+	            bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[NSAM]);
+		    else
+			    bd = nl->get_func_value(clim_covar);
 			CBD += Heaviside(bd) * bd;
-		//	out_bd << "CBD = " << CBD << endl;
-
-	//		cout << " THIS CBD = " << CBD;
-	//		out_bd.close();
-
 		}
 
 		DAP = DAP + 1;
-		//	cout << "THIS DAP = " << DAP << endl;
 		if (CBD < bdEM)
 		{
 			dtEM = DAP + 1.0;  // 'Saving days to EMR
@@ -761,11 +692,8 @@ public:
 
 		if (CBD < bdR1)
 		{
-		//	cout << "THIS bdR1 = " << bdR1 << endl;
-
 			dtR1 = DAP + 1; // 'Saving days to R1
 			cbdR1 = CBD;
-		//	cout << "THIS cbdR1 = " << cbdR1 << endl;
 		}
 	//	if (CBD >= bdR1 && check_last_cbd == false)
 	//	{
@@ -793,7 +721,6 @@ public:
 			dtR8 = DAP + 1; // 'Saving days to R8
 			cbdR8 = CBD;
 		}
-	//	cout << "BDR8" << bdR8 << endl;
 		// Maturity ?
 		if (CBD > bdR8)
 			MAT = 1;
@@ -814,21 +741,6 @@ public:
 			return dtR8;
 		return (double)(-param.nD);
 	}
-/*	double get_phase_change(void)
-	{
-		if (param.threshold == 0)
-			return bdEM;
-		if (param.threshold == 1)
-			return bdR1;
-		if (param.threshold == 3)
-			return bdR3;
-		if (param.threshold == 5)
-			return bdR5;
-		if (param.threshold == 7)
-			return bdR7;
-		if (param.threshold == 8)
-			return bdR8;
-	}*/
 	double get_cbd(void)
 	{
 		if (param.threshold == 0)
@@ -843,7 +755,7 @@ public:
 			return cbdR7;
 		if (param.threshold == 8)
 			return cbdR8;
-	return CBD; 
+	    return CBD; 
 	}
 	void CropLAIN(void)
 	{
@@ -1192,9 +1104,7 @@ public:
 			}
 
 		}
-		//'       TRLN = LAI * (SLNG - SLNS) + (NST + INST - WST * SNCS)
-		//'       FXLF = LAI * (SLNG - SLNS) / TRLN
-
+		
 		else if (CBD >= data.data_p.ttBSG && CBD <= data.data_p.ttTSG)
 		{
 			INGRN = SGR * data.data_p.GNC;
@@ -1418,46 +1328,16 @@ public:
 	double Heaviside(double arg) { return (arg > 0.0) ? 1.0 : 0.0; }
 	void calculation(void)
 	{
-	//	arma::mat Fpoints;
-	//	return;
+	
 		double phase_change;
 		double cbd;
 		double training_error = 0;
 		double curr_error = 0;
+		double interpol_error = 0;
 		int nDays = param.nD;
 		int START_YEAR_TO_PRINT;
-	/*	string last_name_file = param.h5_table_name.toStdString();
-		string res;
-		if (last_name_file.length() == 108)
-		{
-			char o = last_name_file[last_name_file.length() - 4];
-			string one(1, o);
-			res = one;
-		}
-		else if (last_name_file.length() == 109)
-		{
-			char o = last_name_file[last_name_file.length() - 5];
-			char t = last_name_file[last_name_file.length() - 4];
-			string one(1, o);
-			string two(1, t);
-			res = one + two;
-		}*/
-	//	cout << last_name_file << endl;
-	//	cout << last_name_file.length() << endl;
-	//	cout << res << endl;
-	//	cout << nDays << endl;
-	//	nl->print_trace(param.func_file_name.toStdString(), 0);
-	//	double * interpol_error = new double[data.data_a5.nSamples];
-	//	if (param.print_trace > 0 && param.function_mode != SOLTANI_FUNC)
-	//	{
-	//		nl->print_trace(param.func_file_name.toStdString(), 0);
-	//	}			
-	//	cout << data.data_a5.nSamples << endl;
-	//	cout << data.data_a5.nSamples << endl;
-		 for (size_t nsam = 0; nsam < data.data_a5.nSamples; ++nsam)
-		 { 
-		//	 cout << endl;
-		//	cout << "NEW CHICKPEA - NSAM: " <<  nsam << endl;
+		for (size_t nsam = 0; nsam < data.data_a5.nSamples; ++nsam)
+		{ 
 			NSAM = nsam;
 			ROW = -1;
 			MAT = 0;
@@ -1467,28 +1347,11 @@ public:
 			iniDMP = 0;
 			iniDMD = 0;
 			iniSW = 0;
-			iniPNB = 0;
-			//DAP = 0.0;
-			
+			iniPNB = 0;			
 			int start_day = data.data_a5.doy[nsam];
 			int start_year = data.data_a5.years[nsam];
 			int geo_id = data.data_a5.geo_id[nsam];
 			double event_day = data.data_a5.response[nsam];
-		//	out_bd.open(param.h5_table_name.toStdString() + "_" + "bd.txt", std::ios::app);
-		//	out_bd << "chickpea = " << nsam << endl;
-		//	for (int k = 0; k < 18; k++)
-		//		out_bd << data.data_a5.gr_covar[NSAM][k] << " ";
-		//	out_bd << endl;
-		//	out_bd << "start_day = " << start_day << endl;
-		//	out_bd << "start_year = " << start_year << endl;
-		//	out_bd << "geo_id = " << geo_id << endl;
-
-		//	out_bd.close();
-		//	cout << "start_day = " << start_day << endl;
-		//	cout << "start_year = " << start_year << endl;
-		//	cout << "geo_id = " << geo_id << endl;
-
-			//	FindSowingData(geo_id, start_day, start_year);
 			bool check = false;
 			size_t j = 0;
 			START_YEAR_TO_PRINT = start_year;
@@ -1500,12 +1363,10 @@ public:
 				}
 			}
 			ROW = j;
-		//	cout << "ROW = " << ROW << endl;
 			if (check == false)
 			{
 				continue;
 			}
- 		//	if (param.print_trace > 0) cout << "nsam = " << nsam << " geo id = " << geo_id << " BEGIN ROW = " << ROW;
 			int curr_day = -nDays;
 			for (size_t nd = 0; nd < nDays; nd++)
 			{
@@ -1520,87 +1381,45 @@ public:
 				DMDistribution();
 				LegumPlant();
 				SoilWater();
-			//	if (param.print_trace > 0)
-			//	{
-			//		DailyPrintOut();
-			//	}
 				if (MAT == 1)
 				{
 					break;
 				}
-		//		double rhs = 0.1 * ((double)nd + 6.0 - event_day);
-			//	cout << "CBD = " << CBD << endl;
-		//		rhs = (rhs > 0.9) ? 0.9 : rhs;
-		//		rhs = (rhs < 0.1) ? 0.1 : rhs;
-		//		cout << "RHS = " << rhs << endl;
-		//		interpol_error[nsam] += (CBD - rhs) * (CBD - rhs);
+				double rhs = 0.1 * ((double)nd + 6.0 - event_day);
+				rhs = (rhs > 0.9) ? 0.9 : rhs;
+				rhs = (rhs < 0.1) ? 0.1 : rhs;
+				interpol_error += (CBD - rhs) * (CBD - rhs);
 			}
 			phase_change = nl->get_cbd();//get_phase_change();
 			cbd = get_cbd();
 			curr_day = get_curr_day();
-			//	last_name_file = last_name_file[last_name_file.length() - 4];
-	  //	last_name_file = last_name_file[last_name_file.length() - 4];
-		//	out_cbd.open(param.h5_table_name.toStdString() + "_"+ "cbd.txt", std::ios::app);
-		//	out_cbd << cbd << endl;
-		//	out_cbd.close();
 			check_last_cbd = false;
-			//		cout << "    TEMP DATA: " << endl;		
-	
-			//cout << last_name_file << endl;
-		  //  out_dtR1.open( param.h5_file_name.toStdString() +  "_" + "dtR1.txt", std::ios::app);
 			out_dtR1.open(param.func_file_name.toStdString()+param.h5_file_name.toStdString() + param.h5_table_name.toStdString()+ "_" + "dtR1.txt", std::ios::app);
-		//	cout << param.h5_file_name.toStdString() + "_" + to_string(start_year) + "_" + "dtR1.txt" << endl;
 			out_dtR1 << curr_day << endl;
 			out_dtR1.close();
-			
-		//	SummaryPrintOut();
-
-		//	if (param.print_trace > 0)
-		//	{
-			//	SummaryPrintOut();
-			//	cout << " END ROW = " << ROW;
-			//	cout << " MAT = " << MAT;
-			//	cout << " curr_day = " << curr_day;
-			//	cout << " event_dat = " << event_day;
-			//	cout << " CBD = " << cbd;
-			//	cout << " phase_change = " << phase_change << endl;
-		//	}
-		//	cout << "answer:" << endl;
-		//	cout << curr_day << endl;
-		//	cout << event_day << endl;
-
 			training_error += (curr_day - event_day) * (curr_day - event_day);
 			curr_error += (cbd - phase_change) * (cbd - phase_change);
 		}
-	//	cout << endl << "final print:" << endl;
-		//out_error.open(param.h5_file_name.toStdString() + "_" + "ERROR.txt", std::ios::app);
 		out_error.open(param.func_file_name.toStdString() + param.h5_file_name.toStdString() + param.h5_table_name.toStdString()  + "_" + "ERROR.txt", std::ios::app);
 
 		out_error << training_error << endl;
 		out_error << curr_error << endl;
 		out_error << nl->get_l1_pen() << endl;
       	out_error << nl->get_l2_pen() << endl;
+		out_error << interpol_error << endl;
 		out_error.close();
-		cout << training_error << endl;////////////////////////////////////////////////
+		cout << training_error << endl;
 		cout << curr_error << endl;
-		cout << nl->get_l1_pen() << endl;//////////////////////
-		cout << nl->get_l2_pen() << endl;/////////////////////////////////////
+		cout << nl->get_l1_pen() << endl;
+		cout << nl->get_l2_pen() << endl;
+		cout << interpol_error << endl;
 		nl->print_trace(param.func_file_name.toStdString(), 0);
-	//	if (param.print_trace > 0 && param.function_mode != SOLTANI_FUNC)
-	//	{
-	//		nl->print_trace(param.func_file_name.toStdString(), 0);
-	//	}
-	//	delete [] interpol_error;
-	//	delete nl;
 		nl->delete_all();
 	}
 public slots:
 	void run_h5()
 	{
-
-		//if (param.print_trace > 0) cout << "BEGIN CALC" << endl;//////////////////////////////
 		calculation();
-		//if (param.print_trace > 0) cout << "END CALC" << endl;///////////////////////////////
 		emit finished();
 	}
 signals:
