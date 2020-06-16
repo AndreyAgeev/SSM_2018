@@ -1385,10 +1385,13 @@ public:
 				{
 					break;
 				}
-				double rhs = 0.1 * ((double)nd + 6.0 - event_day);
-				rhs = (rhs > 0.9) ? 0.9 : rhs;
-				rhs = (rhs < 0.1) ? 0.1 : rhs;
-				interpol_error += (CBD - rhs) * (CBD - rhs);
+				if (param.crops == 1)
+				{
+					double rhs = 0.1 * ((double)nd + 6.0 - event_day);
+					rhs = (rhs > 0.9) ? 0.9 : rhs;
+					rhs = (rhs < 0.1) ? 0.1 : rhs;
+					interpol_error += (CBD - rhs) * (CBD - rhs);
+				}
 			}
 			phase_change = nl->get_cbd();//get_phase_change();
 			cbd = get_cbd();
@@ -1398,21 +1401,30 @@ public:
 			out_dtR1 << curr_day << endl;
 			out_dtR1.close();
 			training_error += (curr_day - event_day) * (curr_day - event_day);
-			curr_error += (cbd - phase_change) * (cbd - phase_change);
+			if(param.crops == 0)
+			    curr_error += (cbd - phase_change) * (cbd - phase_change);
 		}
 		out_error.open(param.func_file_name.toStdString() + param.h5_file_name.toStdString() + param.h5_table_name.toStdString()  + "_" + "ERROR.txt", std::ios::app);
 
 		out_error << training_error << endl;
-		out_error << curr_error << endl;
+		if (param.crops == 0)
+			out_error << curr_error << endl;
+		else
+			out_error << interpol_error << endl;//
+
 		out_error << nl->get_l1_pen() << endl;
       	out_error << nl->get_l2_pen() << endl;
-		out_error << interpol_error << endl;
+		//out_error << interpol_error << endl;
 		out_error.close();
 		cout << training_error << endl;
-		cout << curr_error << endl;
+		if (param.crops == 0)
+		    cout << curr_error << endl;
+		else
+			cout << interpol_error << endl;//
+
 		cout << nl->get_l1_pen() << endl;
 		cout << nl->get_l2_pen() << endl;
-		cout << interpol_error << endl;
+	//	cout << interpol_error << endl;
 		nl->print_trace(param.func_file_name.toStdString(), 0);
 		nl->delete_all();
 	}
