@@ -231,7 +231,7 @@ private:
 			}
 			sett.endArray();
 			MB = sett.value("betaLimit", 100).toDouble();
-			nlCBD = sett.value("CBD", 1).toDouble();
+			nlCBD = 1.0;
 		}
 	}
 };
