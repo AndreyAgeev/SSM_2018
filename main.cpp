@@ -1,8 +1,8 @@
 #include <QtCore/QCoreApplication>
 #include "model.h"
-#include <WinSDKVer.h>
-#define _WIN32_WINNT 0x0601
-#include <SDKDDKVer.h>
+//#include <WinSDKVer.h>
+//#define _WIN32_WINNT 0x0601
+//#include <SDKDDKVer.h>
 
 #define add(name) param.## name
 int main(int argc, char *argv[])
