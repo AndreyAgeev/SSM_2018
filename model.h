@@ -1397,25 +1397,25 @@ public:
 			cbd = get_cbd();
 			curr_day = get_curr_day();
 			check_last_cbd = false;
-			out_dtR1.open(param.func_file_name.toStdString()+param.h5_file_name.toStdString() + param.h5_table_name.toStdString()+ "_" + "dtR1.txt", std::ios::app);
-			out_dtR1 << curr_day << endl;
-			out_dtR1.close();
+		//	out_dtR1.open(param.func_file_name.toStdString()+param.h5_file_name.toStdString() + param.h5_table_name.toStdString()+ "_" + "dtR1.txt", std::ios::app);
+		//	out_dtR1 << curr_day << endl;
+		//	out_dtR1.close();
 			training_error += (curr_day - event_day) * (curr_day - event_day);
 			if(param.crops == 0)
 			    curr_error += (cbd - phase_change) * (cbd - phase_change);
 		}
-		out_error.open(param.func_file_name.toStdString() + param.h5_file_name.toStdString() + param.h5_table_name.toStdString()  + "_" + "ERROR.txt", std::ios::app);
+	//	out_error.open(param.func_file_name.toStdString() + param.h5_file_name.toStdString() + param.h5_table_name.toStdString()  + "_" + "ERROR.txt", std::ios::app);
 
-		out_error << training_error << endl;
-		if (param.crops == 0)
-			out_error << curr_error << endl;
-		else
-			out_error << interpol_error << endl;//
+	//	out_error << training_error << endl;
+	//	if (param.crops == 0)
+	//		out_error << curr_error << endl;
+	//	else
+	//		out_error << interpol_error << endl;//
 
-		out_error << nl->get_l1_pen() << endl;
-      	out_error << nl->get_l2_pen() << endl;
+	//	out_error << nl->get_l1_pen() << endl;
+      //	out_error << nl->get_l2_pen() << endl;
 		//out_error << interpol_error << endl;
-		out_error.close();
+	//	out_error.close();
 		cout << training_error << endl;
 		if (param.crops == 0)
 		    cout << curr_error << endl;
@@ -1425,7 +1425,7 @@ public:
 		cout << nl->get_l1_pen() << endl;
 		cout << nl->get_l2_pen() << endl;
 	//	cout << interpol_error << endl;
-		nl->print_trace(param.func_file_name.toStdString(), 0);
+	//	nl->print_trace(param.func_file_name.toStdString(), 0);
 		nl->delete_all();
 	}
 public slots:
