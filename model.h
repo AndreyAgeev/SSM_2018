@@ -570,7 +570,6 @@ public:
 		}
 		if (LtDrCntr >= data.data_p.LtWdDur && CBD < data.data_p.ttTSG)
 		{
-			cout << "change cbd not opt" << endl;
 			CBD = data.data_p.ttTSG;
 		}
 	}
@@ -1397,14 +1396,14 @@ public:
 			cbd = get_cbd();
 			curr_day = get_curr_day();
 			check_last_cbd = false;
-		//	out_dtR1.open(param.func_file_name.toStdString()+param.h5_file_name.toStdString() + param.h5_table_name.toStdString()+ "_" + "dtR1.txt", std::ios::app);
-		//	out_dtR1 << curr_day << endl;
+		//	out_dtR1.open(param.func_file_name.toStdString()+ "_" + "dtR1.txt", std::ios::app);
+	//		out_dtR1 << curr_day << endl;
 		//	out_dtR1.close();
 			training_error += (curr_day - event_day) * (curr_day - event_day);
 			if(param.crops == 0)
 			    curr_error += (cbd - phase_change) * (cbd - phase_change);
 		}
-	//	out_error.open(param.func_file_name.toStdString() + param.h5_file_name.toStdString() + param.h5_table_name.toStdString()  + "_" + "ERROR.txt", std::ios::app);
+	//	out_error.open(param.func_file_name.toStdString() + "_" + "ERROR.txt", std::ios::app);
 
 	//	out_error << training_error << endl;
 	//	if (param.crops == 0)
@@ -1413,8 +1412,8 @@ public:
 	//		out_error << interpol_error << endl;//
 
 	//	out_error << nl->get_l1_pen() << endl;
-      //	out_error << nl->get_l2_pen() << endl;
-		//out_error << interpol_error << endl;
+     // 	out_error << nl->get_l2_pen() << endl;
+	//	out_error << interpol_error << endl;
 	//	out_error.close();
 		cout << training_error << endl;
 		if (param.crops == 0)
