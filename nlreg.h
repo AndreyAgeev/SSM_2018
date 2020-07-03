@@ -15,6 +15,7 @@ public:
 		PRINT_TRACE = print_trace;
 		read_flag = rF;
 		read_genotype(crops);
+
 	}
 	double get_func_value(vector<double> clim_arg, vector<double> gt_vars)
 	{
@@ -215,6 +216,7 @@ private:
 			}
 			sett.endArray();
 			size = sett.beginReadArray("beta");
+
 			for (int i = 0; i < size; ++i) {
 				sett.setArrayIndex(i);
 				double arg;
@@ -223,6 +225,7 @@ private:
 			}
 			sett.endArray();
 			size = sett.beginReadArray("concs");
+
 			for (int i = 0; i < size; ++i) {
 				sett.setArrayIndex(i);
 				double arg;
@@ -230,8 +233,13 @@ private:
 				climate_var.push_back(arg);
 			}
 			sett.endArray();
-			MB = sett.value("betaLimit", 100).toDouble();
+			MB = sett.value("MB", 1.0).toDouble();
 			nlCBD = 1.0;
+			for (size_t i = nFunctions; i < nFunctions + nFunctions * num_of_gt_vars; ++i) {
+				double be = (beta[i] > 0.0) ? beta[i] : -beta[i];
+				beta[i] = (be < MB) ? 0.0 : beta[i];
+			}
+			sett.endGroup();
 		}
 	}
 };
