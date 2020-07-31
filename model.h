@@ -283,14 +283,18 @@ public:
 	int NSAM = 0;
 	bool check_last_cbd = false;
 
+	double scbdEm, scbdR1, scbdR3, scbdR5, scbdR7, scbdR8;
+	bool iscbdEm, iscbdR1, iscbdR3, iscbdR5, iscbdR7, iscbdR8;
 	Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
 	{
 		if (param.print_trace > 1) cout << "begin read" << endl;
 		data.read_h5(param.h5_file_name);
 		data.read_spieces(param.h5_table_name, param.ecovar);
 		data.read_ini(param.crops_ini_file);
+
 		nl = new Nlreg(param.func_file_name, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace, param.crops);
 		nl->nlreg_build();
+
 		if (param.print_trace > 1) cout << "end read" << endl;
 	}
 	void SoilWater()
@@ -597,6 +601,18 @@ public:
 			CBD = 0.0;
 			WSFD = 1.0;
 			iniPheno = 1;
+			iscbdEm = false;
+			iscbdR1 = false;
+			iscbdR3 = false;
+			iscbdR5 = false;
+			iscbdR7 = false;
+			iscbdR8 = false;
+			scbdEm = 0.0;
+			scbdR1 = 0.0;
+			scbdR3 = 0.0;
+			scbdR5 = 0.0;
+			scbdR7 = 0.0;
+			scbdR8 = 0.0;
 		}
 		switch (param.threshold)
 		{
@@ -685,15 +701,18 @@ public:
 		DAP = DAP + 1;
 		if (CBD < bdEM)
 		{
-			dtEM = DAP + 1.0;  // 'Saving days to EMR
+			dtEM = DAP + 1;  // 'Saving days to EMR
 			cbdEM = CBD;
 		}
-
+		if (CBD >= bdEM && CBD/ bdEM >= 0.9)
+			iscbdEm = true;
 		if (CBD < bdR1)
 		{
 			dtR1 = DAP + 1; // 'Saving days to R1
 			cbdR1 = CBD;
 		}
+		if (CBD >= bdR1 && CBD / bdR1 >= 0.9)
+			iscbdR1 = true;
 	//	if (CBD >= bdR1 && check_last_cbd == false)
 	//	{
 	//		cbdR1 = CBD;
@@ -705,21 +724,33 @@ public:
 			dtR3 = DAP + 1;  // 'Saving days to R3
 			cbdR3 = CBD;
 		}
+		if (CBD >= bdR3 && CBD / bdR3 >= 0.9)
+			iscbdR3 = true;
+
 		if (CBD < bdR5)
 		{
 			dtR5 = DAP + 1;//  'Saving days to R5
 			cbdR5 = CBD;
 		}
+		if (CBD >= bdR5 && CBD / bdR5 >= 0.9)
+			iscbdR5 = true;
+
 		if (CBD < bdR7)
 		{
 			dtR7 = DAP + 1; //  'Saving days to R7
 			cbdR7 = CBD;
 		}
+		if (CBD >= bdR7 && CBD / bdR7 >= 0.9)
+			iscbdR7 = true;
+
 		if (CBD < bdR8)
 		{
 			dtR8 = DAP + 1; // 'Saving days to R8
 			cbdR8 = CBD;
 		}
+		if (CBD >= bdR8 && CBD / bdR8 >= 0.9)
+			iscbdR8 = true;
+
 		// Maturity ?
 		if (CBD > bdR8)
 			MAT = 1;
@@ -1332,7 +1363,7 @@ public:
 		double cbd;
 		double training_error = 0;
 		double curr_error = 0;
-		double interpol_error = 0;
+		double s_errorE, s_error1, s_error3, s_error5, s_error7, s_error8 = 0;
 		int nDays = param.nD;
 		int START_YEAR_TO_PRINT;
 		for (size_t nsam = 0; nsam < data.data_a5.nSamples; ++nsam)
@@ -1346,7 +1377,13 @@ public:
 			iniDMP = 0;
 			iniDMD = 0;
 			iniSW = 0;
-			iniPNB = 0;			
+			iniPNB = 0;	
+			s_errorE = 0.0;
+			s_error1 = 0.0;
+			s_error3 = 0.0;
+			s_error5 = 0.0;
+			s_error7 = 0.0;
+			s_error8 = 0.0;
 			int start_day = data.data_a5.doy[nsam];
 			int start_year = data.data_a5.years[nsam];
 			int geo_id = data.data_a5.geo_id[nsam];
@@ -1389,7 +1426,40 @@ public:
 					double rhs = 0.1 * ((double)nd + 6.0 - event_day);
 					rhs = (rhs > 0.9) ? 0.9 : rhs;
 					rhs = (rhs < 0.1) ? 0.1 : rhs;
-					interpol_error += (CBD - rhs) * (CBD - rhs);
+					if (iscbdEm == false)
+					{
+						scbdEm += CBD / bdEM;
+						s_errorE += (scbdEm - rhs) * (scbdEm - rhs);
+					}
+					else if (iscbdR1 == false)
+					{
+						scbdR1 += CBD / bdR1;
+						s_error1 += (scbdR1 - rhs) * (scbdR1 - rhs);
+
+					}
+					else if (iscbdR3 == false)
+					{
+						scbdR3 += CBD / bdR3;
+						s_error3 += (scbdR3 - rhs) * (scbdR3 - rhs);
+
+					}
+					else if (iscbdR5 == false)
+					{
+						scbdR5 += CBD / bdR5;
+						s_error5 += (scbdR5 - rhs) * (scbdR5 - rhs);
+
+					}
+					else if (iscbdR7 == false)
+					{
+						scbdR7 += CBD / bdR7;
+						s_error7 += (scbdR7 - rhs) * (scbdR7 - rhs);
+
+					}
+					else if (iscbdR8 == false)
+					{
+						scbdR8 += CBD / bdR8;
+						s_error8 += (scbdR8 - rhs) * (scbdR8 - rhs);
+					}
 				}
 			}
 			phase_change = nl->get_cbd();//get_phase_change();
@@ -1418,8 +1488,8 @@ public:
 		cout << training_error << endl;
 		if (param.crops == 0)
 		    cout << curr_error << endl;
-		else
-			cout << interpol_error << endl;//
+	//	else
+		//	cout << interpol_error << endl;//
 
 		cout << nl->get_l1_pen() << endl;
 		cout << nl->get_l2_pen() << endl;
