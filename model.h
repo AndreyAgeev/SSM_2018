@@ -283,8 +283,10 @@ public:
 	int NSAM = 0;
 	bool check_last_cbd = false;
 
-	double scbdEm, scbdR1, scbdR3, scbdR5, scbdR7, scbdR8;
-	bool iscbdEm, iscbdR1, iscbdR3, iscbdR5, iscbdR7, iscbdR8;
+	double scbdEm, scbdR1, scbdR3, scbdR5, scbdR7, scbdR8;//sigmoids
+	bool iscbdEm, iscbdR1, iscbdR3, iscbdR5, iscbdR7, iscbdR8;//bool var
+
+
 	Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
 	{
 		if (param.print_trace > 1) cout << "begin read" << endl;
@@ -704,14 +706,14 @@ public:
 			dtEM = DAP + 1;  // 'Saving days to EMR
 			cbdEM = CBD;
 		}
-		if (CBD >= bdEM && CBD/ bdEM >= 0.9)
+		if (CBD >= bdEM && scbdEm >= 0.9)
 			iscbdEm = true;
 		if (CBD < bdR1)
 		{
 			dtR1 = DAP + 1; // 'Saving days to R1
 			cbdR1 = CBD;
 		}
-		if (CBD >= bdR1 && CBD / bdR1 >= 0.9)
+		if (CBD >= bdR1 && scbdR1 >= 0.9)
 			iscbdR1 = true;
 	//	if (CBD >= bdR1 && check_last_cbd == false)
 	//	{
@@ -724,31 +726,28 @@ public:
 			dtR3 = DAP + 1;  // 'Saving days to R3
 			cbdR3 = CBD;
 		}
-		if (CBD >= bdR3 && CBD / bdR3 >= 0.9)
+		if (CBD >= bdR3 && scbdR3 >= 0.9)
 			iscbdR3 = true;
-
 		if (CBD < bdR5)
 		{
 			dtR5 = DAP + 1;//  'Saving days to R5
 			cbdR5 = CBD;
 		}
-		if (CBD >= bdR5 && CBD / bdR5 >= 0.9)
+		if (CBD >= bdR5 && scbdR5 >= 0.9)
 			iscbdR5 = true;
-
 		if (CBD < bdR7)
 		{
 			dtR7 = DAP + 1; //  'Saving days to R7
 			cbdR7 = CBD;
 		}
-		if (CBD >= bdR7 && CBD / bdR7 >= 0.9)
+		if (CBD >= bdR7 && scbdR7 >= 0.9)
 			iscbdR7 = true;
-
 		if (CBD < bdR8)
 		{
 			dtR8 = DAP + 1; // 'Saving days to R8
 			cbdR8 = CBD;
 		}
-		if (CBD >= bdR8 && CBD / bdR8 >= 0.9)
+		if (CBD >= bdR8 && scbdR8 >= 0.9)
 			iscbdR8 = true;
 
 		// Maturity ?
@@ -1363,8 +1362,9 @@ public:
 		double cbd;
 		double training_error = 0;
 		double curr_error = 0;
-		double s_errorE, s_error1, s_error3, s_error5, s_error7, s_error8 = 0;
+		double s_errorE, s_error1, s_error3, s_error5, s_error7, s_error8;
 		int nDays = param.nD;
+		double interpol_error = 0.0;
 		int START_YEAR_TO_PRINT;
 		for (size_t nsam = 0; nsam < data.data_a5.nSamples; ++nsam)
 		{ 
@@ -1429,37 +1429,30 @@ public:
 					if (iscbdEm == false)
 					{
 						scbdEm += CBD / bdEM;
-						s_errorE += (scbdEm - rhs) * (scbdEm - rhs);
 					}
 					else if (iscbdR1 == false)
 					{
 						scbdR1 += CBD / bdR1;
 						s_error1 += (scbdR1 - rhs) * (scbdR1 - rhs);
-
 					}
 					else if (iscbdR3 == false)
 					{
 						scbdR3 += CBD / bdR3;
-						s_error3 += (scbdR3 - rhs) * (scbdR3 - rhs);
-
 					}
 					else if (iscbdR5 == false)
 					{
 						scbdR5 += CBD / bdR5;
-						s_error5 += (scbdR5 - rhs) * (scbdR5 - rhs);
-
 					}
 					else if (iscbdR7 == false)
 					{
 						scbdR7 += CBD / bdR7;
-						s_error7 += (scbdR7 - rhs) * (scbdR7 - rhs);
 
 					}
 					else if (iscbdR8 == false)
 					{
 						scbdR8 += CBD / bdR8;
-						s_error8 += (scbdR8 - rhs) * (scbdR8 - rhs);
 					}
+					interpol_error += s_error1;
 				}
 			}
 			phase_change = nl->get_cbd();//get_phase_change();
@@ -1488,8 +1481,8 @@ public:
 		cout << training_error << endl;
 		if (param.crops == 0)
 		    cout << curr_error << endl;
-	//	else
-		//	cout << interpol_error << endl;//
+		else
+			cout << interpol_error << endl;//
 
 		cout << nl->get_l1_pen() << endl;
 		cout << nl->get_l2_pen() << endl;
