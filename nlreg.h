@@ -234,7 +234,7 @@ private:
 			}
 			sett.endArray();
 			MB = sett.value("MB", 1.0).toDouble();
-			nlCBD = 1.0;
+			nlCBD = sett.value("CBD", 1.0).toDouble();
 			for (size_t i = nFunctions; i < nFunctions + nFunctions * num_of_gt_vars; ++i) {
 				double be = (beta[i] > 0.0) ? beta[i] : -beta[i];
 				beta[i] = (be < MB) ? 0.0 : beta[i];
