@@ -1,8 +1,5 @@
 #include <QtCore/QCoreApplication>
 #include "model.h"
-//#include <WinSDKVer.h>
-//#define _WIN32_WINNT 0x0601
-//#include <SDKDDKVer.h>
 
 #define add(name) param.## name
 int main(int argc, char *argv[])
@@ -16,7 +13,7 @@ int main(int argc, char *argv[])
 	    QCoreApplication::translate("main", "Latitude"),
 	    QCoreApplication::translate("main", "l") },
 	{{"A", "With snp - 1, without snp - 0"},
-		QCoreApplication::translate("main", "SNP OR NO"),
+		QCoreApplication::translate("main", "SNP mode"),
 		QCoreApplication::translate("main", "A") },
 	{{"C", "Crops file mode"},
 		QCoreApplication::translate("main", "Crops file mode"),
@@ -28,7 +25,7 @@ int main(int argc, char *argv[])
 		QCoreApplication::translate("main", "function mode"),
 		QCoreApplication::translate("main", "R")},
 	{{"P", "P"},
-		QCoreApplication::translate("main", "threshold"),
+		QCoreApplication::translate("main", "Optimization mode"),
 		QCoreApplication::translate("main", "P")},
 	{{"i", "FixFind"},
 		QCoreApplication::translate("main", "FixFind"),
@@ -260,7 +257,7 @@ int main(int argc, char *argv[])
 		param.ecovar = 1;
 		param.print_trace = T;
 		param.function_mode = R;
- 	    param.threshold = P; 
+ 	    param.optimization_mode = P; 
 		param.snp_mode = snp_or_no;
 		param.crops = crops;
 	}
