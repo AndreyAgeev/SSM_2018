@@ -1325,7 +1325,7 @@ public:
 		double cbd;
 		double training_error = 0;
 		double curr_error = 0;
-		double s_errorE, s_error1, s_error3, s_error5, s_error7, s_error8;
+		double s_errorE = 0.0, s_error1 = 0.0, s_error3 = 0.0, s_error5 = 0.0, s_error7 = 0.0, s_error8 = 0.0;
 		double rhs_E, rhs_1, rhs_3, rhs_5, rhs_7, rhs_8;
 		int nDays = param.nD;
 		double interpol_error = 0.0;
@@ -1342,12 +1342,6 @@ public:
 			iniDMD = 0;
 			iniSW = 0;
 			iniPNB = 0;	
-			s_errorE = 0.0;
-			s_error1 = 0.0;
-			s_error3 = 0.0;
-			s_error5 = 0.0;
-			s_error7 = 0.0;
-			s_error8 = 0.0;
 			rhs_E = 0.0;
 			rhs_1 = 0.0;
 			rhs_3 = 0.0;
