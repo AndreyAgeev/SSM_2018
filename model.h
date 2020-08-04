@@ -20,6 +20,8 @@
 using namespace std;
 using namespace HighFive;
 #define SOLTANI_FUNC 0
+#define OPTIMIZATION 0
+#define SIMULATION 1
 class Model : public QObject
 {
 	Q_OBJECT
@@ -283,10 +285,9 @@ public:
 	int NSAM = 0;
 	bool check_last_cbd = false;
 
-	double scbdEm, scbdR1, scbdR3, scbdR5, scbdR7, scbdR8;//sigmoids
-	bool iscbdEm, iscbdR1, iscbdR3, iscbdR5, iscbdR7, iscbdR8;//bool var
-
-
+	double sigmoid_cbdEm, sigmoid_cbdR1, sigmoid_cbdR3, sigmoid_cbdR5, sigmoid_cbdR7, sigmoid_cbdR8;//sigmoids
+	int passed_stage;
+	double sum_threshold_passed_stage;
 	Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
 	{
 		if (param.print_trace > 1) cout << "begin read" << endl;
@@ -603,39 +604,6 @@ public:
 			CBD = 0.0;
 			WSFD = 1.0;
 			iniPheno = 1;
-			iscbdEm = false;
-			iscbdR1 = false;
-			iscbdR3 = false;
-			iscbdR5 = false;
-			iscbdR7 = false;
-			iscbdR8 = false;
-			scbdEm = 0.0;
-			scbdR1 = 0.0;
-			scbdR3 = 0.0;
-			scbdR5 = 0.0;
-			scbdR7 = 0.0;
-			scbdR8 = 0.0;
-		}
-		switch (param.threshold)
-		{
-		case 0:
-			bdEM = nl->get_cbd();
-			break;
-		case 1:
-			bdR1 = nl->get_cbd();
-			break;
-		case 3:
-			bdR3 = nl->get_cbd();
-			break;
-		case 5:
-			bdR5 = nl->get_cbd();
-			break;
-		case 7:
-			bdR7 = nl->get_cbd();
-			break;
-		case 8:
-			bdR8 = nl->get_cbd();
-			break;
 		}
 		if (param.function_mode == SOLTANI_FUNC)
 		{
@@ -694,10 +662,10 @@ public:
 		{
 			vector<double> clim_covar = { data.data_h5.tmax[ROW], data.data_h5.tmin[ROW], data.data_h5.rain[ROW], data.data_h5.dl[ROW], data.data_h5.srad[ROW] };
 		    if(param.snp_mode == 1)
-	            bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[NSAM]);
+	                bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[NSAM]);
 		    else
-			    bd = nl->get_func_value(clim_covar);
-			CBD += Heaviside(bd) * bd;
+			bd = nl->get_func_value(clim_covar);
+		    CBD += Heaviside(bd) * bd;
 		}
 
 		DAP = DAP + 1;
@@ -706,85 +674,80 @@ public:
 			dtEM = DAP + 1;  // 'Saving days to EMR
 			cbdEM = CBD;
 		}
-		if (CBD >= bdEM && scbdEm >= 0.9)
-			iscbdEm = true;
+		if (CBD >= bdEM && sigmoid_cbdEm >= 0.9)
+		{
+			sum_threshold_passed_stage += bdEM;
+			passed_stage = 1;
+		}
+	
 		if (CBD < bdR1)
 		{
 			dtR1 = DAP + 1; // 'Saving days to R1
 			cbdR1 = CBD;
 		}
-		if (CBD >= bdR1 && scbdR1 >= 0.9)
-			iscbdR1 = true;
-	//	if (CBD >= bdR1 && check_last_cbd == false)
-	//	{
-	//		cbdR1 = CBD;
-	//		check_last_cbd = true;
-	//	}
+		if (CBD >= bdR1 && sigmoid_cbdR1 >= 0.9)
+		{
+			sum_threshold_passed_stage += bdR1;
+			passed_stage = 2;
+		}
 
 		if (CBD < bdR3)
 		{
 			dtR3 = DAP + 1;  // 'Saving days to R3
 			cbdR3 = CBD;
 		}
-		if (CBD >= bdR3 && scbdR3 >= 0.9)
-			iscbdR3 = true;
+		if (CBD >= bdR3 && sigmoid_cbdR3 >= 0.9)
+		{
+			sum_threshold_passed_stage += bdR3;
+			passed_stage = 3;
+		}
+	
 		if (CBD < bdR5)
 		{
 			dtR5 = DAP + 1;//  'Saving days to R5
 			cbdR5 = CBD;
 		}
-		if (CBD >= bdR5 && scbdR5 >= 0.9)
-			iscbdR5 = true;
+		if (CBD >= bdR5 && sigmoid_cbdR5 >= 0.9)
+		{
+			sum_threshold_passed_stage += bdR5;
+			passed_stage = 4;
+		}
+	
 		if (CBD < bdR7)
 		{
 			dtR7 = DAP + 1; //  'Saving days to R7
 			cbdR7 = CBD;
 		}
-		if (CBD >= bdR7 && scbdR7 >= 0.9)
-			iscbdR7 = true;
+		if (CBD >= bdR7 && sigmoid_cbdR7 >= 0.9)
+		{
+			sum_threshold_passed_stage += bdR7;
+			passed_stage = 5;
+		}
+
 		if (CBD < bdR8)
 		{
 			dtR8 = DAP + 1; // 'Saving days to R8
 			cbdR8 = CBD;
 		}
-		if (CBD >= bdR8 && scbdR8 >= 0.9)
-			iscbdR8 = true;
-
-		// Maturity ?
-		if (CBD > bdR8)
-			MAT = 1;
+		if (CBD >= bdR8 && sigmoid_cbdR8 >= 0.9)
+		{
+			sum_threshold_passed_stage += bdR8;
+			passed_stage = 6;
+		}
+	
+		if (param.optimization_mode == SIMULATION)
+		{
+			if (CBD > bdR8)
+				MAT = 1;
+		}
 	}
 	int get_curr_day(void)
 	{
-		if (param.threshold == 0)
-			return dtEM;
-		if (param.threshold == 1)
-			return dtR1;
-		if (param.threshold == 3)
-			return dtR3;
-		if (param.threshold == 5)
-			return dtR5;
-		if (param.threshold == 7)
-			return dtR7;
-		if (param.threshold == 8)
-			return dtR8;
-		return (double)(-param.nD);
+		return dtR1;
 	}
 	double get_cbd(void)
 	{
-		if (param.threshold == 0)
-			return cbdEM;
-		if (param.threshold == 1)
-			return cbdR1;
-		if (param.threshold == 3)
-			return cbdR3;
-		if (param.threshold == 5)
-			return cbdR5;
-		if (param.threshold == 7)
-			return cbdR7;
-		if (param.threshold == 8)
-			return cbdR8;
-	    return CBD; 
+		return cbdR1;
 	}
 	void CropLAIN(void)
 	{
@@ -1363,6 +1326,7 @@ public:
 		double training_error = 0;
 		double curr_error = 0;
 		double s_errorE, s_error1, s_error3, s_error5, s_error7, s_error8;
+		double rhs_E, rhs_1, rhs_3, rhs_5, rhs_7, rhs_8;
 		int nDays = param.nD;
 		double interpol_error = 0.0;
 		int START_YEAR_TO_PRINT;
@@ -1384,6 +1348,14 @@ public:
 			s_error5 = 0.0;
 			s_error7 = 0.0;
 			s_error8 = 0.0;
+			rhs_E = 0.0;
+			rhs_1 = 0.0;
+			rhs_3 = 0.0;
+			rhs_5 = 0.0;
+			rhs_7 = 0.0;
+			rhs_8 = 0.0;
+			sum_threshold_passed_stage = 0.0;
+			passed_stage = 0;
 			int start_day = data.data_a5.doy[nsam];
 			int start_year = data.data_a5.years[nsam];
 			int geo_id = data.data_a5.geo_id[nsam];
@@ -1423,71 +1395,71 @@ public:
 				}
 				if (param.crops == 1)
 				{
-					double rhs = 0.1 * ((double)nd + 6.0 - event_day);
-					rhs = (rhs > 0.9) ? 0.9 : rhs;
-					rhs = (rhs < 0.1) ? 0.1 : rhs;
-					if (iscbdEm == false)
+					if (passed_stage == 0)
 					{
-						scbdEm += CBD / bdEM;
+						rhs_E = 0.1 * ((CBD - sum_threshold_passed_stage) + 6.0 - bdEM);
+						rhs_E = (rhs_E > 0.9) ? 0.9 : rhs_E;
+						rhs_E = (rhs_E < 0.1) ? 0.1 : rhs_E;
+						sigmoid_cbdEm += CBD - sum_threshold_passed_stage;
+						s_errorE += (sigmoid_cbdEm - rhs_E) * (sigmoid_cbdEm - rhs_E);
 					}
-					else if (iscbdR1 == false)
+					if (passed_stage == 1)
 					{
-						scbdR1 += CBD / bdR1;
-						s_error1 += (scbdR1 - rhs) * (scbdR1 - rhs);
+						rhs_1 = 0.1 * ((CBD - sum_threshold_passed_stage) + 6.0 - bdR1);
+						rhs_1 = (rhs_1 > 0.9) ? 0.9 : rhs_1;
+						rhs_1 = (rhs_1 < 0.1) ? 0.1 : rhs_1;
+						sigmoid_cbdR1 += CBD - sum_threshold_passed_stage;
+						s_error1 += (sigmoid_cbdR1 - rhs_1) * (sigmoid_cbdR1 - rhs_1);
 					}
-					else if (iscbdR3 == false)
+					if (passed_stage == 2)
 					{
-						scbdR3 += CBD / bdR3;
+						rhs_3 = 0.1 * ((CBD - sum_threshold_passed_stage) + 6.0 - bdR3);
+						rhs_3 = (rhs_3 > 0.9) ? 0.9 : rhs_3;
+						rhs_3 = (rhs_3 < 0.1) ? 0.1 : rhs_3;
+						sigmoid_cbdR3 += CBD - sum_threshold_passed_stage;
+						s_error3 += (sigmoid_cbdR3 - rhs_3) * (sigmoid_cbdR3 - rhs_3);
 					}
-					else if (iscbdR5 == false)
+					if (passed_stage == 3)
 					{
-						scbdR5 += CBD / bdR5;
+						rhs_5 = 0.1 * ((CBD - sum_threshold_passed_stage) + 6.0 - bdR5);
+						rhs_5 = (rhs_5 > 0.9) ? 0.9 : rhs_5;
+						rhs_5 = (rhs_5 < 0.1) ? 0.1 : rhs_5;
+						sigmoid_cbdR5 += CBD - sum_threshold_passed_stage;
+						s_error5 += (sigmoid_cbdR5 - rhs_5) * (sigmoid_cbdR5 - rhs_5);
 					}
-					else if (iscbdR7 == false)
+					if (passed_stage == 4)
 					{
-						scbdR7 += CBD / bdR7;
-
+						rhs_7 = 0.1 * ((CBD - sum_threshold_passed_stage) + 6.0 - bdR7);
+						rhs_7 = (rhs_7 > 0.9) ? 0.9 : rhs_7;
+						rhs_7 = (rhs_7 < 0.1) ? 0.1 : rhs_7;
+						sigmoid_cbdR7 += CBD - sum_threshold_passed_stage;
+						s_error7 += (sigmoid_cbdR7 - rhs_7) * (sigmoid_cbdR7 - rhs_7);
 					}
-					else if (iscbdR8 == false)
+					if (passed_stage == 5)
 					{
-						scbdR8 += CBD / bdR8;
+						rhs_8 = 0.1 * ((CBD - sum_threshold_passed_stage) + 6.0 - bdR8);
+						rhs_8 = (rhs_8 > 0.9) ? 0.9 : rhs_8;
+						rhs_8 = (rhs_8 < 0.1) ? 0.1 : rhs_8;
+						sigmoid_cbdR8 += CBD - sum_threshold_passed_stage;
+						s_error8 += (sigmoid_cbdR8 - rhs_8) * (sigmoid_cbdR8 - rhs_8);
 					}
-					interpol_error += s_error1;
 				}
 			}
-			phase_change = nl->get_cbd();//get_phase_change();
-			cbd = get_cbd();
 			curr_day = get_curr_day();
 			check_last_cbd = false;
-		//	out_dtR1.open(param.func_file_name.toStdString()+ "_" + "dtR1.txt", std::ios::app);
-	//		out_dtR1 << curr_day << endl;
-		//	out_dtR1.close();
 			training_error += (curr_day - event_day) * (curr_day - event_day);
-			if(param.crops == 0)
-			    curr_error += (cbd - phase_change) * (cbd - phase_change);
 		}
-	//	out_error.open(param.func_file_name.toStdString() + "_" + "ERROR.txt", std::ios::app);
-
-	//	out_error << training_error << endl;
-	//	if (param.crops == 0)
-	//		out_error << curr_error << endl;
-	//	else
-	//		out_error << interpol_error << endl;//
-
-	//	out_error << nl->get_l1_pen() << endl;
-     // 	out_error << nl->get_l2_pen() << endl;
-	//	out_error << interpol_error << endl;
-	//	out_error.close();
 		cout << training_error << endl;
-		if (param.crops == 0)
-		    cout << curr_error << endl;
-		else
-			cout << interpol_error << endl;//
+		cout << s_errorE << endl;
+		cout << s_error1 << endl;
+		cout << s_error3 << endl;
+		cout << s_error5 << endl;
+		cout << s_error7 << endl;
+		cout << s_error8 << endl;
+
 
 		cout << nl->get_l1_pen() << endl;
 		cout << nl->get_l2_pen() << endl;
-	//	cout << interpol_error << endl;
-	//	nl->print_trace(param.func_file_name.toStdString(), 0);
 		nl->delete_all();
 	}
 public slots:
