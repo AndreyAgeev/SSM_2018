@@ -3,7 +3,6 @@
 class Parametrs
 {
 public:
-	int snp_mode;
 	int crops;
 	QString func_file_name;
 	QString h5_file_name;
@@ -14,7 +13,7 @@ public:
 	int wL;
 	int nD;
 	int rT;
-	bool ecovar;
+	int ecovar;
 	int print_trace;
 
 	int function_mode;// 0 - soltani, 1 - opt
