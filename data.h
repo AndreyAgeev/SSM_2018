@@ -112,8 +112,21 @@ public:
 		vector<int> years;
 		vector<int> doy;
 		vector<int> geo_id;
-		arma::vec response;
-		vector<vector<double>> resp;
+		arma::vec response_EM;
+		arma::vec response_R1;
+		arma::vec response_R3;
+		arma::vec response_R5;
+		arma::vec response_R7;
+		arma::vec response_R8;
+
+
+		vector<vector<double>> resp_EM;
+		vector<vector<double>> resp_R1;
+		vector<vector<double>> resp_R3;
+		vector<vector<double>> resp_R5;
+		vector<vector<double>> resp_R7;
+		vector<vector<double>> resp_R8;
+
 		vector<string> species;
 		vector<int> month;
 		vector<vector<double>> gr_covar;
@@ -234,7 +247,7 @@ public:
 		}
 
 	} 
-	void read_spieces(QString file_name, bool extra_covar)
+	void read_spieces(QString file_name, int extra_covar)
 	{
 		try {
 			File file(file_name.toStdString(), File::ReadOnly);
@@ -249,17 +262,53 @@ public:
 			month_read.read(data_a5.month);
 			DataSet geo_id_read = file.getDataSet("geo_id");
 			geo_id_read.read(data_a5.geo_id);
-			DataSet b_read = file.getDataSet("response");
-			space = b_read.getSpace();
+			DataSet b_read_em = file.getDataSet("response_EM");
+			space = b_read_em.getSpace();
 			int ns = space.getDimensions()[0]; // number of samples
 			int nn = space.getDimensions()[1]; // number of measurements
-			b_read.read(data_a5.resp);
+			b_read_em.read(data_a5.resp_EM);
 			assert(ns == data_a5.nSamples);
 			assert(nn == 1);
+			DataSet b_read_r1 = file.getDataSet("response_R1");
+			space = b_read_r1.getSpace();
+			ns = space.getDimensions()[0]; // number of samples
+			nn = space.getDimensions()[1]; // number of measurements
+			b_read_r1.read(data_a5.resp_R1);
+			assert(ns == data_a5.nSamples);
+			assert(nn == 1);
+			DataSet b_read_r3 = file.getDataSet("response_R3");
+			space = b_read_r3.getSpace();
+			ns = space.getDimensions()[0]; // number of samples
+			nn = space.getDimensions()[1]; // number of measurements
+			b_read_r3.read(data_a5.resp_R3);
+			assert(ns == data_a5.nSamples);
+			assert(nn == 1);
+			DataSet b_read_r5 = file.getDataSet("response_R5");
+			space = b_read_r5.getSpace();
+			ns = space.getDimensions()[0]; // number of samples
+			nn = space.getDimensions()[1]; // number of measurements
+			b_read_r5.read(data_a5.resp_R5);
+			assert(ns == data_a5.nSamples);
+			assert(nn == 1);
+			DataSet b_read_r7 = file.getDataSet("response_R7");
+			space = b_read_r7.getSpace();
+			ns = space.getDimensions()[0]; // number of samples
+			nn = space.getDimensions()[1]; // number of measurements
+			b_read_r7.read(data_a5.resp_R7);
+			assert(ns == data_a5.nSamples);
+			assert(nn == 1);
+			DataSet b_read_r8 = file.getDataSet("response_R8");
+			space = b_read_r8.getSpace();
+			ns = space.getDimensions()[0]; // number of samples
+			nn = space.getDimensions()[1]; // number of measurements
+			b_read_r8.read(data_a5.resp_R8);
+			assert(ns == data_a5.nSamples);
+			assert(nn == 1);
+	
 			DataSet a1_read = file.getDataSet("species");
 			a1_read.read(data_a5.species);
 			data_a5.nGrCovar = 0;
-			if (extra_covar) {
+			if (extra_covar == 1) {
 				DataSet c0_read = file.getDataSet("gr_covar");
 				DataSpace space = c0_read.getSpace();
 				data_a5.nGrCovar = space.getDimensions()[1]; // number of measurements
@@ -271,7 +320,12 @@ public:
 		catch (Exception& err) {
 			std::cerr << err.what() << std::endl;
 		}
-		data_a5.response = Data::std2arvec(data_a5.resp, data_a5.nSamples, 0);
+		data_a5.response_EM = Data::std2arvec(data_a5.resp_EM, data_a5.nSamples, 0);
+		data_a5.response_R1 = Data::std2arvec(data_a5.resp_R1, data_a5.nSamples, 0);
+		data_a5.response_R3 = Data::std2arvec(data_a5.resp_R3, data_a5.nSamples, 0);
+		data_a5.response_R5 = Data::std2arvec(data_a5.resp_R5, data_a5.nSamples, 0);
+		data_a5.response_R7 = Data::std2arvec(data_a5.resp_R7, data_a5.nSamples, 0);
+		data_a5.response_R8 = Data::std2arvec(data_a5.resp_R8, data_a5.nSamples, 0);
 	}
 
 private:
