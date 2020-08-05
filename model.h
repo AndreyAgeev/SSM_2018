@@ -1506,13 +1506,13 @@ public:
 		cout << training_error_R5 << endl;
 		cout << training_error_R7 << endl;
 		cout << training_error_R8 << endl;
-
+/*
 		cout << curr_error_EM << endl;
 		cout << curr_error_R1 << endl;
 		cout << curr_error_R3 << endl;
 		cout << curr_error_R5 << endl;
 		cout << curr_error_R7 << endl;
-		cout << curr_error_R8 << endl;
+		cout << curr_error_R8 << endl;*/
 	
 		cout << nl->get_l1_pen() << endl;
 		cout << nl->get_l2_pen() << endl;
