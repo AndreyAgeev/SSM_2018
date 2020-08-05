@@ -1,5 +1,8 @@
 #include <QtCore/QCoreApplication>
 #include "model.h"
+//#include <WinSDKVer.h>
+//#define _WIN32_WINNT 0x0601
+//#include <SDKDDKVer.h>
 
 #define add(name) param.## name
 int main(int argc, char *argv[])
@@ -125,10 +128,10 @@ int main(int argc, char *argv[])
 			param.h5_table_name = args.at(0); // samples
 			param.func_file_name = param.crops_ini_file;
 		}
-		const QString snpParameter = parser.value("A");
-		const int snp_or_no = snpParameter.toInt();
-		if (snp_or_no != 0 && snp_or_no != 1) {
-			std::cout << "Bad snp: " + snp_or_no;
+		const QString ecovarParameter = parser.value("A");
+		const int ecovar = ecovarParameter.toInt();
+		if (ecovar != 0 && ecovar != 1) {
+			std::cout << "Bad snp: " + ecovar;
 		}
 
 		const QString TParameter = parser.value("print-trace");
@@ -254,11 +257,10 @@ int main(int argc, char *argv[])
 		param.wL = L;
 		param.nD = D;
 		param.rT = 1;//read_flag = 1
-		param.ecovar = 1;
+		param.ecovar = ecovar;
 		param.print_trace = T;
 		param.function_mode = R;
  	    param.optimization_mode = P; 
-		param.snp_mode = snp_or_no;
 		param.crops = crops;
 	}
 	model = new Model(param, &a);
