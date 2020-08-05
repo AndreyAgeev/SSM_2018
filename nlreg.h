@@ -48,10 +48,6 @@ public:
 		}
 		return val;
 	}
-	double get_cbd()
-	{
-		return nlCBD;
-	}
 	double get_l1_pen()
 	{
 		double val = 0;
@@ -152,7 +148,6 @@ private:
 	GrammarContainer* grc;
 	vector<double> climate_var;
 	vector<double> beta;
-	double nlCBD;
 	double MB;
 	QString funcs_file_name;
 	double *phenotype;
@@ -193,7 +188,6 @@ private:
 			}
 			climate_var = concs;
 			if (read_flag > 0) {
-				in >> nlCBD;
 				in >> MB;
 				for (size_t i = nFunctions; i < nFunctions + nFunctions * num_of_gt_vars; ++i) {
 					double be = (beta[i] > 0.0) ? beta[i] : -beta[i];
@@ -234,7 +228,6 @@ private:
 			}
 			sett.endArray();
 			MB = sett.value("MB", 1.0).toDouble();
-			nlCBD = sett.value("CBD", 1.0).toDouble();
 			for (size_t i = nFunctions; i < nFunctions + nFunctions * num_of_gt_vars; ++i) {
 				double be = (beta[i] > 0.0) ? beta[i] : -beta[i];
 				beta[i] = (be < MB) ? 0.0 : beta[i];
