@@ -25,8 +25,8 @@ public:
 			retFtn = grc->get_nth_tree(i);
 			double fval = retFtn->eval(clim_arg);
 			val += beta[i] * fval;
-	
-			for (size_t j = 0; j <  num_of_gt_vars; ++j) {
+
+			for (size_t j = 0; j < num_of_gt_vars; ++j) {
 				val += beta[i*num_of_gt_vars + j + nFunctions] * gt_vars[j] * fval;
 			}
 		}
@@ -115,7 +115,7 @@ public:
 					flag = 1;
 				}
 			}
-			out_func << endl; 
+			out_func << endl;
 			for (size_t i = 0; i < nFunctions * wordLength; ++i) { // + nEcovar
 				out_func << phenotype[i] << " ";
 			}
@@ -151,7 +151,7 @@ private:
 	double MB;
 	QString funcs_file_name;
 	double *phenotype;
-    int *phenomask;
+	int *phenomask;
 	vector<int> genotype;
 	void read_genotype(const int crops) {
 		if (crops == 0)
@@ -202,6 +202,7 @@ private:
 			QSettings sett(funcs_file_name, QSettings::IniFormat);
 			sett.beginGroup("DEEP");
 			int size = sett.beginReadArray("x");
+			double arg_cv;
 			for (int i = 0; i < size; ++i) {
 				sett.setArrayIndex(i);
 				int arg;
@@ -218,15 +219,17 @@ private:
 				beta.push_back(arg);
 			}
 			sett.endArray();
-			size = sett.beginReadArray("concs");
+			arg_cv = sett.value("TCD", 25).toDouble();
+			climate_var.push_back(arg_cv);
+			arg_cv = sett.value("TBD", 15).toDouble();
+			climate_var.push_back(arg_cv);
+			arg_cv = sett.value("Pbase", 40).toDouble();
+			climate_var.push_back(arg_cv);
+			arg_cv = sett.value("cpp", 18).toDouble();
+			climate_var.push_back(arg_cv);
+			arg_cv = sett.value("Sbase", 40).toDouble();
+			climate_var.push_back(arg_cv);
 
-			for (int i = 0; i < size; ++i) {
-				sett.setArrayIndex(i);
-				double arg;
-				arg = sett.value("value").toDouble();
-				climate_var.push_back(arg);
-			}
-			sett.endArray();
 			MB = sett.value("MB", 1.0).toDouble();
 			for (size_t i = nFunctions; i < nFunctions + nFunctions * num_of_gt_vars; ++i) {
 				double be = (beta[i] > 0.0) ? beta[i] : -beta[i];
