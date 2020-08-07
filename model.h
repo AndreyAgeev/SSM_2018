@@ -280,7 +280,7 @@ public:
 
 
 	bool write_check = false;
-
+	bool write_check_summary = false;
 
 	int NSAM = 0;
 	bool check_last_cbd = false;
@@ -680,11 +680,11 @@ public:
 			cbdEM = CBD;
 		}
 
-		if (CBD >= bdEM && sigmoid_cbdEM >= 0.9 && passed_stage == 0)
+	/*	if (CBD >= bdEM && sigmoid_cbdEM >= 0.9 && passed_stage == 0)
 		{
 			sum_threshold_passed_stage_0 = cbdEM;
 			passed_stage = 1;
-		}
+		}*/
 
 		if (CBD < bdR1)
 		{
@@ -692,11 +692,11 @@ public:
 			cbdR1 = CBD;
 		}
 
-		if (CBD >= bdR1 && sigmoid_cbdR1 >= 0.9  && passed_stage == 1)
+	/*	if (CBD >= bdR1 && sigmoid_cbdR1 >= 0.9  && passed_stage == 1)
 		{
 			sum_threshold_passed_stage_1 = sum_threshold_passed_stage_0 + cbdR1;
 			passed_stage = 2;
-		}
+		}*/
 
 		if (CBD < bdR3)
 		{
@@ -704,11 +704,11 @@ public:
 			cbdR3 = CBD;
 		}
 
-		if (CBD >= bdR3 && sigmoid_cbdR3 >= 0.9  && passed_stage == 2)
+		/*	if (CBD >= bdR3 && sigmoid_cbdR3 >= 0.9  && passed_stage == 2)
 		{
 			sum_threshold_passed_stage_2 = sum_threshold_passed_stage_1 + cbdR3;
 			passed_stage = 3;
-		}
+		}*/
 
 		if (CBD < bdR5)
 		{
@@ -716,11 +716,11 @@ public:
 			cbdR5 = CBD;
 		}
 
-		if (CBD >= bdR5 && sigmoid_cbdR5 >= 0.9  && passed_stage == 3)
+		/*	if (CBD >= bdR5 && sigmoid_cbdR5 >= 0.9  && passed_stage == 3)
 		{
 			sum_threshold_passed_stage_3 = sum_threshold_passed_stage_2 + cbdR5;
 			passed_stage = 4;
-		}
+		}*/
 
 		if (CBD < bdR7)
 		{
@@ -728,11 +728,11 @@ public:
 			cbdR7 = CBD;
 		}
 
-		if (CBD >= bdR7 && sigmoid_cbdR7 >= 0.9  && passed_stage == 4)
+		/*	if (CBD >= bdR7 && sigmoid_cbdR7 >= 0.9  && passed_stage == 4)
 		{
 			sum_threshold_passed_stage_4 = sum_threshold_passed_stage_3 + cbdR7;
 			passed_stage = 5;
-		}
+		}*/
 
 		if (CBD < bdR8)
 		{
@@ -740,11 +740,11 @@ public:
 			cbdR8 = CBD;
 		}
 
-		if (CBD >= bdR8 && sigmoid_cbdR8 >= 0.9 && passed_stage == 5)
+		/*	if (CBD >= bdR8 && sigmoid_cbdR8 >= 0.9 && passed_stage == 5)
 		{
 			sum_threshold_passed_stage_5 = sum_threshold_passed_stage_4 + cbdR8;
 			passed_stage = 6;
-		}
+		}*/
 
 		if (CBD > bdR8)
 			MAT = 1;
@@ -1204,7 +1204,7 @@ public:
 //		out_NVEG.open(param.h5_table_name.toStdString() + "_" + "output_NVEG.txt", std::ios::app);
 //		out_NGRN.open(param.h5_table_name.toStdString() + "_" + "output_NGRN.txt", std::ios::app);
 
-		out.open(param.h5_table_name.toStdString() + "_" + "output.txt", std::ios::app);
+		out.open(param.func_file_name.toStdString() + "_" + "daily_output.txt", std::ios::app);
 		if (write_check == false) {
 			out << "GEO_ID= " << "NSAM= " << "ROW= " << "YEARS= " << "DOY= " << "DAP= " << "TMP= " << "DTT= " << "CBD= " << "rhs_EM= " << "rhs_R1= " << "rhs_R3= " << "rhs_R5= " << "rhs_R7= " << "rhs_R8= " << "MSNN= " << "GLAI= " << "DLAI= " << "LAI= " << "TCFRUE= " << "FINT= " << "DDMP= " << "GLF= " << "GST= " << "SGR= " << "WLF= " << "WST= " << "WVEG=  " << "WGRN= " << "WTOP= " << "DEPORT= " << "RAIN= " << "IRGW= " << "RUNOF= " << "PET= " << "SEVP= " << "TR= " << "ATSW= " << "FTSW= " << "CRAIN= " << "CIRGW= " << "IRGNO= " << "CRUNOF= " << "CE= " << "CTR= " << "WSTORG= " << "NUP= " << "NLF= " << "NST= " << "NVEG= " << "NGRN= " << "CNUP= " << "MAT= " << endl;
 			write_check = true;
@@ -1285,10 +1285,18 @@ public:
 	}
 
 
-	void SummaryPrintOut()
+	void SummaryPrintOut(double s_error_EM, double s_error_R1, double s_error_R3, double s_error_R5, double s_error_R7, double s_error_R8 )
 	{
 		out_s.open(param.func_file_name.toStdString() + "_" + "output_summary.txt", std::ios::app);
-		//out_s.open(param.func_file_name.toStdString() + "_" + "output_summary.txt", std::ios::app);
+		if (write_check_summary == false) {
+			out_s << "NSAM    " << "NAME    " << "dtEM    " << "event_day_EM     " << "dtR1    " << "event_day_R1     " << "dtR3    " << "event_day_R3     " << "dtR5    " << "event_day_R5     " << "dtR7    " << "event_day_R7     " << "dtR8    " << "event_day_R8" << "cbdEM    " << "bdEM     " << "cbdR1   " << "bdR1     " << "cbdR3    " << "bdR3     " << "cbdR5    " << "bdR5     " << "cbdR7    " << "bdR7     " << "cbdR8    " << "bdR8     " << "s_error_EM     " << "s_error_R1      " << " s_error_R3   " << " s_error_R5      " << "s_error_R7    " << " s_error_R8      " << endl;
+			write_check_summary = true;
+		}
+		out_s << NSAM << "   " << data.data_a5.species[NSAM]  << "   " << dtEM << "   " << data.data_a5.response_EM[NSAM]    << "   " << dtR1    << "   " << data.data_a5.response_R1[NSAM] << "   " << dtR3   << "   " << data.data_a5.response_R3[NSAM] << "   " << dtR5     << "   " << data.data_a5.response_R5[NSAM] << "   " << dtR7  << "   " << data.data_a5.response_R7[NSAM] << "   " << dtR8  << "   " << data.data_a5.response_R8[NSAM] << "   " << cbdEM    << "   " << bdEM     << "   " << cbdR1   << "   " << bdR1      << "   " << cbdR3     << "   " << bdR3      << "   " << cbdR5    << "   " << bdR5     << "   " << cbdR7   << "   " << bdR7     << "   " << cbdR8    << "   " << bdR8     << "   " << s_error_EM    << "   " << s_error_R1       << "   " << s_error_R3    << "   " << s_error_R5       << "   " << s_error_R7     << "   " << s_error_R8       << "   " << endl;
+
+		
+		
+		/*
 		out_s << "[" << NSAM << "]" << endl;
 		out_s << "geo_id = " << data.data_a5.geo_id[NSAM] << endl;
 		out_s << "CBD = " << CBD << endl;
@@ -1324,7 +1332,7 @@ public:
 		out_s << " NGRN = " << NGRN << endl;
 		out_s << "CNUP = " << CNUP << endl;
 		out_s << " param.INSOL = " << param.INSOL << endl;
-		out_s << "CIRGW = " << CIRGW << endl;
+		out_s << "CIRGW = " << CIRGW << endl;*/
 		out_s.close();
 	}
 
@@ -1367,6 +1375,12 @@ public:
 			sigmoid_cbdR5 = 0.0;
 			sigmoid_cbdR7 = 0.0;
 			sigmoid_cbdR8 = 0.0;
+			dtEM = 0;
+			dtR1 = 0;
+			dtR3 = 0;
+			dtR5 = 0;
+			dtR7 = 0;
+			dtR8 = 0;
 
 		//	sum_threshold_passed_stage = 0.0;
 			sum_threshold_passed_stage_0 = 0.0;
@@ -1418,64 +1432,123 @@ public:
 				SoilWater();
 
 				double rhs;
-				if (event_day_EM > 0)
+				if (/*passed_stage == 0 &&*/ event_day_EM > 0 && sigmoid_cbdR1 < 0.6)
 				{
-					rhs = 0.1 * ((double)nd + 6.0 - event_day_EM);
+					/*double*/ rhs = 0.1 * ((double)nd + 6.0 - event_day_EM);
 					rhs = (rhs > 0.9) ? 0.9 : rhs;
 					rhs = (rhs < 0.1) ? 0.1 : rhs;
 					rhs_EM = 0.1 * (CBD + 6.0 - data.data_p.ttSWEM);
+					//					rhs_EM = 0.1 * (CBD + 6.0 - bdEM);
+					//					rhs_EM = (rhs_EM > 0.9) ? 0.9 : rhs_EM;
+					//					rhs_EM = (rhs_EM < 0.1) ? 0.1 : rhs_EM;
 					s_error_EM += (rhs - rhs_EM) * (rhs - rhs_EM);
 					sigmoid_cbdEM = rhs_EM;
 
 				}
-				if (event_day_R1 > 0)
+
+				if (CBD >= bdEM && sigmoid_cbdEM >= 0.6 && passed_stage == 0)
 				{
-					rhs = 0.1 * ((double)nd + 6.0 - event_day_R1);
+					sum_threshold_passed_stage_0 = cbdEM;
+					passed_stage = 1;
+				}
+
+				if (sigmoid_cbdEM >= 0.6 && event_day_R1 > 0 && sigmoid_cbdR3 < 0.6)
+				{
+					/*double*/ rhs = 0.1 * ((double)nd + 6.0 - event_day_R1);
 					rhs = (rhs > 0.9) ? 0.9 : rhs;
 					rhs = (rhs < 0.1) ? 0.1 : rhs;
 					rhs_R1 = 0.1 * ((CBD - sum_threshold_passed_stage_0) + 6.0 - data.data_p.ttEMR1);
+					//					rhs_R1 = 0.1 * (CBD + 6.0 - bdR1);
+					//					rhs_R1 = (rhs_R1 > 0.9) ? 0.9 : rhs_R1;
+					//					rhs_R1 = (rhs_R1 < 0.1) ? 0.1 : rhs_R1;
 					s_error_R1 += (rhs - rhs_R1) * (rhs - rhs_R1);
 					sigmoid_cbdR1 = rhs_R1;
 
 				}
-				if (event_day_R3 > 0)
+
+				if (CBD >= bdR1 && sigmoid_cbdR1 >= 0.6  && passed_stage == 1)
 				{
-					rhs = 0.1 * ((double)nd + 6.0 - event_day_R3);
+					sum_threshold_passed_stage_1 = sum_threshold_passed_stage_0 + cbdR1;
+					passed_stage = 2;
+				}
+
+				if (sigmoid_cbdR1 >= 0.6 &&  event_day_R3 > 0 && sigmoid_cbdR5 < 0.6)
+				{
+					/*double*/ rhs = 0.1 * ((double)nd + 6.0 - event_day_R3);
 					rhs = (rhs > 0.9) ? 0.9 : rhs;
 					rhs = (rhs < 0.1) ? 0.1 : rhs;
 					rhs_R3 = 0.1 * ((CBD - sum_threshold_passed_stage_1) + 6.0 - data.data_p.ttR1R3);
+					//					rhs_R3 = 0.1 * (CBD + 6.0 - bdR3);
+					//					rhs_R3 = (rhs_R3 > 0.9) ? 0.9 : rhs_R3;
+					//					rhs_R3 = (rhs_R3 < 0.1) ? 0.1 : rhs_R3;
 					s_error_R3 += (rhs - rhs_R3) * (rhs - rhs_R3);
 					sigmoid_cbdR3 = rhs_R3;
 
 				}
-				if (event_day_R5 > 0)
+
+				if (CBD >= bdR3 && sigmoid_cbdR3 >= 0.6  && passed_stage == 2)
 				{
-					rhs = 0.1 * ((double)nd + 6.0 - event_day_R5);
+					sum_threshold_passed_stage_2 = sum_threshold_passed_stage_1 + cbdR3;
+					passed_stage = 3;
+				}
+
+				if (sigmoid_cbdR3 >= 0.6 &&  event_day_R5 > 0 && sigmoid_cbdR7 < 0.6)
+				{
+					/*double*/ rhs = 0.1 * ((double)nd + 6.0 - event_day_R5);
 					rhs = (rhs > 0.9) ? 0.9 : rhs;
 					rhs = (rhs < 0.1) ? 0.1 : rhs;
 					rhs_R5 = 0.1 * ((CBD - sum_threshold_passed_stage_2) + 6.0 - data.data_p.ttR3R5);
+					//					rhs_R5 = 0.1 * (CBD + 6.0 - bdR5);
+					//					rhs_R5 = (rhs_R5 > 0.9) ? 0.9 : rhs_R5;
+					//					rhs_R5 = (rhs_R5 < 0.1) ? 0.1 : rhs_R5;
 					s_error_R5 += (rhs - rhs_R5) * (rhs - rhs_R5);
 					sigmoid_cbdR5 = rhs_R5;
 
 				}
-				if (event_day_R7 > 0)
+
+				if (CBD >= bdR5 && sigmoid_cbdR5 >= 0.6  && passed_stage == 3)
 				{
-					rhs = 0.1 * ((double)nd + 6.0 - event_day_R7);
+					sum_threshold_passed_stage_3 = sum_threshold_passed_stage_2 + cbdR5;
+					passed_stage = 4;
+				}
+
+				if (sigmoid_cbdR5 >= 0.6 &&  event_day_R7 > 0 && sigmoid_cbdR8 < 0.6)
+				{
+					/*double*/ rhs = 0.1 * ((double)nd + 6.0 - event_day_R7);
 					rhs = (rhs > 0.9) ? 0.9 : rhs;
 					rhs = (rhs < 0.1) ? 0.1 : rhs;
 					rhs_R7 = 0.1 * ((CBD - sum_threshold_passed_stage_3) + 6.0 - data.data_p.ttR5R7);
+					//					rhs_R7 = 0.1 * (CBD + 6.0 - bdR7);
+					//					rhs_R7 = (rhs_R7 > 0.9) ? 0.9 : rhs_R7;
+					//					rhs_R7 = (rhs_R7 < 0.1) ? 0.1 : rhs_R7;
 					s_error_R7 += (rhs - rhs_R7) * (rhs - rhs_R7);
 					sigmoid_cbdR7 = rhs_R7;
 
 				}
-				if (event_day_R8 > 0)
+
+				if (CBD >= bdR7 && sigmoid_cbdR7 >= 0.6  && passed_stage == 4)
 				{
-					rhs = 0.1 * ((double)nd + 6.0 - event_day_R8);
+					sum_threshold_passed_stage_4 = sum_threshold_passed_stage_3 + cbdR7;
+					passed_stage = 5;
+				}
+
+				if (sigmoid_cbdR7 >= 0.6 &&  event_day_R8 > 0)
+				{
+					/*double*/ rhs = 0.1 * ((double)nd + 6.0 - event_day_R8);
 					rhs = (rhs > 0.9) ? 0.9 : rhs;
 					rhs = (rhs < 0.1) ? 0.1 : rhs;
 					rhs_R8 = 0.1 * ((CBD - sum_threshold_passed_stage_4) + 6.0 - data.data_p.ttR7R8);
+					//					rhs_R8 = 0.1 * (CBD + 6.0 - bdR5);
+					//					rhs_R8 = (rhs_R8 > 0.9) ? 0.9 : rhs_R8;
+					//					rhs_R8 = (rhs_R8 < 0.1) ? 0.1 : rhs_R8;
 					s_error_R8 += (rhs - rhs_R8) * (rhs - rhs_R8);
 					sigmoid_cbdR8 = rhs_R8;
+				}
+
+				if (CBD >= bdR8 && sigmoid_cbdR8 >= 0.6 && passed_stage == 5)
+				{
+					sum_threshold_passed_stage_5 = sum_threshold_passed_stage_4 + cbdR8;
+					passed_stage = 6;
 				}
 
 				if (param.print_trace) DailyPrintOut();
@@ -1494,6 +1567,7 @@ public:
 			if (event_day_R5 > 0) training_error_R5 += (dtR5 - event_day_R5) * (dtR5 - event_day_R5);
 			if (event_day_R7 > 0) training_error_R7 += (dtR7 - event_day_R7) * (dtR7 - event_day_R7);
 			if (event_day_R8 > 0) training_error_R8 += (dtR8 - event_day_R8) * (dtR8 - event_day_R8);
+			if (param.print_trace) SummaryPrintOut(s_error_EM, s_error_R1, s_error_R3, s_error_R5, s_error_R7, s_error_R8);
 		}
 		cout << s_error_EM << endl;
 		cout << s_error_R1 << endl;
