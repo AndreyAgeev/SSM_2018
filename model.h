@@ -1287,14 +1287,89 @@ public:
 
 	void SummaryPrintOut(double s_error_EM, double s_error_R1, double s_error_R3, double s_error_R5, double s_error_R7, double s_error_R8 )
 	{
+		const int nameWidth = 20;
+		const int numWidth = 20;
 		out_s.open(param.func_file_name.toStdString() + "_" + "output_summary.txt", std::ios::app);
 		if (write_check_summary == false) {
-			out_s << "NSAM    " << "NAME    " << "dtEM    " << "event_day_EM     " << "dtR1    " << "event_day_R1     " << "dtR3    " << "event_day_R3     " << "dtR5    " << "event_day_R5     " << "dtR7    " << "event_day_R7     " << "dtR8    " << "event_day_R8" << "cbdEM    " << "bdEM     " << "cbdR1   " << "bdR1     " << "cbdR3    " << "bdR3     " << "cbdR5    " << "bdR5     " << "cbdR7    " << "bdR7     " << "cbdR8    " << "bdR8     " << "s_error_EM     " << "s_error_R1      " << " s_error_R3   " << " s_error_R5      " << "s_error_R7    " << " s_error_R8      " << endl;
+			out_s << left << setw(nameWidth) << setfill(' ') << "NSAM";
+			out_s << left << setw(nameWidth) << setfill(' ') << "species";
+			out_s << left << setw(nameWidth) << setfill(' ') << "dtEM";
+			out_s << left << setw(nameWidth) << setfill(' ') << "response_EM";
+			out_s << left << setw(nameWidth) << setfill(' ') << "dtR1";
+			out_s << left << setw(nameWidth) << setfill(' ') << "response_R1";
+			out_s << left << setw(nameWidth) << setfill(' ') << "dtR3";
+			out_s << left << setw(nameWidth) << setfill(' ') << "response_R3";
+			out_s << left << setw(nameWidth) << setfill(' ') << "dtR5";
+			out_s << left << setw(nameWidth) << setfill(' ') << "response_R5";
+			out_s << left << setw(nameWidth) << setfill(' ') << "dtR7";
+			out_s << left << setw(nameWidth) << setfill(' ') << "response_R7";
+			out_s << left << setw(nameWidth) << setfill(' ') << "dtR8";
+			out_s << left << setw(nameWidth) << setfill(' ') << "response_R8";
+			out_s << left << setw(nameWidth) << setfill(' ') << "cbdEM";
+			out_s << left << setw(nameWidth) << setfill(' ') << "bdEM";
+
+			out_s << left << setw(nameWidth) << setfill(' ') << "cbdR1";
+			out_s << left << setw(nameWidth) << setfill(' ') << "bdR1";
+
+			out_s << left << setw(nameWidth) << setfill(' ') << "cbdR3";
+			out_s << left << setw(nameWidth) << setfill(' ') << "bdR3";
+
+			out_s << left << setw(nameWidth) << setfill(' ') << "cbdR5";
+			out_s << left << setw(nameWidth) << setfill(' ') << "bdR5";
+
+			out_s << left << setw(nameWidth) << setfill(' ') << "cbdR7";
+			out_s << left << setw(nameWidth) << setfill(' ') << "bdR7";
+
+			out_s << left << setw(nameWidth) << setfill(' ') << "cbdR8";
+			out_s << left << setw(nameWidth) << setfill(' ') << "bdR8";
+
+			out_s << left << setw(nameWidth) << setfill(' ') << "s_error_EM";
+			out_s << left << setw(nameWidth) << setfill(' ') << "s_error_R1";
+			out_s << left << setw(nameWidth) << setfill(' ') << "s_error_R3";
+			out_s << left << setw(nameWidth) << setfill(' ') << "s_error_R5";
+			out_s << left << setw(nameWidth) << setfill(' ') << "s_error_R7";
+			out_s << left << setw(nameWidth) << setfill(' ') << "s_error_R8" << endl;
+
 			write_check_summary = true;
 		}
-		out_s << NSAM << "   " << data.data_a5.species[NSAM]  << "   " << dtEM << "   " << data.data_a5.response_EM[NSAM]    << "   " << dtR1    << "   " << data.data_a5.response_R1[NSAM] << "   " << dtR3   << "   " << data.data_a5.response_R3[NSAM] << "   " << dtR5     << "   " << data.data_a5.response_R5[NSAM] << "   " << dtR7  << "   " << data.data_a5.response_R7[NSAM] << "   " << dtR8  << "   " << data.data_a5.response_R8[NSAM] << "   " << cbdEM    << "   " << bdEM     << "   " << cbdR1   << "   " << bdR1      << "   " << cbdR3     << "   " << bdR3      << "   " << cbdR5    << "   " << bdR5     << "   " << cbdR7   << "   " << bdR7     << "   " << cbdR8    << "   " << bdR8     << "   " << s_error_EM    << "   " << s_error_R1       << "   " << s_error_R3    << "   " << s_error_R5       << "   " << s_error_R7     << "   " << s_error_R8       << "   " << endl;
+		out_s << left << setw(numWidth) << setfill(' ') << NSAM;
+		out_s << left << setw(numWidth) << setfill(' ') << data.data_a5.species[NSAM];
+		out_s << left << setw(numWidth) << setfill(' ') << dtEM;
+		out_s << left << setw(numWidth) << setfill(' ') << data.data_a5.response_EM[NSAM];
+		out_s << left << setw(numWidth) << setfill(' ') << dtR1;
+		out_s << left << setw(numWidth) << setfill(' ') << data.data_a5.response_R1[NSAM];
+		out_s << left << setw(numWidth) << setfill(' ') << dtR3;
+		out_s << left << setw(numWidth) << setfill(' ') << data.data_a5.response_R3[NSAM];
+		out_s << left << setw(numWidth) << setfill(' ') << dtR5;
+		out_s << left << setw(numWidth) << setfill(' ') << data.data_a5.response_R5[NSAM];
+		out_s << left << setw(numWidth) << setfill(' ') << dtR7;
+		out_s << left << setw(numWidth) << setfill(' ') << data.data_a5.response_R7[NSAM];
+		out_s << left << setw(numWidth) << setfill(' ') << dtR8;
+		out_s << left << setw(numWidth) << setfill(' ') << data.data_a5.response_R8[NSAM];
+		out_s << left << setw(numWidth) << setfill(' ') << cbdEM;
+		out_s << left << setw(numWidth) << setfill(' ') << bdEM;
 
-		
+		out_s << left << setw(numWidth) << setfill(' ') << cbdR1;
+		out_s << left << setw(numWidth) << setfill(' ') << bdR1;
+
+		out_s << left << setw(numWidth) << setfill(' ') << cbdR3;
+		out_s << left << setw(numWidth) << setfill(' ') << bdR3;
+
+		out_s << left << setw(numWidth) << setfill(' ') << cbdR5;
+		out_s << left << setw(numWidth) << setfill(' ') << bdR5;
+
+		out_s << left << setw(numWidth) << setfill(' ') << cbdR7;
+		out_s << left << setw(numWidth) << setfill(' ') << bdR7;
+
+		out_s << left << setw(numWidth) << setfill(' ') << cbdR8;
+		out_s << left << setw(numWidth) << setfill(' ') << bdR8;
+
+		out_s << left << setw(numWidth) << setfill(' ') << s_error_EM;
+		out_s << left << setw(numWidth) << setfill(' ') << s_error_R1;
+		out_s << left << setw(numWidth) << setfill(' ') << s_error_R3;
+		out_s << left << setw(numWidth) << setfill(' ') << s_error_R5;
+		out_s << left << setw(numWidth) << setfill(' ') << s_error_R7;
+		out_s << left << setw(numWidth) << setfill(' ') << s_error_R8 << endl;
 		
 		/*
 		out_s << "[" << NSAM << "]" << endl;
