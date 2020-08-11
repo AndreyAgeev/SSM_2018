@@ -8,6 +8,7 @@
 #include <QSettings>
 #include <QVariant>
 #include <armadillo>
+#include <random>
 using namespace std;
 using namespace HighFive;
 class Data
@@ -137,6 +138,8 @@ public:
 
 
 	Data_a data_a5;
+	Data_a data_a5_training;
+	Data_a data_a5_valid;
 
 	Data_f data_h5;
 	Data_phen data_p;
@@ -327,7 +330,77 @@ public:
 		data_a5.response_R7 = Data::std2arvec(data_a5.resp_R7, data_a5.nSamples, 0);
 		data_a5.response_R8 = Data::std2arvec(data_a5.resp_R8, data_a5.nSamples, 0);
 	}
-
+	void dividing_dataset(int seed, int extra_covar)
+	{
+		vector<int> index;
+		vector<int> training_index, valid_index;
+		for (int i = 0; i < data_a5.nSamples; i++)
+			index.push_back(i);
+		mt19937 g;
+		g.seed(seed);
+		shuffle(index.begin(), index.end(), g);
+		auto const training = index.begin();
+		auto const valid = training + (index.size() * 80.0) / 100;
+		auto const end = index.end();
+		training_index.assign(training, valid);
+		valid_index.assign(valid, end);
+		for (int i = 0; i < training_index.size(); i++)
+		{
+			data_a5_training.years.push_back(data_a5.years[training_index[i]]);
+			data_a5_training.doy.push_back(data_a5.doy[training_index[i]]);
+			data_a5_training.geo_id.push_back(data_a5.geo_id[training_index[i]]);
+			data_a5_training.resp_EM.push_back(data_a5.resp_EM[training_index[i]]);
+			data_a5_training.resp_R1.push_back(data_a5.resp_R1[training_index[i]]);
+			data_a5_training.resp_R3.push_back(data_a5.resp_R3[training_index[i]]);
+			data_a5_training.resp_R5.push_back(data_a5.resp_R5[training_index[i]]);
+			data_a5_training.resp_R7.push_back(data_a5.resp_R7[training_index[i]]);
+			data_a5_training.resp_R8.push_back(data_a5.resp_R8[training_index[i]]);
+			data_a5_training.species.push_back(data_a5.species[training_index[i]]);
+			data_a5_training.month.push_back(data_a5.month[training_index[i]]);
+			if (extra_covar == 1) {
+				data_a5_training.gr_covar.push_back(data_a5.gr_covar[training_index[i]]);		
+			}
+			data_a5_training.nSamples = training_index.size();
+		}
+		if (extra_covar == 1) {
+			data_a5_training.gr_names = data_a5.gr_names;
+				data_a5_training.nGrCovar = training_index.size();
+		}
+		data_a5_training.response_EM = Data::std2arvec(data_a5_training.resp_EM, data_a5_training.nSamples, 0);
+		data_a5_training.response_R1 = Data::std2arvec(data_a5_training.resp_R1, data_a5_training.nSamples, 0);
+		data_a5_training.response_R3 = Data::std2arvec(data_a5_training.resp_R3, data_a5_training.nSamples, 0);
+		data_a5_training.response_R5 = Data::std2arvec(data_a5_training.resp_R5, data_a5_training.nSamples, 0);
+		data_a5_training.response_R7 = Data::std2arvec(data_a5_training.resp_R7, data_a5_training.nSamples, 0);
+		data_a5_training.response_R8 = Data::std2arvec(data_a5_training.resp_R8, data_a5_training.nSamples, 0);
+		for (int i = 0; i < valid_index.size(); i++)
+		{
+			data_a5_valid.years.push_back(data_a5.years[valid_index[i]]);
+			data_a5_valid.doy.push_back(data_a5.doy[valid_index[i]]);
+			data_a5_valid.geo_id.push_back(data_a5.geo_id[valid_index[i]]);
+			data_a5_valid.resp_EM.push_back(data_a5.resp_EM[valid_index[i]]);
+			data_a5_valid.resp_R1.push_back(data_a5.resp_R1[valid_index[i]]);
+			data_a5_valid.resp_R3.push_back(data_a5.resp_R3[valid_index[i]]);
+			data_a5_valid.resp_R5.push_back(data_a5.resp_R5[valid_index[i]]);
+			data_a5_valid.resp_R7.push_back(data_a5.resp_R7[valid_index[i]]);
+			data_a5_valid.resp_R8.push_back(data_a5.resp_R8[valid_index[i]]);
+			data_a5_valid.species.push_back(data_a5.species[valid_index[i]]);
+			data_a5_valid.month.push_back(data_a5.month[valid_index[i]]);
+			if (extra_covar == 1) {
+				data_a5_valid.gr_covar.push_back(data_a5.gr_covar[valid_index[i]]);
+			}
+			data_a5_valid.nSamples = valid_index.size();
+		}
+		if (extra_covar == 1) {
+			data_a5_valid.gr_names = data_a5.gr_names;
+			data_a5_valid.nGrCovar = valid_index.size();
+		}
+		data_a5_valid.response_EM = Data::std2arvec(data_a5_valid.resp_EM, data_a5_valid.nSamples, 0);
+		data_a5_valid.response_R1 = Data::std2arvec(data_a5_valid.resp_R1, data_a5_valid.nSamples, 0);
+		data_a5_valid.response_R3 = Data::std2arvec(data_a5_valid.resp_R3, data_a5_valid.nSamples, 0);
+		data_a5_valid.response_R5 = Data::std2arvec(data_a5_valid.resp_R5, data_a5_valid.nSamples, 0);
+		data_a5_valid.response_R7 = Data::std2arvec(data_a5_valid.resp_R7, data_a5_valid.nSamples, 0);
+		data_a5_valid.response_R8 = Data::std2arvec(data_a5_valid.resp_R8, data_a5_valid.nSamples, 0);
+	}
 private:
 	arma::mat std2arvec(std::vector<std::vector<double> > &vec, int n_rows, int offset) {
 		arma::vec Y(n_rows, 1);
@@ -336,7 +409,5 @@ private:
 		}
 		return Y;
 	}
-
-		
 };
 
