@@ -17,11 +17,13 @@
 #include <fstream>
 #include <math.h>
 #include <nlreg.h>
+#include <iomanip>
 using namespace std;
 using namespace HighFive;
 #define SOLTANI_FUNC 0
 #define OPTIMIZATION 0
 #define SIMULATION 1
+
 class Model : public QObject
 {
 	Q_OBJECT
@@ -300,7 +302,8 @@ public:
 		data.read_h5(param.h5_file_name);
 		data.read_spieces(param.h5_table_name, param.ecovar);
 		data.read_ini(param.crops_ini_file);
-
+		if (param.dividing_dataset == 1)
+		    data.dividing_dataset(param.seed, param.ecovar);
 		nl = new Nlreg(param.func_file_name, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace, param.crops);
 		nl->nlreg_build();
 
@@ -680,23 +683,11 @@ public:
 			cbdEM = CBD;
 		}
 
-	/*	if (CBD >= bdEM && sigmoid_cbdEM >= 0.9 && passed_stage == 0)
-		{
-			sum_threshold_passed_stage_0 = cbdEM;
-			passed_stage = 1;
-		}*/
-
 		if (CBD < bdR1)
 		{
 			dtR1 = DAP + 1; // 'Saving days to R1
 			cbdR1 = CBD;
 		}
-
-	/*	if (CBD >= bdR1 && sigmoid_cbdR1 >= 0.9  && passed_stage == 1)
-		{
-			sum_threshold_passed_stage_1 = sum_threshold_passed_stage_0 + cbdR1;
-			passed_stage = 2;
-		}*/
 
 		if (CBD < bdR3)
 		{
@@ -704,23 +695,11 @@ public:
 			cbdR3 = CBD;
 		}
 
-		/*	if (CBD >= bdR3 && sigmoid_cbdR3 >= 0.9  && passed_stage == 2)
-		{
-			sum_threshold_passed_stage_2 = sum_threshold_passed_stage_1 + cbdR3;
-			passed_stage = 3;
-		}*/
-
 		if (CBD < bdR5)
 		{
 			dtR5 = DAP + 1;//  'Saving days to R5
 			cbdR5 = CBD;
 		}
-
-		/*	if (CBD >= bdR5 && sigmoid_cbdR5 >= 0.9  && passed_stage == 3)
-		{
-			sum_threshold_passed_stage_3 = sum_threshold_passed_stage_2 + cbdR5;
-			passed_stage = 4;
-		}*/
 
 		if (CBD < bdR7)
 		{
@@ -728,23 +707,11 @@ public:
 			cbdR7 = CBD;
 		}
 
-		/*	if (CBD >= bdR7 && sigmoid_cbdR7 >= 0.9  && passed_stage == 4)
-		{
-			sum_threshold_passed_stage_4 = sum_threshold_passed_stage_3 + cbdR7;
-			passed_stage = 5;
-		}*/
-
 		if (CBD < bdR8)
 		{
 			dtR8 = DAP + 1; // 'Saving days to R8
 			cbdR8 = CBD;
 		}
-
-		/*	if (CBD >= bdR8 && sigmoid_cbdR8 >= 0.9 && passed_stage == 5)
-		{
-			sum_threshold_passed_stage_5 = sum_threshold_passed_stage_4 + cbdR8;
-			passed_stage = 6;
-		}*/
 
 		if (CBD > bdR8)
 			MAT = 1;
@@ -1192,33 +1159,11 @@ public:
 	}
 	void DailyPrintOut(void)
 	{
-
-		//out_LAI.open(param.func_file_name.toStdString() + "_" + "output_LAI" + param.h5_file_name.toStdString() + ".txt", std::ios::app);
-//		out_LAI.open(param.h5_table_name.toStdString() + "_" + "output_LAI.txt", std::ios::app);
-//		out_DAP.open(param.h5_table_name.toStdString() + "_" + "DAP.txt" , std::ios::app);
-//		out_FTSW.open(param.h5_table_name.toStdString() + "_" + "output_ftsw.txt" , std::ios::app);
-//		out_CE.open(param.h5_table_name.toStdString() + "_" + "output_CE.txt", std::ios::app);
-//		out_CTR.open(param.h5_table_name.toStdString() + "_" + "output_CTR.txt", std::ios::app);
-//		out_MSNN.open(param.h5_table_name.toStdString() + "_" + "output_MSNN.txt", std::ios::app);
-//		out_CNUP.open(param.h5_table_name.toStdString() + "_" + "output_CNUP.txt", std::ios::app);
-//		out_NVEG.open(param.h5_table_name.toStdString() + "_" + "output_NVEG.txt", std::ios::app);
-//		out_NGRN.open(param.h5_table_name.toStdString() + "_" + "output_NGRN.txt", std::ios::app);
-
 		out.open(param.func_file_name.toStdString() + "_" + "daily_output.txt", std::ios::app);
 		if (write_check == false) {
 			out << "GEO_ID= " << "NSAM= " << "ROW= " << "YEARS= " << "DOY= " << "DAP= " << "TMP= " << "DTT= " << "CBD= " << "rhs_EM= " << "rhs_R1= " << "rhs_R3= " << "rhs_R5= " << "rhs_R7= " << "rhs_R8= " << "MSNN= " << "GLAI= " << "DLAI= " << "LAI= " << "TCFRUE= " << "FINT= " << "DDMP= " << "GLF= " << "GST= " << "SGR= " << "WLF= " << "WST= " << "WVEG=  " << "WGRN= " << "WTOP= " << "DEPORT= " << "RAIN= " << "IRGW= " << "RUNOF= " << "PET= " << "SEVP= " << "TR= " << "ATSW= " << "FTSW= " << "CRAIN= " << "CIRGW= " << "IRGNO= " << "CRUNOF= " << "CE= " << "CTR= " << "WSTORG= " << "NUP= " << "NLF= " << "NST= " << "NVEG= " << "NGRN= " << "CNUP= " << "MAT= " << endl;
 			write_check = true;
 		}
-		//		out_LAI << LAI << endl;
-		//		out_DAP << DAP << endl;
-		//		out_FTSW << FTSW << endl;
-		//		out_CE << CE << endl;
-		//		out_CTR << CTR << endl;
-		//		out_MSNN << MSNN << endl;
-		//		out_CNUP << CNUP << endl;
-		//		out_NVEG << NVEG << endl;
-		//		out_NGRN << NGRN << endl;
-
 		out << data.data_a5.geo_id[NSAM] << " ";
 		out << NSAM << "  ";
 		out << ROW << "  ";
@@ -1273,20 +1218,9 @@ public:
 		out << CNUP << "  ";
 		out << MAT << endl;
 		out.close();
-		//		out_LAI.close();
-		//		out_DAP.close();
-		//		out_FTSW.close();
-		//		out_CE.close();
-		//		out_CTR.close();
-		//		out_MSNN.close();
-		//		out_CNUP.close();
-		//		out_NVEG.close();
-		//		out_NGRN.close();
 	}
 
 
-	
-	
 	void SummaryPrintOut(double s_error_EM, double s_error_R1, double s_error_R3, double s_error_R5, double s_error_R7, double s_error_R8, double training_error_EM, double training_error_R1, double training_error_R3, double training_error_R5, double training_error_R7, double training_error_R8)
 	{
 		out_s.open(param.func_file_name.toStdString() + "_" + "output_summary.txt", std::ios::app);
@@ -1296,135 +1230,6 @@ public:
 			write_check_summary = true;
 		}
 		out_s << NSAM <<';'<< data.data_a5.species[NSAM] << ';' << dtEM << ';' << data.data_a5.response_EM[NSAM] <<';' << dtR1 << ';' << data.data_a5.response_R1[NSAM] << ';' << dtR3 <<';' << data.data_a5.response_R3[NSAM] << ';' << dtR5 << ';' << data.data_a5.response_R5[NSAM] << ';' << dtR7 << ';' << data.data_a5.response_R7[NSAM] << ';' << dtR8 << ';' << data.data_a5.response_R8[NSAM] << ';' << cbdEM << ';' << bdEM << ';' << cbdR1 << ';' << bdR1 << ';' << cbdR3 <<';' << bdR3 <<';' << cbdR5 << ';' << bdR5 << ';' << cbdR7 << ';' << bdR7 <<';' << cbdR8 << ';' << bdR8 << ';' << s_error_EM << ';' << s_error_R1 << ';' << s_error_R3 << ';' << s_error_R5 <<';' << s_error_R7 <<';' << s_error_R8 << ';' << training_error_EM << ';' << training_error_R1 << ';' << training_error_R3 << ';' << training_error_R5 << ';' << training_error_R7 << ';' << training_error_R8 << ';' << endl;
-
-		
-		
-		/*
-		const int nameWidth = 20;
-		const int numWidth = 20;
-		const char separator = ' ';
-		out_s.open(param.func_file_name.toStdString() + "_" + "output_summary.txt", std::ios::app);
-		if (write_check_summary == false) {
-			out_s << left << setw(nameWidth) << setfill(separator) << "NSAM";
-			out_s << left << setw(nameWidth) << setfill(separator) << "species";
-			out_s << left << setw(nameWidth) << setfill(separator) << "dtEM";
-			out_s << left << setw(nameWidth) << setfill(separator) << "response_EM";
-			out_s << left << setw(nameWidth) << setfill(separator) << "dtR1";
-			out_s << left << setw(nameWidth) << setfill(separator) << "response_R1";
-			out_s << left << setw(nameWidth) << setfill(separator) << "dtR3";
-			out_s << left << setw(nameWidth) << setfill(separator) << "response_R3";
-			out_s << left << setw(nameWidth) << setfill(separator) << "dtR5";
-			out_s << left << setw(nameWidth) << setfill(separator) << "response_R5";
-			out_s << left << setw(nameWidth) << setfill(separator) << "dtR7";
-			out_s << left << setw(nameWidth) << setfill(separator) << "response_R7";
-			out_s << left << setw(nameWidth) << setfill(separator) << "dtR8";
-			out_s << left << setw(nameWidth) << setfill(separator) << "response_R8";
-			out_s << left << setw(nameWidth) << setfill(separator) << "cbdEM";
-			out_s << left << setw(nameWidth) << setfill(separator) << "bdEM";
-
-			out_s << left << setw(nameWidth) << setfill(separator) << "cbdR1";
-			out_s << left << setw(nameWidth) << setfill(separator) << "bdR1";
-
-			out_s << left << setw(nameWidth) << setfill(separator) << "cbdR3";
-			out_s << left << setw(nameWidth) << setfill(separator) << "bdR3";
-
-			out_s << left << setw(nameWidth) << setfill(separator) << "cbdR5";
-			out_s << left << setw(nameWidth) << setfill(separator) << "bdR5";
-
-			out_s << left << setw(nameWidth) << setfill(separator) << "cbdR7";
-			out_s << left << setw(nameWidth) << setfill(separator) << "bdR7";
-
-			out_s << left << setw(nameWidth) << setfill(separator) << "cbdR8";
-			out_s << left << setw(nameWidth) << setfill(separator) << "bdR8";
-
-			out_s << left << setw(nameWidth) << setfill(separator) << "s_error_EM";
-			out_s << left << setw(nameWidth) << setfill(separator) << "s_error_R1";
-			out_s << left << setw(nameWidth) << setfill(separator) << "s_error_R3";
-			out_s << left << setw(nameWidth) << setfill(separator) << "s_error_R5";
-			out_s << left << setw(nameWidth) << setfill(separator) << "s_error_R7";
-			out_s << left << setw(nameWidth) << setfill(separator) << "s_error_R8" << endl;
-
-			write_check_summary = true;
-		}
-		out_s << left << setw(numWidth) << setfill(separator) << NSAM;
-		out_s << left << setw(numWidth) << setfill(separator) << data.data_a5.species[NSAM];
-		out_s << left << setw(numWidth) << setfill(separator) << dtEM;
-		out_s << left << setw(numWidth) << setfill(separator) << data.data_a5.response_EM[NSAM];
-		out_s << left << setw(numWidth) << setfill(separator) << dtR1;
-		out_s << left << setw(numWidth) << setfill(separator) << data.data_a5.response_R1[NSAM];
-		out_s << left << setw(numWidth) << setfill(separator) << dtR3;
-		out_s << left << setw(numWidth) << setfill(separator) << data.data_a5.response_R3[NSAM];
-		out_s << left << setw(numWidth) << setfill(separator) << dtR5;
-		out_s << left << setw(numWidth) << setfill(separator) << data.data_a5.response_R5[NSAM];
-		out_s << left << setw(numWidth) << setfill(separator) << dtR7;
-		out_s << left << setw(numWidth) << setfill(separator) << data.data_a5.response_R7[NSAM];
-		out_s << left << setw(numWidth) << setfill(separator) << dtR8;
-		out_s << left << setw(numWidth) << setfill(separator) << data.data_a5.response_R8[NSAM];
-		out_s << left << setw(numWidth) << setfill(separator) << cbdEM;
-		out_s << left << setw(numWidth) << setfill(separator) << bdEM;
-
-		out_s << left << setw(numWidth) << setfill(separator) << cbdR1;
-		out_s << left << setw(numWidth) << setfill(separator) << bdR1;
-
-		out_s << left << setw(numWidth) << setfill(separator) << cbdR3;
-		out_s << left << setw(numWidth) << setfill(separator) << bdR3;
-
-		out_s << left << setw(numWidth) << setfill(separator) << cbdR5;
-		out_s << left << setw(numWidth) << setfill(separator) << bdR5;
-
-		out_s << left << setw(numWidth) << setfill(separator) << cbdR7;
-		out_s << left << setw(numWidth) << setfill(separator) << bdR7;
-
-		out_s << left << setw(numWidth) << setfill(separator) << cbdR8;
-		out_s << left << setw(numWidth) << setfill(separator) << bdR8;
-
-		out_s << left << setw(numWidth) << setfill(separator) << s_error_EM;
-		out_s << left << setw(numWidth) << setfill(separator) << s_error_R1;
-		out_s << left << setw(numWidth) << setfill(separator) << s_error_R3;
-		out_s << left << setw(numWidth) << setfill(separator) << s_error_R5;
-		out_s << left << setw(numWidth) << setfill(separator) << s_error_R7;
-		out_s << left << setw(numWidth) << setfill(separator) << s_error_R8 << endl;
-
-		*/
-		
-		
-		/*
-		out_s << "[" << NSAM << "]" << endl;
-		out_s << "geo_id = " << data.data_a5.geo_id[NSAM] << endl;
-		out_s << "CBD = " << CBD << endl;
-		out_s << "year = " << data.data_h5.years[ROW] << endl;
-		out_s << "dtEM = " << dtEM << endl;
-		out_s << "dtR1 = " << dtR1 << endl;
-		out_s << "dtR3 = " << dtR3 << endl;
-		out_s << "dtR5 = " << dtR5 << endl;
-		out_s << "dtR7 = " << dtR7 << endl;
-		out_s << "dtR8 = " << dtR8 << endl;
-		out_s << "cbdR1 = " << cbdR1 << endl;
-		out_s << "MSNN = " << MSNN << endl;
-		out_s << "MXLAI = " << MXLAI << endl;
-		out_s << "BSGLAI = " << BSGLAI << endl;
-		out_s << "BSGDM = " << BSGDM << endl;
-		out_s << "WTOP = " << WTOP << endl;
-		out_s << "WGRN = " << WGRN << endl;
-		out_s << " WGRN / WTOP * 100 = " << WGRN / WTOP * 100 << endl;
-		out_s << "WGRN / data.data_p.TRESH = " << WGRN / data.data_p.TRESH << endl;
-		out_s << "ISATSW = " << ISATSW << endl;
-		out_s << "CRAIN = " << CRAIN << endl;
-		out_s << "CIRGW = " << CIRGW << endl;
-		out_s << "IRGNO = " << IRGNO << endl;
-		out_s << "ATSW = " << ATSW << endl;
-		out_s << "CRUNOF = " << CRUNOF << endl;
-		out_s << "CE = " << CE << endl;
-		out_s << "CTR" << CTR << endl;
-		out_s << "WSTORG = " << WSTORG << endl;
-		out_s << "CE + CTR = " << CE + CTR << endl;
-		out_s << "CE / (CE + CTR + 0.00001) = " << CE / (CE + CTR + 0.00001) << endl;
-		out_s << "NLF = " << NLF << endl;
-		out_s << "(NLF + NST) = " << (NLF + NST) << endl;
-		out_s << " NGRN = " << NGRN << endl;
-		out_s << "CNUP = " << CNUP << endl;
-		out_s << " param.INSOL = " << param.INSOL << endl;
-		out_s << "CIRGW = " << CIRGW << endl;*/
 		out_s.close();
 	}
 
@@ -1659,7 +1464,7 @@ public:
 			if (event_day_R5 > 0) training_error_R5 += (dtR5 - event_day_R5) * (dtR5 - event_day_R5);
 			if (event_day_R7 > 0) training_error_R7 += (dtR7 - event_day_R7) * (dtR7 - event_day_R7);
 			if (event_day_R8 > 0) training_error_R8 += (dtR8 - event_day_R8) * (dtR8 - event_day_R8);
-			if (param.print_trace) SummaryPrintOut(s_error_EM, s_error_R1, s_error_R3, s_error_R5, s_error_R7, s_error_R8);
+			if (param.print_trace) SummaryPrintOut(s_error_EM, s_error_R1, s_error_R3, s_error_R5, s_error_R7, s_error_R8, training_error_EM, training_error_R1, training_error_R3, training_error_R5, training_error_R7, training_error_R8);
 		}
 		cout << s_error_EM << endl;
 		cout << s_error_R1 << endl;
@@ -1682,8 +1487,19 @@ public:
 public slots:
 	void run_h5()
 	{
-		calculation();
-		emit finished();
+		if (param.dividing_dataset == 1)
+		{
+			data.data_a5 = data.data_a5_training;
+			calculation();
+			data.data_a5 = data.data_a5_valid;
+			calculation();
+			emit finished();
+		}
+		else
+		{
+			calculation();
+			emit finished();
+		}
 	}
 signals:
 	void finished();
