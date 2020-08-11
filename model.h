@@ -302,8 +302,8 @@ public:
 		data.read_h5(param.h5_file_name);
 		data.read_spieces(param.h5_table_name, param.ecovar);
 		data.read_ini(param.crops_ini_file);
-		if (param.dividing_dataset == 1)
-		    data.dividing_dataset(param.seed, param.ecovar);
+		if (param.dividing_dataset > 0)
+		    data.dividing_dataset(param.seed, param.ecovar, param.dividing_dataset);
 		nl = new Nlreg(param.func_file_name, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace, param.crops);
 		nl->nlreg_build();
 
@@ -1487,7 +1487,7 @@ public:
 public slots:
 	void run_h5()
 	{
-		if (param.dividing_dataset == 1)
+		if (param.dividing_dataset > 0)
 		{
 			data.data_a5 = data.data_a5_training;
 			calculation();
