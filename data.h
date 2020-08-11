@@ -330,8 +330,9 @@ public:
 		data_a5.response_R7 = Data::std2arvec(data_a5.resp_R7, data_a5.nSamples, 0);
 		data_a5.response_R8 = Data::std2arvec(data_a5.resp_R8, data_a5.nSamples, 0);
 	}
-	void dividing_dataset(int seed, int extra_covar)
+	void dividing_dataset(int seed, int extra_covar, int dividing_dataset)
 	{
+		int division_ratio;
 		vector<int> index;
 		vector<int> training_index, valid_index;
 		for (int i = 0; i < data_a5.nSamples; i++)
@@ -339,8 +340,20 @@ public:
 		mt19937 g;
 		g.seed(seed);
 		shuffle(index.begin(), index.end(), g);
+		if (dividing_dataset == 1)
+		{
+			division_ratio = (index.size() * 50.0) / 100;
+		}
+		else if (dividing_dataset == 2)
+		{
+			division_ratio = (index.size() * 65.0) / 100;
+		}
+		else if (dividing_dataset == 3)
+		{
+			division_ratio = (index.size() * 80.0) / 100;
+		}
 		auto const training = index.begin();
-		auto const valid = training + (index.size() * 80.0) / 100;
+		auto const valid = training + division_ratio;
 		auto const end = index.end();
 		training_index.assign(training, valid);
 		valid_index.assign(valid, end);
