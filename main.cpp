@@ -15,6 +15,12 @@ int main(int argc, char *argv[])
 	{{"l", "Latitude"},
 	    QCoreApplication::translate("main", "Latitude"),
 	    QCoreApplication::translate("main", "l") },
+	{{"G", "Divided dataset"},
+		QCoreApplication::translate("main", "Dividing the dataset - 1, else - 0."),
+		QCoreApplication::translate("main", "G")},
+	{{"S", "Seed"},
+		QCoreApplication::translate("main", "Seed for random dividing the dataset."),
+		QCoreApplication::translate("main", "s")},
 	{{"A", "With snp - 1, without snp - 0"},
 		QCoreApplication::translate("main", "SNP mode"),
 		QCoreApplication::translate("main", "A") },
@@ -247,6 +253,19 @@ int main(int argc, char *argv[])
 		const int INSOL = INSOLParameter.toInt();
 		param.INSOL = INSOL;
 
+		const QString GParameter = parser.value("G");
+		const int G = GParameter.toInt();
+		if (G < 0) {
+			std::cout << "Bad p: " + G;
+		}
+		param.dividing_dataset = G;
+
+		const QString SParameter = parser.value("S");
+		const int seed = SParameter.toInt();
+		if (G < 0) {
+			std::cout << "Bad p: " + G;
+		}
+		param.seed = seed;
 
 		const QString UParameter = parser.value("U");
 		const double U = UParameter.toDouble();
@@ -260,7 +279,7 @@ int main(int argc, char *argv[])
 		param.ecovar = ecovar;
 		param.print_trace = T;
 		param.function_mode = R;
- 	    param.optimization_mode = P; 
+ 	        param.optimization_mode = P; 
 		param.crops = crops;
 	}
 	model = new Model(param, &a);
