@@ -1,10 +1,7 @@
 #include <QtCore/QCoreApplication>
 #include "model.h"
-//#include <WinSDKVer.h>
-//#define _WIN32_WINNT 0x0601
-//#include <SDKDDKVer.h>
-
 #define add(name) param.## name
+
 int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
@@ -20,7 +17,7 @@ int main(int argc, char *argv[])
 		QCoreApplication::translate("main", "G")},
 	{{"S", "Seed"},
 		QCoreApplication::translate("main", "Seed for random dividing the dataset."),
-		QCoreApplication::translate("main", "s")},
+		QCoreApplication::translate("main", "S")},
 	{{"A", "With snp - 1, without snp - 0"},
 		QCoreApplication::translate("main", "SNP mode"),
 		QCoreApplication::translate("main", "A") },
