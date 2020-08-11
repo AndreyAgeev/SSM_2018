@@ -15,6 +15,8 @@ public:
 	int rT;
 	int ecovar;
 	int print_trace;
+	int seed;
+	int dividing_dataset;
 
 	int function_mode;// 0 - soltani, 1 - opt
 	int optimization_mode;//0- 1- 2
