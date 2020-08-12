@@ -1482,7 +1482,6 @@ public:
 		cout << nl->get_l1_pen() << endl;
 		cout << nl->get_l2_pen() << endl;
 		if (param.print_trace) nl->print_trace(param.func_file_name.toStdString(), param.ecovar - 1);
-		nl->delete_all();
 	}
 public slots:
 	void run_h5()
