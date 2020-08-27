@@ -5,7 +5,7 @@
 #include <QtCore>
 #include <QDebug>
 #include <armadillo>
-
+#include <limits>
 
 #include <highfive/H5Attribute.hpp>
 #include <highfive/H5File.hpp>
@@ -1468,17 +1468,17 @@ public:
 		}
 		cout << s_error_EM << endl;
 		cout << s_error_R1 << endl;
-		cout << s_error_R3 << endl;
-		cout << s_error_R5 << endl;
-		cout << s_error_R7 << endl;
-		cout << s_error_R8 << endl;
+		cout << std::numeric_limits<double>::max() << endl;
+		cout << std::numeric_limits<double>::max() << endl;
+		cout << std::numeric_limits<double>::max() << endl;
+		cout << std::numeric_limits<double>::max() << endl;
 
 		cout << training_error_EM << endl;
 		cout << training_error_R1 << endl;
-		cout << training_error_R3 << endl;
-		cout << training_error_R5 << endl;
-		cout << training_error_R7 << endl;
-		cout << training_error_R8 << endl;
+		cout << std::numeric_limits<double>::max() << endl;
+		cout << std::numeric_limits<double>::max() << endl;
+		cout << std::numeric_limits<double>::max() << endl;
+		cout << std::numeric_limits<double>::max() << endl;
 		cout << nl->get_l1_pen() << endl;
 		cout << nl->get_l2_pen() << endl;
 		if (param.print_trace) nl->print_trace(param.func_file_name.toStdString(), param.ecovar - 1);
