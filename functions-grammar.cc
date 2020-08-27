@@ -153,7 +153,7 @@ void InputNode::coprint(std::ostream &out) {
 	}
 	else {
 		if (PRINT_TRACE > 1) cerr << "not defined in input coprint" << endl;
-		cout << "(0)";
+		out << "(0)";
 	}
 }
 
