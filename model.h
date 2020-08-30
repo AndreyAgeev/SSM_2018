@@ -23,7 +23,7 @@ using namespace HighFive;
 #define SOLTANI_FUNC 0
 #define OPTIMIZATION 0
 #define SIMULATION 1
-
+#define UNUSED_SCORE 100000000000000
 class Model : public QObject
 {
 	Q_OBJECT
@@ -1466,19 +1466,19 @@ public:
 			if (event_day_R8 > 0) training_error_R8 += (dtR8 - event_day_R8) * (dtR8 - event_day_R8);
 			if (param.print_trace) SummaryPrintOut(s_error_EM, s_error_R1, s_error_R3, s_error_R5, s_error_R7, s_error_R8, training_error_EM, training_error_R1, training_error_R3, training_error_R5, training_error_R7, training_error_R8);
 		}
-		if (s_error_EM > 0) cout << s_error_EM << endl; else  cout << 1.e+12 << endl;
-		if (s_error_R1 > 0) cout << s_error_R1 << endl; else  cout << 1.e+12 + 1.0 << endl;
-		if (s_error_R3 > 0) cout << s_error_R3 << endl; else  cout << 1.e+12 + 2.0 << endl;
-		if (s_error_R5 > 0) cout << s_error_R5 << endl; else  cout << 1.e+12 + 3.0 << endl;
-		if (s_error_R7 > 0) cout << s_error_R7 << endl; else  cout << 1.e+12 + 4.0 << endl;
-		if (s_error_R8 > 0) cout << s_error_R8 << endl; else  cout << 1.e+12 + 5.0 << endl;
+		if (s_error_EM > 0) cout << s_error_EM << endl; else  cout << UNUSED_SCORE << endl;
+		if (s_error_R1 > 0) cout << s_error_R1 << endl; else  cout << 2.0 * UNUSED_SCORE<< endl;
+		if (s_error_R3 > 0) cout << s_error_R3 << endl; else  cout << 3.0 * UNUSED_SCORE << endl;
+		if (s_error_R5 > 0) cout << s_error_R5 << endl; else  cout << 4.0 * UNUSED_SCORE << endl;
+		if (s_error_R7 > 0) cout << s_error_R7 << endl; else  cout << 5.0 * UNUSED_SCORE << endl;
+		if (s_error_R8 > 0) cout << s_error_R8 << endl; else  cout << 6.0 * UNUSED_SCORE << endl;
 
-		if (training_error_EM > 0) cout << training_error_EM << endl; else cout << 1.e+12 + 6.0 << endl;
-		if (training_error_R1 > 0) cout << training_error_R1 << endl; else cout << 1.e+12 + 7.0 << endl;
-		if (training_error_R3 > 0) cout << training_error_R3 << endl; else cout << 1.e+12 + 8.0 << endl;
-		if (training_error_R5 > 0) cout << training_error_R5 << endl; else cout << 1.e+12 + 9.0 << endl;
-		if (training_error_R7 > 0) cout << training_error_R7 << endl; else cout << 1.e+12 + 10.0 << endl;
-		if (training_error_R8 > 0) cout << training_error_R8 << endl; else cout << 1.e+12 + 11.0 << endl;
+		if (training_error_EM > 0) cout << training_error_EM << endl; else cout << 7.0 * UNUSED_SCORE << endl;
+		if (training_error_R1 > 0) cout << training_error_R1 << endl; else cout << 8.0 * UNUSED_SCORE << endl;
+		if (training_error_R3 > 0) cout << training_error_R3 << endl; else cout << 9.0 * UNUSED_SCORE  << endl;
+		if (training_error_R5 > 0) cout << training_error_R5 << endl; else cout << 10.0 * UNUSED_SCORE << endl;
+		if (training_error_R7 > 0) cout << training_error_R7 << endl; else cout << 11.0 * UNUSED_SCORE  << endl;
+		if (training_error_R8 > 0) cout << training_error_R8 << endl; else cout << 12.0 * UNUSED_SCORE << endl;
 		cout << nl->get_l1_pen() << endl;
 		cout << nl->get_l2_pen() << endl;
 		if (param.print_trace) nl->print_trace(param.func_file_name.toStdString(), param.ecovar - 1);
