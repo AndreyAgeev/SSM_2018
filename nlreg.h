@@ -15,7 +15,6 @@ public:
 		PRINT_TRACE = print_trace;
 		read_flag = rF;
 		read_genotype(crops);
-
 	}
 	double get_func_value(vector<double> clim_arg, vector<double> gt_vars)
 	{
@@ -210,15 +209,25 @@ private:
 				genotype.push_back(arg);
 			}
 			sett.endArray();
-			size = sett.beginReadArray("beta");
 
-			for (int i = 0; i < size; ++i) {
-				sett.setArrayIndex(i);
+			size = sett.beginReadArray("beta");
+			if (size != 0)
+			{
+				for (int i = 0; i < size; ++i) {
+					sett.setArrayIndex(i);
+					double arg;
+					arg = sett.value("value").toDouble();
+					beta.push_back(arg);
+				}	
+				sett.endArray();
+			}
+			else
+			{	
+				sett.endArray();
 				double arg;
-				arg = sett.value("value").toDouble();
+				arg = sett.value("beta").toDouble();
 				beta.push_back(arg);
 			}
-			sett.endArray();
 			arg_cv = sett.value("TCD", 25).toDouble();
 			climate_var.push_back(arg_cv);
 			arg_cv = sett.value("TBD", 15).toDouble();
