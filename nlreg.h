@@ -180,7 +180,7 @@ private:
 			}
 			vector<double> concs;
 
-			for (size_t i = 0; i < num_of_climate_vars; ++i) {
+			for (size_t i = 0; i < 2 * num_of_climate_vars; ++i) {
 				double arg3;
 				in >> arg3;
 				concs.push_back(arg3);
@@ -239,6 +239,17 @@ private:
 			arg_cv = sett.value("Sbase", 40).toDouble();
 			climate_var.push_back(arg_cv);
 
+			arg_cv = sett.value("TCD", 25).toDouble();
+			climate_var.push_back(arg_cv);
+			arg_cv = sett.value("TBD", 15).toDouble();
+			climate_var.push_back(arg_cv);
+			arg_cv = sett.value("Pbase", 40).toDouble();
+			climate_var.push_back(arg_cv);
+			arg_cv = sett.value("cpp", 18).toDouble();
+			climate_var.push_back(arg_cv);
+			arg_cv = sett.value("Sbase", 40).toDouble();
+			climate_var.push_back(arg_cv);
+			
 			MB = sett.value("MB", 1.0).toDouble();
 			for (size_t i = nFunctions; i < nFunctions + nFunctions * num_of_gt_vars; ++i) {
 				double be = (beta[i] > 0.0) ? beta[i] : -beta[i];
