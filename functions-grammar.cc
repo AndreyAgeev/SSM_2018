@@ -603,6 +603,82 @@ InputMinusConst* InputMinusConst::clone() {
 }
 
 //
+//		ConstMinusInput
+//
+ConstMinusInput::ConstMinusInput() {
+	numChildren = 2;
+	child_type[0] = 2;
+	child_type[1] = 1;
+	label = "ConstMinusInput";
+	precendence = 6;
+}
+
+double ConstMinusInput::eval(vector<double>& inVal) {
+	if (children[0] && children[1]) {
+		return - children[0]->eval(inVal) + children[1]->eval(inVal);
+	}
+	else if (children[0]) {
+		return -children[0]->eval(inVal);
+	}
+	else if (children[1]) {
+		return +children[1]->eval(inVal);
+	}
+	else {
+		if (PRINT_TRACE > 1) cerr << "left and right not defined in InputMinusConst" << endl;
+		return 0.0;
+	}
+}
+
+void ConstMinusInput::coprint(std::ostream &out) {
+	if (children[0] && children[1]) {
+		out << " (-";
+		children[0]->coprint(out);
+		out << " + ";
+		children[1]->coprint(out);
+		out << ") ";
+	}
+	else if (children[0]) {
+		out << " (-";
+		children[0]->coprint(out);
+		out << ") ";
+	}
+	else if (children[1]) {
+		out << " (";
+		children[1]->coprint(out);
+		out << ") ";
+	}
+	else {
+		if (PRINT_TRACE > 1) cerr << "left and right not defined in InputMinusConst" << endl;
+		out << " (";
+		out << " 0 ";
+		out << ") ";
+	}
+}
+
+ConstMinusInput* ConstMinusInput::prune() {
+	if (children[0]) {
+		children[0] = children[0]->prune();
+	}
+	if (children[1]) {
+		children[1] = children[1]->prune();
+	}
+	if (!children[0] && !children[1]) {
+		//		cout << *this << endl;
+		delete this;
+		return NULL;
+	}
+	return this;
+}
+
+ConstMinusInput* ConstMinusInput::clone() {
+	ConstMinusInput* retNode = new ConstMinusInput();
+	for (int i = 0; i < numChildren; i++) {
+		retNode->children[i] = children[i]->clone();
+	}
+	return retNode;
+}
+
+//
 //		RecInputMinusConst
 //
 RecInputMinusConst::RecInputMinusConst() {
@@ -677,6 +753,81 @@ RecInputMinusConst* RecInputMinusConst::clone() {
 	return retNode;
 }
 
+//
+//		RecConstMinusInput
+//
+RecConstMinusInput::RecConstMinusInput() {
+	numChildren = 2;
+	child_type[0] = 2;
+	child_type[1] = 1;
+	label = "RecConstMinusInput";
+	precendence = 6;
+}
+
+double RecConstMinusInput::eval(vector<double>& inVal) {
+	if (children[0] && children[1]) {
+		return 1 / (- children[0]->eval(inVal) + children[1]->eval(inVal));
+	}
+	else if (children[0]) {
+		return -1 / children[0]->eval(inVal);
+	}
+	else if (children[1]) {
+		return 1 / children[1]->eval(inVal);
+	}
+	else {
+		if (PRINT_TRACE > 1) cerr << "left and right not defined in RecInputMinusConst" << endl;
+		return 1.0;
+	}
+}
+
+void RecConstMinusInput::coprint(std::ostream &out) {
+	if (children[0] && children[1]) {
+		out << " (1/(-";
+		children[0]->coprint(out);
+		out << " + ";
+		children[1]->coprint(out);
+		out << ")) ";
+	}
+	else if (children[0]) {
+		out << " (-1/(";
+		children[0]->coprint(out);
+		out << ")) ";
+	}
+	else if (children[1]) {
+		out << " (1/(";
+		children[1]->coprint(out);
+		out << ")) ";
+	}
+	else {
+		if (PRINT_TRACE > 1) cerr << "left and right not defined in InputMinusConst" << endl;
+		out << " (1";
+		out << ") ";
+	}
+}
+
+RecConstMinusInput* RecConstMinusInput::prune() {
+	if (children[0]) {
+		children[0] = children[0]->prune();
+	}
+	if (children[1]) {
+		children[1] = children[1]->prune();
+	}
+	if (!children[0] && !children[1]) {
+		//		cout << *this << endl;
+		delete this;
+		return NULL;
+	}
+	return this;
+}
+
+RecConstMinusInput* RecConstMinusInput::clone() {
+	RecConstMinusInput* retNode = new RecConstMinusInput();
+	for (int i = 0; i < numChildren; i++) {
+		retNode->children[i] = children[i]->clone();
+	}
+	return retNode;
+}
+
 /*
  * expr = grule(op(expr, expr), X, (X - Y), 1/(X - Y)),
  * Y = grule(0.1, 0.3, 0.5, 0.7, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0),
@@ -713,10 +864,20 @@ GrammarNode* GrammarContainer::find_node_type_0(int gen, double *phenotype)
 		n = new InputNode();
 		break;
 	case 5:
+			this->last_const = 0;
 		n = new InputMinusConst();
 		break;
 	case 6:
+			this->last_const = 0;			
 		n = new RecInputMinusConst();
+		break;
+	case 7:
+			this->last_const = this->n_predictors;
+		n = new ConstMinusInput();
+		break;
+	case 8:
+			this->last_const = this->n_predictors;
+		n = new RecConstMinusInput();
 		break;
 	default:
 		cout << "Error find node type 0" << gen << endl;
@@ -739,14 +900,14 @@ GrammarNode* GrammarContainer::find_node_type_2(int gen, double *phenotype)
 {
 	GrammarNode*n;
 	int ge = gen % n_predictors;
-	this->last_predictor = ge;
+	this->last_predictor = ge + this->last_const;
 	n = new InputNode(ge, predictors[ge]);
 	//cout << " ge= " << (long double)ge << " ";
 	(*phenotype) = (long double)ge;
 	return n;
 }
 
-GrammarNode* GrammarContainer::find_node(int type, int gen, double conc, double *phenotype, int& phenomask)
+GrammarNode* GrammarContainer::find_node(int type, int gen, vector<double>& conc, double *phenotype, int& phenomask)
 {
 	GrammarNode*n;
 	switch (type) {
@@ -756,7 +917,7 @@ GrammarNode* GrammarContainer::find_node(int type, int gen, double conc, double 
 		break;
 	case 1:
 		phenomask = 1;
-		n = find_node_type_1(gen, conc, phenotype);
+		n = find_node_type_1(gen, conc[this->last_predictor], phenotype);
 		break;
 	case 2:
 		phenomask = 2;
@@ -791,10 +952,11 @@ GrammarNode* GrammarContainer::build_tree(vector<int>& genotype, vector<double>&
 	StackNode *curr;
 	QStack<StackNode*> stack;
 	this->last_predictor = 0;
+	this->last_const = 0;
 	int i = 0;
 	int curr_type = 0;
 
-	root_expr = find_node(curr_type, genotype[i], conc[this->last_predictor], &phenotype[i], phenomask[i]);
+	root_expr = find_node(curr_type, genotype[i], conc, &phenotype[i], phenomask[i]);
 	i++;
 	//cout << "g " << genotype[i - 1] << ' ' << i - 1 << ' ' << *root_expr << endl;
 	//cout << "p " << phenotype[i - 1] << ' ' << i - 1 << ' ' << *root_expr << endl;
@@ -809,7 +971,7 @@ GrammarNode* GrammarContainer::build_tree(vector<int>& genotype, vector<double>&
 	while (!stack.isEmpty() && i < genotype.size()) {
 		curr = stack.pop();
 		curr_type = curr->child_type;
-		child = find_node(curr_type, genotype[i], conc[this->last_predictor], &phenotype[i], phenomask[i]);
+		child = find_node(curr_type, genotype[i], conc, &phenotype[i], phenomask[i]);
 		i++;
 	//	cout << "BEFORE" << endl;
 	//	cout << "g " << genotype[i - 1] << ' ' << i - 1 << ' ' << *child << endl;
