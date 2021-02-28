@@ -154,7 +154,7 @@ public:
 	Divide();
 	virtual double eval(vector<double>& inVal);
 	Divide* clone();
-	virtual void coprint(std:: ostream &out);
+	virtual void coprint(std::ostream &out);
 	virtual Divide* prune();
 	virtual void setScale(vector<double>& a, vector<double>& b) {
 		if (children[0]) children[0]->setScale(a, b);
@@ -180,6 +180,22 @@ public:
 	//	virtual void printOn (ostream& os) { os << "InputMinusConst" << endl; };
 };
 
+//subtraction from const NEW
+class ConstMinusInput : public GrammarNode {
+public:
+	ConstMinusInput();
+	virtual double eval(vector<double>& inVal);
+	ConstMinusInput* clone();
+	virtual void coprint(std::ostream &out);
+	virtual ConstMinusInput* prune();
+	virtual void setScale(vector<double>& a, vector<double>& b) {
+		if (children[0]) children[0]->setScale(a, b);
+		if (children[1]) children[1]->setScale(a, b);
+	}
+	//	virtual string getLabel();
+	//	virtual void printOn (ostream& os) { os << "InputMinusConst" << endl; };
+};
+
 //rec subtraction of const
 class RecInputMinusConst : public GrammarNode {
 public:
@@ -196,12 +212,28 @@ public:
 	//	virtual void printOn (ostream& os) { os << "RecInputMinusConst" << endl; };
 };
 
+//rec subtraction from const NEW
+class RecConstMinusInput : public GrammarNode {
+public:
+	RecConstMinusInput();
+	virtual double eval(vector<double>& inVal);
+	RecConstMinusInput* clone();
+	virtual void coprint(std::ostream &out);
+	virtual RecConstMinusInput* prune();
+	virtual void setScale(vector<double>& a, vector<double>& b) {
+		if (children[0]) children[0]->setScale(a, b);
+		if (children[1]) children[1]->setScale(a, b);
+	}
+	//	virtual string getLabel();
+	//	virtual void printOn (ostream& os) { os << "RecInputMinusConst" << endl; };
+};
+
 class GrammarContainer {
 public:
 	GrammarContainer(vector<string>& measurements, int n_t) : predictors(measurements), tree(n_t) {
 		n_trees = n_t;
 		n_predictors = predictors.size();
-		n_nodes_type_0 = 7;
+		n_nodes_type_0 = 9;
 		n_nodes_type_1 = 1;
 		n_nodes_type_2 = 1;
 	}
@@ -216,8 +248,9 @@ private:
 	int n_nodes_type_1;
 	int n_nodes_type_2;
 	int last_predictor;
+	int last_const;
 	GrammarNode* build_tree(vector<int>& genotype, vector<double>& conc, double *phenotype, int *phenomask);
-	GrammarNode* find_node(int type, int gen, double conc, double *phenotype, int& phenomask);
+	GrammarNode* find_node(int type, int gen, vector<double>& conc, double *phenotype, int& phenomask);
 	GrammarNode* find_node_type_0(int gen, double *phenotype);
 	GrammarNode* find_node_type_1(int gen, double conc, double *phenotype);
 	GrammarNode* find_node_type_2(int gen, double *phenotype);
