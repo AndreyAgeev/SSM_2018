@@ -225,10 +225,11 @@ private:
 			{	
 				sett.endArray();
 				double arg;
-				arg = sett.value("beta").toDouble();
-				beta.push_back(arg);
+			        arg = sett.value("beta").toDouble();
+			        beta.push_back(arg);
 			}
-			arg_cv = sett.value("TCD", 25).toDouble();
+			
+			arg_cv = sett.value("TP2D", 25).toDouble();
 			climate_var.push_back(arg_cv);
 			arg_cv = sett.value("TBD", 15).toDouble();
 			climate_var.push_back(arg_cv);
@@ -237,19 +238,18 @@ private:
 			arg_cv = sett.value("cpp", 18).toDouble();
 			climate_var.push_back(arg_cv);
 			arg_cv = sett.value("Sbase", 40).toDouble();
+			climate_var.push_back(arg_cv);
+			arg_cv = sett.value("TCD", 25).toDouble();
+			climate_var.push_back(arg_cv);
+			arg_cv = sett.value("TP1D", 15).toDouble();
+			climate_var.push_back(arg_cv);
+			arg_cv = sett.value("Pceil", 40).toDouble();
+			climate_var.push_back(arg_cv);
+			arg_cv = sett.value("cppx", 18).toDouble();
+			climate_var.push_back(arg_cv);
+			arg_cv = sett.value("Sceil", 40).toDouble();
 			climate_var.push_back(arg_cv);
 
-			arg_cv = sett.value("TCD", 25).toDouble();
-			climate_var.push_back(arg_cv);
-			arg_cv = sett.value("TBD", 15).toDouble();
-			climate_var.push_back(arg_cv);
-			arg_cv = sett.value("Pbase", 40).toDouble();
-			climate_var.push_back(arg_cv);
-			arg_cv = sett.value("cpp", 18).toDouble();
-			climate_var.push_back(arg_cv);
-			arg_cv = sett.value("Sbase", 40).toDouble();
-			climate_var.push_back(arg_cv);
-			
 			MB = sett.value("MB", 1.0).toDouble();
 			for (size_t i = nFunctions; i < nFunctions + nFunctions * num_of_gt_vars; ++i) {
 				double be = (beta[i] > 0.0) ? beta[i] : -beta[i];
