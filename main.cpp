@@ -1,9 +1,9 @@
 #include <QtCore/QCoreApplication>
 #include "model.h"
 #define add(name) param.## name
+
 int main(int argc, char *argv[])
 {
-
 	QCoreApplication a(argc, argv);
 	QCommandLineParser parser;
 	parser.addHelpOption();
@@ -12,6 +12,18 @@ int main(int argc, char *argv[])
 	{{"l", "Latitude"},
 	    QCoreApplication::translate("main", "Latitude"),
 	    QCoreApplication::translate("main", "l") },
+	{{"G", "Divided dataset"},
+		QCoreApplication::translate("main", "Dividing the dataset - 1, else - 0."),
+		QCoreApplication::translate("main", "G")},
+	{{"S", "Seed"},
+		QCoreApplication::translate("main", "Seed for random dividing the dataset."),
+		QCoreApplication::translate("main", "S")},
+	{{"A", "With snp - 1, without snp - 0"},
+		QCoreApplication::translate("main", "SNP mode"),
+		QCoreApplication::translate("main", "A") },
+	{{"C", "Crops file mode"},
+		QCoreApplication::translate("main", "Crops file mode"),
+		QCoreApplication::translate("main", "C") },
 	{{"s", "VPDF"},
 		QCoreApplication::translate("main", "VPDF."),
 		QCoreApplication::translate("main", "s") },
@@ -19,7 +31,7 @@ int main(int argc, char *argv[])
 		QCoreApplication::translate("main", "function mode"),
 		QCoreApplication::translate("main", "R")},
 	{{"P", "P"},
-		QCoreApplication::translate("main", "threshold"),
+		QCoreApplication::translate("main", "Optimization mode"),
 		QCoreApplication::translate("main", "P")},
 	{{"i", "FixFind"},
 		QCoreApplication::translate("main", "FixFind"),
@@ -90,7 +102,7 @@ int main(int argc, char *argv[])
 		QCoreApplication::translate("main", "U."),
 		QCoreApplication::translate("main", "U")},
 	});
-	parser.addPositionalArgument("cropsoinifile", "The file to open.");
+	parser.addPositionalArgument("cropsinifile", "The file to open.");
 	parser.addPositionalArgument("samplesfile", "The file to open.");
 	parser.addPositionalArgument("weatherfile", "The file to open.");
 //	parser.addPositionalArgument("funcsfile", "The file to read funcs.");
@@ -101,10 +113,31 @@ int main(int argc, char *argv[])
 	Parametrs param;
 	if (args.size())
 	{
-		param.func_file_name = args.at(3); // funcs
-		param.h5_file_name = args.at(2); // samples
-		param.h5_table_name = args.at(1); // weather
-		param.crops_ini_file = args.at(0); // weather
+		const QString CROPSParameter = parser.value("C");
+		const int crops = CROPSParameter.toInt();
+		if (crops != 0 && crops != 1) {////0 - outside file, 1 - inside
+			std::cout << "Bad crops mode: " + crops;
+		}
+		if (crops == 0)
+		{
+			param.func_file_name = args.at(3); // funcs
+			param.h5_file_name = args.at(2); // weather
+			param.h5_table_name = args.at(1); // samples
+			param.crops_ini_file = args.at(0);//crops
+		}
+		else
+		{
+			param.crops_ini_file = args.at(2);//crops + func
+			param.h5_file_name = args.at(1); // weather
+			param.h5_table_name = args.at(0); // samples
+			param.func_file_name = param.crops_ini_file;
+		}
+		const QString ecovarParameter = parser.value("A");
+		const int ecovar = ecovarParameter.toInt();
+		if (ecovar != 0 && ecovar != 1) {
+			std::cout << "Bad snp: " + ecovar;
+		}
+
 		const QString TParameter = parser.value("print-trace");
 		const int T = TParameter.toInt();
 		if (T < 0) {
@@ -119,10 +152,7 @@ int main(int argc, char *argv[])
 
 		const QString PParameter = parser.value("P");
 		const int P = PParameter.toInt();
-		if (P != 0 && P != 1 && P != 3 && P != 5 && P != 7 && P != 8 && P != -1) {
-			std::cout << "Bad p: " + P;
-		}
-
+		
 		const QString NParameter = parser.value("number-of-funcs");
 		const int N = NParameter.toInt();
 		if (N < 0) {
@@ -220,6 +250,19 @@ int main(int argc, char *argv[])
 		const int INSOL = INSOLParameter.toInt();
 		param.INSOL = INSOL;
 
+		const QString GParameter = parser.value("G");
+		const int G = GParameter.toInt();
+		if (G < 0) {
+			std::cout << "Bad p: " + G;
+		}
+		param.dividing_dataset = G;
+
+		const QString SParameter = parser.value("S");
+		const int seed = SParameter.toInt();
+		if (G < 0) {
+			std::cout << "Bad p: " + G;
+		}
+		param.seed = seed;
 
 		const QString UParameter = parser.value("U");
 		const double U = UParameter.toDouble();
@@ -229,14 +272,12 @@ int main(int argc, char *argv[])
 		param.nF = N;
 		param.wL = L;
 		param.nD = D;
-		param.rT = 1;
-		param.ecovar = parser.isSet("extra_covar");
+		param.rT = 1;//read_flag = 1
+		param.ecovar = ecovar;
 		param.print_trace = T;
 		param.function_mode = R;
- 	    param.threshold = P;
-	}
-	if (param.print_trace > 0) {
-		param.Print();
+ 	        param.optimization_mode = P; 
+		param.crops = crops;
 	}
 	model = new Model(param, &a);
 	QObject::connect(model, SIGNAL(finished()), &a, SLOT(quit()));

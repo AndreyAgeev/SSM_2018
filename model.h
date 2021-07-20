@@ -4,6 +4,8 @@
 #include <iostream>
 #include <QtCore>
 #include <QDebug>
+#include <armadillo>
+#include <limits>
 
 #include <highfive/H5Attribute.hpp>
 #include <highfive/H5File.hpp>
@@ -15,9 +17,13 @@
 #include <fstream>
 #include <math.h>
 #include <nlreg.h>
+#include <iomanip>
 using namespace std;
 using namespace HighFive;
 #define SOLTANI_FUNC 0
+#define OPTIMIZATION 0
+#define SIMULATION 1
+#define UNUSED_SCORE 100000000000000
 class Model : public QObject
 {
 	Q_OBJECT
@@ -25,13 +31,13 @@ public:
 	int ROW = 0;
 	int MAT;
 	int index_lai = -1;
-	double iniPheno;
-	double iniLai;
-	double iniDMP;
-	double iniDMD;
-	double iniSW;
-	double iniPNB;
-	double CumFind;
+	int iniPheno;//INT
+	int iniLai;
+	int iniDMP;
+	int iniDMD;
+	int iniSW;
+	int iniPNB;
+	int CumFind;
 
 	//SoilWater
 	double CLL;
@@ -74,6 +80,7 @@ public:
 	double DRAIN1;
 	double DRAIN;
 	double GRTD;
+
 	double CBD;
 
 	double EWAT;
@@ -112,12 +119,12 @@ public:
 	double TMP;
 
 	double DOY;
-	double dtEM;
-	double dtR1;
-	double dtR3;
-	double dtR5;
-	double dtR7;
-	double  dtR8;
+	int dtEM;
+	int dtR1;
+	int dtR3;
+	int dtR5;
+	int dtR7;
+	int  dtR8;
 	double  MXLAI;
 	double BSGDM;
 	double  WTOP;
@@ -152,7 +159,7 @@ public:
 	double cbdR8;
 
 
-	double DAP;
+	int DAP;
 	double tempfun;
 	double DTT;
 
@@ -216,6 +223,12 @@ public:
 	std::ofstream out_CNUP;
 	std::ofstream out_NVEG;
 	std::ofstream out_NGRN;
+	std::ofstream out_error;
+	std::ofstream out_cbd;
+	std::ofstream out_dtR1;
+	std::ofstream out_bd;
+
+
 	double TSUNST;
 	double NIGHTL;
 	double TEMP1;
@@ -269,25 +282,32 @@ public:
 
 
 	bool write_check = false;
-
+	bool write_check_summary = false;
 
 	int NSAM = 0;
+	bool check_last_cbd = false;
 
-
+	int passed_stage;
+	//double sum_threshold_passed_stage;
+	double sum_threshold_passed_stage_0;
+	double sum_threshold_passed_stage_1;
+	double sum_threshold_passed_stage_2;
+	double sum_threshold_passed_stage_3;
+	double sum_threshold_passed_stage_4;
+	double sum_threshold_passed_stage_5;
+	double sigmoid_cbdEM, sigmoid_cbdR1, sigmoid_cbdR3, sigmoid_cbdR5, sigmoid_cbdR7, sigmoid_cbdR8;
 	Model(Parametrs new_param, QObject *parent = 0) : QObject(parent), param(new_param)
 	{
 		if (param.print_trace > 1) cout << "begin read" << endl;
 		data.read_h5(param.h5_file_name);
 		data.read_spieces(param.h5_table_name, param.ecovar);
 		data.read_ini(param.crops_ini_file);
-		nl = new Nlreg(data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace);
-		nl->set_genotype(data.data_b.x);
-		nl->set_beta(data.data_b.beta);
-		nl->set_beta_limit(data.data_b.betaLimit);
-		nl->set_climate_vars(data.data_b.concs);
+		if (param.dividing_dataset > 0)
+		    data.dividing_dataset(param.seed, param.ecovar, param.dividing_dataset);
+		nl = new Nlreg(param.func_file_name, data.data_h5.clim_names, data.data_a5.gr_names, param.nF, param.wL, param.rT, param.print_trace, param.crops);
 		nl->nlreg_build();
+
 		if (param.print_trace > 1) cout << "end read" << endl;
-		//	run_h5();
 	}
 	void SoilWater()
 	{
@@ -565,59 +585,18 @@ public:
 
 		}
 		if (LtDrCntr >= data.data_p.LtWdDur && CBD < data.data_p.ttTSG)
+		{
 			CBD = data.data_p.ttTSG;
+		}
 	}
 
-	void FindSowingData(int geo_id, int start_day, int start_year)
-	{
-		/*if (param.FixFind == 2)
-		{
-			CumFind = 0.0;
-			for (int row = ROW; row < data.data_h5.years.size(); row++)
-			{
-				ROW = row;
-				DOY = data.data_h5.doy[ROW];;
-				CBD = 0.0;
-				SoilWater();
-				CumFind = CumFind + 1;
-				if (CumFind > param.SearchDur)
-					MAT = 1;
-				if (MAT == 1)
-				{
-					DOY = -1;
-					dtEM = 0.0;
-					dtR1 = 0.0;
-					dtR3 = 0.0;
-					dtR5 = 0.0;
-					dtR7 = 0.0;
-					dtR8 = 0.0;
-					MXLAI = 0.0;
-					BSGLAI = 0.0;
-					BSGDM = 0.0;
-					WTOP = 0.0;
-					WGRN = 0.0;
-					NLF = 0.0;
-					NST = 0.0;
-					NVEG = 0.0;
-					NGRN = 0.0;
-					CNUP = 0.0;
-					param.INSOL = 0.0;
-				}
-				if (ATSW1 + WSTORG >= param.SowWat || MAT == 1)
-					break;
-			}
-			Pdoy = data.data_h5.doy[ROW];
-		}*/
-	}
 	void Weather(void)
 	{
-		//	ROW += 1;
 		TMP = (data.data_h5.tmax[ROW] + data.data_h5.tmin[ROW]) / 2.0;
 	}
 
-	void Phenology(void)
+	void Phenology()
 	{
-		int threshold_index;
 		if (iniPheno == 0)
 		{
 			bdEM = data.data_p.ttSWEM;
@@ -629,32 +608,11 @@ public:
 			bdBLG = bdEM;
 			bdTLM = bdR1 + data.data_p.ttR1TLM;
 			bdTLP = bdR1 + data.data_p.ttR1TLP;
-			DAP = 0.0;
+			DAP = 0;
 			CBD = 0.0;
 			WSFD = 1.0;
 			iniPheno = 1;
 		}
-/*		switch (param.threshold)
-		{
-		case 0:
-			bdEM = nl->get_cbd();
-			break;
-		case 1:
-			bdR1 = nl->get_cbd();
-			break;
-		case 3:
-			bdR3 = nl->get_cbd();
-			break;
-		case 5:
-			bdR5 = nl->get_cbd();
-			break;
-		case 7:
-			bdR7 = nl->get_cbd();
-			break;
-		case 8:
-			bdR8 = nl->get_cbd();
-			break;
-		}*/
 		if (param.function_mode == SOLTANI_FUNC)
 		{
 			// Thermal time calculation
@@ -711,100 +669,55 @@ public:
 		else
 		{
 			vector<double> clim_covar = { data.data_h5.tmax[ROW], data.data_h5.tmin[ROW], data.data_h5.rain[ROW], data.data_h5.dl[ROW], data.data_h5.srad[ROW] };
-			if (param.ecovar)
+			if (param.ecovar == 1)
 				bd = nl->get_func_value(clim_covar, data.data_a5.gr_covar[NSAM]);
 			else
 				bd = nl->get_func_value(clim_covar);
-
-
 			CBD += Heaviside(bd) * bd;
 		}
 
-		DAP = DAP + 1.0;
-
-
+		DAP = DAP + 1;
 		if (CBD < bdEM)
 		{
-			dtEM = DAP + 1.0;  // 'Saving days to EMR
+			dtEM = DAP + 1;  // 'Saving days to EMR
 			cbdEM = CBD;
 		}
+
 		if (CBD < bdR1)
 		{
-			dtR1 = DAP + 1.0; // 'Saving days to R1
+			dtR1 = DAP + 1; // 'Saving days to R1
 			cbdR1 = CBD;
 		}
+
 		if (CBD < bdR3)
 		{
-			dtR3 = DAP + 1.0;  // 'Saving days to R3
+			dtR3 = DAP + 1;  // 'Saving days to R3
 			cbdR3 = CBD;
 		}
+
 		if (CBD < bdR5)
 		{
-			dtR5 = DAP + 1.0;//  'Saving days to R5
+			dtR5 = DAP + 1;//  'Saving days to R5
 			cbdR5 = CBD;
 		}
+
 		if (CBD < bdR7)
 		{
-			dtR7 = DAP + 1.0; //  'Saving days to R7
+			dtR7 = DAP + 1; //  'Saving days to R7
 			cbdR7 = CBD;
 		}
+
 		if (CBD < bdR8)
 		{
-			dtR8 = DAP + 1.0; // 'Saving days to R8
+			dtR8 = DAP + 1; // 'Saving days to R8
 			cbdR8 = CBD;
 		}
 
-		// Maturity ?
 		if (CBD > bdR8)
 			MAT = 1;
 	}
-	double get_curr_day(void)
-	{
-		if (param.threshold == 0)
-			return dtEM;
-		if (param.threshold == 1)
-			return dtR1;
-		if (param.threshold == 3)
-			return dtR3;
-		if (param.threshold == 5)
-			return dtR5;
-		if (param.threshold == 7)
-			return dtR7;
-		if (param.threshold == 8)
-			return dtR8;
-		return (double)(-param.nD);
-	}
-/*	double get_phase_change(void)
-	{
-		if (param.threshold == 0)
-			return bdEM;
-		if (param.threshold == 1)
-			return bdR1;
-		if (param.threshold == 3)
-			return bdR3;
-		if (param.threshold == 5)
-			return bdR5;
-		if (param.threshold == 7)
-			return bdR7;
-		if (param.threshold == 8)
-			return bdR8;
-	}*/
-	double get_cbd(void)
-	{
-		if (param.threshold == 0)
-			return cbdEM;
-		if (param.threshold == 1)
-			return cbdR1;
-		if (param.threshold == 3)
-			return cbdR3;
-		if (param.threshold == 5)
-			return cbdR5;
-		if (param.threshold == 7)
-			return cbdR7;
-		if (param.threshold == 8)
-			return cbdR8;
-		return CBD;
-	}
+
+
 	void CropLAIN(void)
 	{
 		if (iniLai == 0)
@@ -1152,8 +1065,6 @@ public:
 			}
 
 		}
-		//'       TRLN = LAI * (SLNG - SLNS) + (NST + INST - WST * SNCS)
-		//'       FXLF = LAI * (SLNG - SLNS) / TRLN
 
 		else if (CBD >= data.data_p.ttBSG && CBD <= data.data_p.ttTSG)
 		{
@@ -1248,31 +1159,12 @@ public:
 	}
 	void DailyPrintOut(void)
 	{
-		out_LAI.open("output_LAI.txt", std::ios::app);
-		out_DAP.open("DAP.txt", std::ios::app);
-		out_FTSW.open("output_ftsw.txt", std::ios::app);
-		out_CE.open("output_CE.txt", std::ios::app);
-		out_CTR.open("output_CTR.txt", std::ios::app);
-		out_MSNN.open("output_MSNN.txt", std::ios::app);
-		out_CNUP.open("output_CNUP.txt", std::ios::app);
-		out_NVEG.open("output_NVEG.txt", std::ios::app);
-		out_NGRN.open("output_NGRN.txt", std::ios::app);
-
-		out.open("output.txt", std::ios::app);
+		out.open(param.func_file_name.toStdString() + "_" + "daily_output.txt", std::ios::app);
 		if (write_check == false) {
-			out << "NSAM= " << "ROW= " << " YEARS= " << " DOY= " << "DAP= " << " TMP= " << " DTT= " << "CBD= " << "MSNN= " << "GLAI= " << " DLAI=" << "LAI = " << "TCFRUE = " << "FINT= " << " DDMP= " << "GLF= " << "GST= " << " SGR= " << " WLF= " << "WST= " << "WVEG=  " << " WGRN= " << "WTOP= " << "DEPORT= " << "RAIN= " << "IRGW= " << "RUNOF= " << "PET= " << "SEVP= " << "TR= " << "ATSW= " << " FTSW=  " << " CRAIN= " << " CIRGW= " << "IRGNO= " << " CRUNOF= " << "CE= " << " CTR= " << "WSTORG= " << "NUP= " << " NLF= " << "NST= " << "NVEG= " << " NGRN= " << "CNUP= " << "MAT= " << endl;
+			out << "GEO_ID= " << "NSAM= " << "ROW= " << "YEARS= " << "DOY= " << "DAP= " << "TMP= " << "DTT= " << "CBD= " << "rhs_EM= " << "rhs_R1= " << "rhs_R3= " << "rhs_R5= " << "rhs_R7= " << "rhs_R8= " << "MSNN= " << "GLAI= " << "DLAI= " << "LAI= " << "TCFRUE= " << "FINT= " << "DDMP= " << "GLF= " << "GST= " << "SGR= " << "WLF= " << "WST= " << "WVEG=  " << "WGRN= " << "WTOP= " << "DEPORT= " << "RAIN= " << "IRGW= " << "RUNOF= " << "PET= " << "SEVP= " << "TR= " << "ATSW= " << "FTSW= " << "CRAIN= " << "CIRGW= " << "IRGNO= " << "CRUNOF= " << "CE= " << "CTR= " << "WSTORG= " << "NUP= " << "NLF= " << "NST= " << "NVEG= " << "NGRN= " << "CNUP= " << "MAT= " << endl;
 			write_check = true;
 		}
-		out_LAI << LAI << endl;
-		out_DAP << DAP << endl;
-		out_FTSW << FTSW << endl;
-		out_CE << CE << endl;
-		out_CTR << CTR << endl;
-		out_MSNN << MSNN << endl;
-		out_CNUP << CNUP << endl;
-		out_NVEG << NVEG << endl;
-		out_NGRN << NGRN << endl;
-
+		out << data.data_a5.geo_id[NSAM] << " ";
 		out << NSAM << "  ";
 		out << ROW << "  ";
 		out << data.data_h5.years[ROW] << "  ";
@@ -1281,6 +1173,12 @@ public:
 		out << TMP << "  ";
 		out << DTT << "  ";
 		out << CBD << "  ";
+		out << sigmoid_cbdEM << "  ";
+		out << sigmoid_cbdR1 << "  ";
+		out << sigmoid_cbdR3 << "  ";
+		out << sigmoid_cbdR5 << "  ";
+		out << sigmoid_cbdR7 << "  ";
+		out << sigmoid_cbdR8 << "  ";
 		out << MSNN << "  ";
 		out << GLAI << "  ";
 		out << DLAI << "  ";
@@ -1320,63 +1218,36 @@ public:
 		out << CNUP << "  ";
 		out << MAT << endl;
 		out.close();
-		out_LAI.close();
-		out_DAP.close();
-		out_FTSW.close();
-		out_CE.close();
-		out_CTR.close();
-		out_MSNN.close();
-		out_CNUP.close();
-		out_NVEG.close();
-		out_NGRN.close();
 	}
-	void SummaryPrintOut()
+
+
+	void SummaryPrintOut(double s_error_EM, double s_error_R1, double s_error_R3, double s_error_R5, double s_error_R7, double s_error_R8, double training_error_EM, double training_error_R1, double training_error_R3, double training_error_R5, double training_error_R7, double training_error_R8)
 	{
-		out_s.open("output_summary.txt", std::ios::app);
-		out_s << "[" << NSAM << "]" << endl;
-		out_s << "year = " << data.data_h5.years[ROW] << endl;
-		out_s << "dtEM = " << dtEM << endl;
-		out_s << "dtR1 = " << dtR1 << endl;
-		out_s << "dtR3 = " << dtR3 << endl;
-		out_s << "dtR5 = " << dtR5 << endl;
-		out_s << "dtR7 = " << dtR7 << endl;
-		out_s << "dtR8 = " << dtR8 << endl;
-		out_s << "MSNN = " << MSNN << endl;
-		out_s << "MXLAI = " << MXLAI << endl;
-		out_s << "BSGLAI = " << BSGLAI << endl;
-		out_s << "BSGDM = " << BSGDM << endl;
-		out_s << "WTOP = " << WTOP << endl;
-		out_s << "WGRN = " << WGRN << endl;
-		out_s << " WGRN / WTOP * 100 = " << WGRN / WTOP * 100 << endl;
-		out_s << "WGRN / data.data_p.TRESH = " << WGRN / data.data_p.TRESH << endl;
-		out_s << "ISATSW = " << ISATSW << endl;
-		out_s << "CRAIN = " << CRAIN << endl;
-		out_s << "CIRGW = " << CIRGW << endl;
-		out_s << "IRGNO = " << IRGNO << endl;
-		out_s << "ATSW = " << ATSW << endl;
-		out_s << "CRUNOF = " << CRUNOF << endl;
-		out_s << "CE = " << CE << endl;
-		out_s << "CTR" << CTR << endl;
-		out_s << "WSTORG = " << WSTORG << endl;
-		out_s << "CE + CTR = " << CE + CTR << endl;
-		out_s << "CE / (CE + CTR + 0.00001) = " << CE / (CE + CTR + 0.00001) << endl;
-		out_s << "NLF = " << NLF << endl;
-		out_s << "(NLF + NST) = " << (NLF + NST) << endl;
-		out_s << " NGRN = " << NGRN << endl;
-		out_s << "CNUP = " << CNUP << endl;
-		out_s << " param.INSOL = " << param.INSOL << endl;
-		out_s << "CIRGW = " << CIRGW << endl;
+		out_s.open(param.func_file_name.toStdString() + "_" + "output_summary.txt", std::ios::app);
+
+		if (write_check_summary == false) {
+			out_s << "NSAM;" << "NAME;" << "dtEM;" << "event_day_EM;" << "dtR1;" << "event_day_R1;" << "dtR3;" << "event_day_R3;" << "dtR5;" << "event_day_R5;" << "dtR7;" << "event_day_R7;" << "dtR8;" << "event_day_R8;" << "cbdEM;" << "bdEM;" << "cbdR1;" << "bdR1;" << "cbdR3;" << "bdR3;" << "cbdR5;" << "bdR5;" << "cbdR7;" << "bdR7;" << "cbdR8;" << "bdR8;" << "s_error_EM;" << "s_error_R1;" << "s_error_R3;" << "s_error_R5;" << "s_error_R7;" << "s_error_R8;" << "training_error_EM;" << "training_error_R1;" << "training_error_R3;" << "training_error_R5;" << "training_error_R7;" <<  "training_error_R8;" << endl;
+			write_check_summary = true;
+		}
+		out_s << NSAM <<';'<< data.data_a5.species[NSAM] << ';' << dtEM << ';' << data.data_a5.response_EM[NSAM] <<';' << dtR1 << ';' << data.data_a5.response_R1[NSAM] << ';' << dtR3 <<';' << data.data_a5.response_R3[NSAM] << ';' << dtR5 << ';' << data.data_a5.response_R5[NSAM] << ';' << dtR7 << ';' << data.data_a5.response_R7[NSAM] << ';' << dtR8 << ';' << data.data_a5.response_R8[NSAM] << ';' << cbdEM << ';' << bdEM << ';' << cbdR1 << ';' << bdR1 << ';' << cbdR3 <<';' << bdR3 <<';' << cbdR5 << ';' << bdR5 << ';' << cbdR7 << ';' << bdR7 <<';' << cbdR8 << ';' << bdR8 << ';' << s_error_EM << ';' << s_error_R1 << ';' << s_error_R3 << ';' << s_error_R5 <<';' << s_error_R7 <<';' << s_error_R8 << ';' << training_error_EM << ';' << training_error_R1 << ';' << training_error_R3 << ';' << training_error_R5 << ';' << training_error_R7 << ';' << training_error_R8 << ';' << endl;
 		out_s.close();
 	}
-	double Heaviside(double arg) { return (arg > 0) ? 1.0 : 0.0; }
+
+
+	double Heaviside(double arg) { return (arg > 0.0) ? 1.0 : 0.0; }
+
+
 	void calculation(void)
 	{
+
 		double phase_change;
 		double cbd;
-		double training_error = 0;
-		double curr_error = 0;
+		double training_error_EM = 0.0, training_error_R1 = 0.0, training_error_R3 = 0.0, training_error_R5 = 0.0, training_error_R7 = 0.0, training_error_R8 = 0.0;
+		double curr_error_EM = 0.0, curr_error_R1 = 0.0, curr_error_R3 = 0.0, curr_error_R5 = 0.0, curr_error_R7 = 0.0, curr_error_R8 = 0.0;
+		double s_error_EM = 0.0, s_error_R1 = 0.0, s_error_R3 = 0.0, s_error_R5 = 0.0, s_error_R7 = 0.0, s_error_R8 = 0.0;
+		double rhs_EM, rhs_R1, rhs_R3, rhs_R5, rhs_R7, rhs_R8;
 		int nDays = param.nD;
-
+		int START_YEAR_TO_PRINT;
 		for (size_t nsam = 0; nsam < data.data_a5.nSamples; ++nsam)
 		{
 			NSAM = nsam;
@@ -1389,14 +1260,47 @@ public:
 			iniDMD = 0;
 			iniSW = 0;
 			iniPNB = 0;
+			rhs_EM = 0.0;
+			rhs_R1 = 0.0;
+			rhs_R3 = 0.0;
+			rhs_R5 = 0.0;
+			rhs_R7 = 0.0;
+			rhs_R8 = 0.0;
+			sigmoid_cbdEM = 0.0;
+			sigmoid_cbdR1 = 0.0;
+			sigmoid_cbdR3 = 0.0;
+			sigmoid_cbdR5 = 0.0;
+			sigmoid_cbdR7 = 0.0;
+			sigmoid_cbdR8 = 0.0;
+			dtEM = 0;
+			dtR1 = 0;
+			dtR3 = 0;
+			dtR5 = 0;
+			dtR7 = 0;
+			dtR8 = 0;
+
+		//	sum_threshold_passed_stage = 0.0;
+			sum_threshold_passed_stage_0 = 0.0;
+			sum_threshold_passed_stage_1 = 0.0;
+			sum_threshold_passed_stage_2 = 0.0;
+			sum_threshold_passed_stage_3 = 0.0;
+			sum_threshold_passed_stage_4 = 0.0;
+			sum_threshold_passed_stage_5 = 0.0;
+			passed_stage = 0;
 
 			int start_day = data.data_a5.doy[nsam];
 			int start_year = data.data_a5.years[nsam];
 			int geo_id = data.data_a5.geo_id[nsam];
-			double event_day = data.data_a5.response[nsam];
-			//	FindSowingData(geo_id, start_day, start_year);
+			double event_day_EM = data.data_a5.response_EM[nsam];
+			double event_day_R1 = data.data_a5.response_R1[nsam];
+			double event_day_R3 = data.data_a5.response_R3[nsam];
+			double event_day_R5 = data.data_a5.response_R5[nsam];
+			double event_day_R7 = data.data_a5.response_R7[nsam];
+			double event_day_R8 = data.data_a5.response_R8[nsam];
+
 			bool check = false;
 			size_t j = 0;
+			START_YEAR_TO_PRINT = start_year;
 			for (size_t nd = 0; nd < data.data_h5.nWeather; ++nd) {
 				if (geo_id == data.data_h5.geo_id[nd] && data.data_h5.doy[nd] == start_day && data.data_h5.years[nd] == start_year) {
 					j = nd;
@@ -1405,13 +1309,10 @@ public:
 				}
 			}
 			ROW = j;
-
 			if (check == false)
 			{
 				continue;
 			}
-
-			if (param.print_trace > 0) cout << "nsam = " << nsam << " geo id = " << geo_id << " BEGIN ROW = " << ROW;
 			int curr_day = -nDays;
 			for (size_t nd = 0; nd < nDays; nd++)
 			{
@@ -1426,62 +1327,178 @@ public:
 				DMDistribution();
 				LegumPlant();
 				SoilWater();
-				if (param.print_trace > 0)
-				{
-					DailyPrintOut();
-				}
-				if (MAT == 1)
-				{
-					break;
-				}
-			}
-			phase_change = bdR1;//nl->get_cbd();//get_phase_change();
-			cbd = cbdR1;// get_cbd();
-		//	if (param.threshold != -1)
-			curr_day = get_curr_day();
-		//	else
-		//		curr_day = -nDays;
 
-			if (param.print_trace > 0)
-			{
-				SummaryPrintOut();
-				cout << " END ROW = " << ROW;
-				cout << " MAT = " << MAT;
-				cout << " dtEM = "<< dtEM;
-				cout << " dtR1 = "<< dtR1;
-				cout << " dtR3 = "<< dtR3;
-				cout << " dtR5 = "<< dtR5;
-				cout << " dtR7 = "<< dtR7;
-				cout << " dtR8 = "<< dtR8;
-				cout << " event_dat = " << event_day;
-				cout << " CBDEM = " << cbdEM;
-				cout << " CBDR1 = " << cbdR1;
-				cout << " CBDR3 = " << cbdR3;
-				cout << " CBDR5 = " << cbdR5;
-				cout << " CBDR7 = " << cbdR7;
-				cout << " CBDR8 = " << cbdR8;
-				cout << " phase_change = " << phase_change << endl;
+				double rhs;
+				if (/*passed_stage == 0 &&*/ event_day_EM > 0 && sigmoid_cbdR1 < 0.6)
+				{
+					/*double*/ rhs = 0.1 * ((double)nd + 6.0 - event_day_EM);
+					rhs = (rhs > 0.9) ? 0.9 : rhs;
+					rhs = (rhs < 0.1) ? 0.1 : rhs;
+					rhs_EM = 0.1 * (CBD + 6.0 - data.data_p.ttSWEM);
+					//					rhs_EM = 0.1 * (CBD + 6.0 - bdEM);
+					//					rhs_EM = (rhs_EM > 0.9) ? 0.9 : rhs_EM;
+					//					rhs_EM = (rhs_EM < 0.1) ? 0.1 : rhs_EM;
+					s_error_EM += (rhs - rhs_EM) * (rhs - rhs_EM);
+					sigmoid_cbdEM = rhs_EM;
+
+				}
+
+				if (CBD >= bdEM && sigmoid_cbdEM >= 0.6 && passed_stage == 0)
+				{
+					sum_threshold_passed_stage_0 = cbdEM;
+					passed_stage = 1;
+				}
+
+				if (sigmoid_cbdEM >= 0.6 && event_day_R1 > 0 && sigmoid_cbdR3 < 0.6)
+				{
+					/*double*/ rhs = 0.1 * ((double)nd + 6.0 - event_day_R1);
+					rhs = (rhs > 0.9) ? 0.9 : rhs;
+					rhs = (rhs < 0.1) ? 0.1 : rhs;
+					rhs_R1 = 0.1 * ((CBD - sum_threshold_passed_stage_0) + 6.0 - data.data_p.ttEMR1);
+					//					rhs_R1 = 0.1 * (CBD + 6.0 - bdR1);
+					//					rhs_R1 = (rhs_R1 > 0.9) ? 0.9 : rhs_R1;
+					//					rhs_R1 = (rhs_R1 < 0.1) ? 0.1 : rhs_R1;
+					s_error_R1 += (rhs - rhs_R1) * (rhs - rhs_R1);
+					sigmoid_cbdR1 = rhs_R1;
+
+				}
+
+				if (CBD >= bdR1 && sigmoid_cbdR1 >= 0.6  && passed_stage == 1)
+				{
+					sum_threshold_passed_stage_1 = sum_threshold_passed_stage_0 + cbdR1;
+					passed_stage = 2;
+				}
+
+				if (sigmoid_cbdR1 >= 0.6 &&  event_day_R3 > 0 && sigmoid_cbdR5 < 0.6)
+				{
+					/*double*/ rhs = 0.1 * ((double)nd + 6.0 - event_day_R3);
+					rhs = (rhs > 0.9) ? 0.9 : rhs;
+					rhs = (rhs < 0.1) ? 0.1 : rhs;
+					rhs_R3 = 0.1 * ((CBD - sum_threshold_passed_stage_1) + 6.0 - data.data_p.ttR1R3);
+					//					rhs_R3 = 0.1 * (CBD + 6.0 - bdR3);
+					//					rhs_R3 = (rhs_R3 > 0.9) ? 0.9 : rhs_R3;
+					//					rhs_R3 = (rhs_R3 < 0.1) ? 0.1 : rhs_R3;
+					s_error_R3 += (rhs - rhs_R3) * (rhs - rhs_R3);
+					sigmoid_cbdR3 = rhs_R3;
+
+				}
+
+				if (CBD >= bdR3 && sigmoid_cbdR3 >= 0.6  && passed_stage == 2)
+				{
+					sum_threshold_passed_stage_2 = sum_threshold_passed_stage_1 + cbdR3;
+					passed_stage = 3;
+				}
+
+				if (sigmoid_cbdR3 >= 0.6 &&  event_day_R5 > 0 && sigmoid_cbdR7 < 0.6)
+				{
+					/*double*/ rhs = 0.1 * ((double)nd + 6.0 - event_day_R5);
+					rhs = (rhs > 0.9) ? 0.9 : rhs;
+					rhs = (rhs < 0.1) ? 0.1 : rhs;
+					rhs_R5 = 0.1 * ((CBD - sum_threshold_passed_stage_2) + 6.0 - data.data_p.ttR3R5);
+					//					rhs_R5 = 0.1 * (CBD + 6.0 - bdR5);
+					//					rhs_R5 = (rhs_R5 > 0.9) ? 0.9 : rhs_R5;
+					//					rhs_R5 = (rhs_R5 < 0.1) ? 0.1 : rhs_R5;
+					s_error_R5 += (rhs - rhs_R5) * (rhs - rhs_R5);
+					sigmoid_cbdR5 = rhs_R5;
+
+				}
+
+				if (CBD >= bdR5 && sigmoid_cbdR5 >= 0.6  && passed_stage == 3)
+				{
+					sum_threshold_passed_stage_3 = sum_threshold_passed_stage_2 + cbdR5;
+					passed_stage = 4;
+				}
+
+				if (sigmoid_cbdR5 >= 0.6 &&  event_day_R7 > 0 && sigmoid_cbdR8 < 0.6)
+				{
+					/*double*/ rhs = 0.1 * ((double)nd + 6.0 - event_day_R7);
+					rhs = (rhs > 0.9) ? 0.9 : rhs;
+					rhs = (rhs < 0.1) ? 0.1 : rhs;
+					rhs_R7 = 0.1 * ((CBD - sum_threshold_passed_stage_3) + 6.0 - data.data_p.ttR5R7);
+					//					rhs_R7 = 0.1 * (CBD + 6.0 - bdR7);
+					//					rhs_R7 = (rhs_R7 > 0.9) ? 0.9 : rhs_R7;
+					//					rhs_R7 = (rhs_R7 < 0.1) ? 0.1 : rhs_R7;
+					s_error_R7 += (rhs - rhs_R7) * (rhs - rhs_R7);
+					sigmoid_cbdR7 = rhs_R7;
+
+				}
+
+				if (CBD >= bdR7 && sigmoid_cbdR7 >= 0.6  && passed_stage == 4)
+				{
+					sum_threshold_passed_stage_4 = sum_threshold_passed_stage_3 + cbdR7;
+					passed_stage = 5;
+				}
+
+				if (sigmoid_cbdR7 >= 0.6 &&  event_day_R8 > 0)
+				{
+					/*double*/ rhs = 0.1 * ((double)nd + 6.0 - event_day_R8);
+					rhs = (rhs > 0.9) ? 0.9 : rhs;
+					rhs = (rhs < 0.1) ? 0.1 : rhs;
+					rhs_R8 = 0.1 * ((CBD - sum_threshold_passed_stage_4) + 6.0 - data.data_p.ttR7R8);
+					//					rhs_R8 = 0.1 * (CBD + 6.0 - bdR5);
+					//					rhs_R8 = (rhs_R8 > 0.9) ? 0.9 : rhs_R8;
+					//					rhs_R8 = (rhs_R8 < 0.1) ? 0.1 : rhs_R8;
+					s_error_R8 += (rhs - rhs_R8) * (rhs - rhs_R8);
+					sigmoid_cbdR8 = rhs_R8;
+				}
+
+				if (CBD >= bdR8 && sigmoid_cbdR8 >= 0.6 && passed_stage == 5)
+				{
+					sum_threshold_passed_stage_5 = sum_threshold_passed_stage_4 + cbdR8;
+					passed_stage = 6;
+				}
+
+				if (param.print_trace) DailyPrintOut();
+				if (param.optimization_mode == SIMULATION)
+				{
+					if (MAT == 1)
+					{
+						break;
+					}
+				}
+
 			}
-			training_error += (curr_day - event_day) * (curr_day - event_day);
-			curr_error += (cbd - phase_change) * (cbd - phase_change);
+			if (event_day_EM > 0) training_error_EM += (dtEM - event_day_EM) * (dtEM - event_day_EM);
+			if (event_day_R1 > 0) training_error_R1 += (dtR1 - event_day_R1) * (dtR1 - event_day_R1);
+			if (event_day_R3 > 0) training_error_R3 += (dtR3 - event_day_R3) * (dtR3 - event_day_R3);
+			if (event_day_R5 > 0) training_error_R5 += (dtR5 - event_day_R5) * (dtR5 - event_day_R5);
+			if (event_day_R7 > 0) training_error_R7 += (dtR7 - event_day_R7) * (dtR7 - event_day_R7);
+			if (event_day_R8 > 0) training_error_R8 += (dtR8 - event_day_R8) * (dtR8 - event_day_R8);
+			if (param.print_trace) SummaryPrintOut(s_error_EM, s_error_R1, s_error_R3, s_error_R5, s_error_R7, s_error_R8, training_error_EM, training_error_R1, training_error_R3, training_error_R5, training_error_R7, training_error_R8);
 		}
-		cout << training_error << endl;
-		cout << curr_error << endl;
+		if (s_error_EM > 0) cout << s_error_EM << endl; else  cout << UNUSED_SCORE << endl;
+		if (s_error_R1 > 0) cout << s_error_R1 << endl; else  cout << 2.0 * UNUSED_SCORE<< endl;
+		if (s_error_R3 > 0) cout << s_error_R3 << endl; else  cout << 3.0 * UNUSED_SCORE << endl;
+		if (s_error_R5 > 0) cout << s_error_R5 << endl; else  cout << 4.0 * UNUSED_SCORE << endl;
+		if (s_error_R7 > 0) cout << s_error_R7 << endl; else  cout << 5.0 * UNUSED_SCORE << endl;
+		if (s_error_R8 > 0) cout << s_error_R8 << endl; else  cout << 6.0 * UNUSED_SCORE << endl;
+
+		if (training_error_EM > 0) cout << training_error_EM << endl; else cout << 7.0 * UNUSED_SCORE << endl;
+		if (training_error_R1 > 0) cout << training_error_R1 << endl; else cout << 8.0 * UNUSED_SCORE << endl;
+		if (training_error_R3 > 0) cout << training_error_R3 << endl; else cout << 9.0 * UNUSED_SCORE  << endl;
+		if (training_error_R5 > 0) cout << training_error_R5 << endl; else cout << 10.0 * UNUSED_SCORE << endl;
+		if (training_error_R7 > 0) cout << training_error_R7 << endl; else cout << 11.0 * UNUSED_SCORE  << endl;
+		if (training_error_R8 > 0) cout << training_error_R8 << endl; else cout << 12.0 * UNUSED_SCORE << endl;
 		cout << nl->get_l1_pen() << endl;
 		cout << nl->get_l2_pen() << endl;
-		if (param.print_trace > 0 && param.function_mode != SOLTANI_FUNC)
-		{
-			nl->print_trace(0);
-		}
+		if (param.print_trace) nl->print_trace(param.func_file_name.toStdString(), param.ecovar - 1);
 	}
 public slots:
 	void run_h5()
 	{
-
-		if (param.print_trace > 0) cout << "BEGIN CALC" << endl;
-		calculation();
-		if (param.print_trace > 0) cout << "END CALC" << endl;
-		emit finished();
+		if (param.dividing_dataset > 0)
+		{
+			data.data_a5 = data.data_a5_training;
+			calculation();
+			data.data_a5 = data.data_a5_valid;
+			calculation();
+			emit finished();
+		}
+		else
+		{
+			calculation();
+			emit finished();
+		}
 	}
 signals:
 	void finished();
