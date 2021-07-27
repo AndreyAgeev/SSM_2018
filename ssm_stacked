@@ -23,7 +23,7 @@ def aggregate_stack(res_tabs, max_max):
 		err_corr = np.corrcoef(y_data, y_model)[0, 1]
 		err_max = np.max(abs(y_data - y_model))
 		print(str(j) + ' ' + 'correlation:' + str(err_corr) + ' ' + 'maximum:' + str(err_max) + ' ' + 'argmax:' + str(np.argmax(abs(y_data - y_model))))
-		if (err_max < 60):
+		if (err_max < max_max):
 			list_of_models.append(j)
 			kounter += 1
 			if (kounter == 1):
