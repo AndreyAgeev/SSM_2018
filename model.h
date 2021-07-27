@@ -1159,10 +1159,12 @@ public:
 	}
 	void DailyPrintOut(void)
 	{
-		out.open(param.func_file_name.toStdString() + "_" + "daily_output.txt", std::ios::app);
 		if (write_check == false) {
+			out.open(param.func_file_name.toStdString() + "_" + "daily_output.txt", std::ios::trunc);
 			out << "GEO_ID= " << "NSAM= " << "ROW= " << "YEARS= " << "DOY= " << "DAP= " << "TMP= " << "DTT= " << "CBD= " << "rhs_EM= " << "rhs_R1= " << "rhs_R3= " << "rhs_R5= " << "rhs_R7= " << "rhs_R8= " << "MSNN= " << "GLAI= " << "DLAI= " << "LAI= " << "TCFRUE= " << "FINT= " << "DDMP= " << "GLF= " << "GST= " << "SGR= " << "WLF= " << "WST= " << "WVEG=  " << "WGRN= " << "WTOP= " << "DEPORT= " << "RAIN= " << "IRGW= " << "RUNOF= " << "PET= " << "SEVP= " << "TR= " << "ATSW= " << "FTSW= " << "CRAIN= " << "CIRGW= " << "IRGNO= " << "CRUNOF= " << "CE= " << "CTR= " << "WSTORG= " << "NUP= " << "NLF= " << "NST= " << "NVEG= " << "NGRN= " << "CNUP= " << "MAT= " << endl;
 			write_check = true;
+		} else {
+			out.open(param.func_file_name.toStdString() + "_" + "daily_output.txt", std::ios::app);
 		}
 		out << data.data_a5.geo_id[NSAM] << " ";
 		out << NSAM << "  ";
@@ -1223,11 +1225,12 @@ public:
 
 	void SummaryPrintOut(double s_error_EM, double s_error_R1, double s_error_R3, double s_error_R5, double s_error_R7, double s_error_R8, double training_error_EM, double training_error_R1, double training_error_R3, double training_error_R5, double training_error_R7, double training_error_R8)
 	{
-		out_s.open(param.func_file_name.toStdString() + "_" + "output_summary.txt", std::ios::app);
-
 		if (write_check_summary == false) {
+			out_s.open(param.func_file_name.toStdString() + "_" + "output_summary.txt", std::ios::trunc);
 			out_s << "NSAM;" << "NAME;" << "dtEM;" << "event_day_EM;" << "dtR1;" << "event_day_R1;" << "dtR3;" << "event_day_R3;" << "dtR5;" << "event_day_R5;" << "dtR7;" << "event_day_R7;" << "dtR8;" << "event_day_R8;" << "cbdEM;" << "bdEM;" << "cbdR1;" << "bdR1;" << "cbdR3;" << "bdR3;" << "cbdR5;" << "bdR5;" << "cbdR7;" << "bdR7;" << "cbdR8;" << "bdR8;" << "s_error_EM;" << "s_error_R1;" << "s_error_R3;" << "s_error_R5;" << "s_error_R7;" << "s_error_R8;" << "training_error_EM;" << "training_error_R1;" << "training_error_R3;" << "training_error_R5;" << "training_error_R7;" <<  "training_error_R8;" << endl;
 			write_check_summary = true;
+		} else {
+			out_s.open(param.func_file_name.toStdString() + "_" + "output_summary.txt", std::ios::app);
 		}
 		out_s << NSAM <<';'<< data.data_a5.species[NSAM] << ';' << dtEM << ';' << data.data_a5.response_EM[NSAM] <<';' << dtR1 << ';' << data.data_a5.response_R1[NSAM] << ';' << dtR3 <<';' << data.data_a5.response_R3[NSAM] << ';' << dtR5 << ';' << data.data_a5.response_R5[NSAM] << ';' << dtR7 << ';' << data.data_a5.response_R7[NSAM] << ';' << dtR8 << ';' << data.data_a5.response_R8[NSAM] << ';' << cbdEM << ';' << bdEM << ';' << cbdR1 << ';' << bdR1 << ';' << cbdR3 <<';' << bdR3 <<';' << cbdR5 << ';' << bdR5 << ';' << cbdR7 << ';' << bdR7 <<';' << cbdR8 << ';' << bdR8 << ';' << s_error_EM << ';' << s_error_R1 << ';' << s_error_R3 << ';' << s_error_R5 <<';' << s_error_R7 <<';' << s_error_R8 << ';' << training_error_EM << ';' << training_error_R1 << ';' << training_error_R3 << ';' << training_error_R5 << ';' << training_error_R7 << ';' << training_error_R8 << ';' << endl;
 		out_s.close();
