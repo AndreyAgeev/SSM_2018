@@ -191,6 +191,23 @@ Add::Add() {
 double Add::eval(vector<double>& inVal) {
 	if (children[0] && children[1]) {
 		return children[0]->eval(inVal) + children[1]->eval(inVal);
+	} else if (children[0]){
+		return children[0]->eval(inVal);
+	} else if (children[1]){
+		return children[1]->eval(inVal);
+	} else {
+		if (PRINT_TRACE > 1) cerr << "left and right not defined in add"<<endl;
+		return 0.0;
+	}
+}
+
+/*
+double Add::eval(vector<double>& inVal, double& dvdt){
+	if (children[0] && children[1]){
+		double dvdt1, dvdt2, ff;
+		ff = children[0]->eval(inVal, dvdt1) + children[1]->eval(inVal, dvdt2);
+		dvdt1 = dvdt1 + dvdt2;
+		return ff;
 	}
 	else if (children[0]) {
 		return children[0]->eval(inVal);
@@ -431,6 +448,25 @@ Divide::Divide() {
 double Divide::eval(vector<double>& inVal) {
 	if (children[0] && children[1]) {
 		return children[0]->eval(inVal) / children[1]->eval(inVal);
+	} else if (children[0]){
+		return children[0]->eval(inVal);
+	} else if (children[1]){
+		return 1/children[1]->eval(inVal);
+	} else {
+		if (PRINT_TRACE > 1) cerr << "left and right not defined in divide"<<endl;
+		return 0.0;
+	}
+}
+
+/*
+double Divide::eval(vector<double>& inVal, double& dvdt){
+	if (children[0] && children[1]){
+		double dvdt1, dvdt2, ff, ff1, ff2;
+		ff1 = children[0]->eval(inVal, dvdt1);
+		ff2 = children[0]->eval(inVal, dvdt2);
+		ff = ff1 / ff2;
+		dvdt = (dvdt1 * ff2 - ff1 * dvdt2) / dvdt2 / dvdt2;
+		return ff;
 	}
 	else if (children[0]) {
 		return children[0]->eval(inVal);
@@ -524,6 +560,23 @@ InputMinusConst::InputMinusConst() {
 double InputMinusConst::eval(vector<double>& inVal) {
 	if (children[0] && children[1]) {
 		return children[0]->eval(inVal) - children[1]->eval(inVal);
+	} else if (children[0]){
+		return children[0]->eval(inVal);
+	} else if (children[1]){
+		return -children[1]->eval(inVal);
+	} else {
+		if (PRINT_TRACE > 1) cerr << "left and right not defined in InputMinusConst" << endl;
+		return 0.0;
+	}
+}
+
+/*
+double InputMinusConst::eval(vector<double>& inVal, double& dvdt){
+	if (children[0] && children[1]){
+		double ff, dvdt1, dvdt2;
+		ff = children[0]->eval(inVal, dvdt1) - children[1]->eval(inVal, dvdt2);
+		dvdt = dvdt1 - dvdt2;
+		return ff;
 	}
 	else if (children[0]) {
 		return children[0]->eval(inVal);

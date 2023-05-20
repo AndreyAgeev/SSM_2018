@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 		QCoreApplication::translate("main", "MAI1."),
 		QCoreApplication::translate("main", "j")},
 	{{"a", "MAI"},
-		QCoreApplication::translate("main", "MAI."), 
+		QCoreApplication::translate("main", "MAI."),
 		QCoreApplication::translate("main", "a")},
 	{{"o", "INSOL"},
 		QCoreApplication::translate("main", "INSOL."),
@@ -105,7 +105,8 @@ int main(int argc, char *argv[])
 	parser.addPositionalArgument("cropsinifile", "The file to open.");
 	parser.addPositionalArgument("samplesfile", "The file to open.");
 	parser.addPositionalArgument("weatherfile", "The file to open.");
-	parser.addPositionalArgument("funcsfile", "The file to read funcs.");
+//	parser.addPositionalArgument("funcsfile", "The file to read funcs.");
+	parser.addPositionalArgument("cropsoinifile", "The file to open.");
 	parser.process(a);
 	const QStringList args = parser.positionalArguments();
 	Model * model;
@@ -167,7 +168,6 @@ int main(int argc, char *argv[])
 		if (D <= 0) {
 			std::cout << "Bad nd: " + D << endl;
 		}
-
 		const QString LatParameter = parser.value("Latitude");
 		const double Lat = LatParameter.toDouble();
 		param.Latitude = Lat;

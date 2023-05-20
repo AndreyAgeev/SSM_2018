@@ -135,6 +135,26 @@ public:
 		out_func << endl;
 		out_func.close();
 	}
+	void set_genotype(vector<int>& gt)
+	{
+		genotype = gt;
+	}
+	void set_beta(vector<double>& be)
+	{
+		beta = be;
+	}
+	void set_beta_limit(double& arg)
+	{
+		MB = arg;
+		for (size_t i = nFunctions; i < nFunctions + nFunctions * num_of_gt_vars; ++i) {
+			double be = (beta[i] > 0) ? beta[i] : -beta[i];
+			beta[i] = (be < MB) ? 0.0 : beta[i];
+		}
+	}
+	void set_climate_vars(vector<double>& concs)
+	{
+		climate_var = concs;
+	}
 private:
 	int num_of_climate_vars; // Number of columns in the weather table == number of consts to read after func's and betas
 	int num_of_gt_vars; // Number of genotype data columns (snp or qtl or locations). Number of betas=number of funcs + number of func * number of gt vars

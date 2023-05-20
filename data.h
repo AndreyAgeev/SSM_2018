@@ -14,7 +14,7 @@ using namespace HighFive;
 class Data
 {
 public:
-	struct Data_f 
+	struct Data_f
 	{
             vector<int> years;
 			vector<int> doy;
@@ -135,7 +135,14 @@ public:
 		int nSamples;
 		int nGrCovar;
 	};
-
+	struct Data_b
+	{
+		vector<int> x;
+		vector<double> beta;
+		vector<double> concs;
+		double betaLimit;
+	};
+	Data_b data_b;
 
 	Data_a data_a5;
 	Data_a data_a5_training;
